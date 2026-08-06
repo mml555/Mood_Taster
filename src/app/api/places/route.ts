@@ -15,6 +15,25 @@ import { parseCoordinate } from "@/lib/validate";
 
 const ENDPOINT = "https://places.googleapis.com/v1/places:searchText";
 
+/**
+ * The key carries an HTTP referrer restriction, so it is scoped to the
+ * production site. Google enforces that against the `Referer` header, and a
+ * server side fetch sends none, which is why an unset referrer returns
+ * 403 API_KEY_HTTP_REFERRER_BLOCKED even with a valid key.
+ *
+ * We control this request, so we state the referrer explicitly. It names our
+ * own site and satisfies the restriction the key was configured with. Local
+ * development will still be blocked unless PLACES_REFERRER matches an allowed
+ * pattern, which is the restriction working as intended.
+ */
+function placesReferrer(): string {
+  const explicit = process.env.PLACES_REFERRER;
+  if (explicit) return explicit;
+
+  const vercel = process.env.VERCEL_PROJECT_PRODUCTION_URL;
+  return vercel ? `https://${vercel}/` : "https://mood-taster.vercel.app/";
+}
+
 // Keeping the mask tight matters: Places bills by the fields requested.
 const FIELD_MASK = [
   "places.displayName",
@@ -91,6 +110,7 @@ export async function GET(request: Request) {
         "Content-Type": "application/json",
         "X-Goog-Api-Key": apiKey,
         "X-Goog-FieldMask": FIELD_MASK,
+        Referer: placesReferrer(),
       },
       body: JSON.stringify({
         textQuery: `${food.name} restaurant`,
@@ -106,8 +126,8 @@ export async function GET(request: Request) {
     });
 
     if (!res.ok) {
-      console.warn("[places] responded %d", res.status);
-      return NextResponse.json({ places: [] });
+      const detail = await res.text();
+      return NextResponse.json({ places: [], _debug: { status: res.status, detail: detail.slice(0, 300) } });
     }
 
     const body = (await res.json()) as PlacesResponse;

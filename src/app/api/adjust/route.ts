@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { ask, isAiConfigured, sanitizeLine } from "@/lib/ai";
+import { ask, isAiConfigured, parseJsonObject, sanitizeLine } from "@/lib/ai";
 import {
   ADVENTURE,
   FLAVORS,
@@ -60,23 +60,15 @@ export async function POST(request: Request) {
     instructions: RULES,
     input: `Current: ${JSON.stringify(answers)}. They said: "${complaint}"`,
     maxOutputTokens: 500,
-    timeoutMs: 4000,
+    json: true,
   });
 
   if (raw === null) {
     return NextResponse.json({ answers: null, note: null });
   }
 
-  // Models still fence JSON occasionally despite being told not to.
-  const match = raw.match(/\{[\s\S]*\}/);
-  if (!match) {
-    return NextResponse.json({ answers: null, note: null });
-  }
-
-  let parsed: unknown;
-  try {
-    parsed = JSON.parse(match[0]);
-  } catch {
+  const parsed = parseJsonObject(raw);
+  if (!parsed) {
     return NextResponse.json({ answers: null, note: null });
   }
 
@@ -87,9 +79,8 @@ export async function POST(request: Request) {
     return NextResponse.json({ answers: null, note: null });
   }
 
-  const rawNote = (parsed as Record<string, unknown>).note;
   const note =
-    typeof rawNote === "string" ? sanitizeLine(rawNote, 120) : null;
+    typeof parsed.note === "string" ? sanitizeLine(parsed.note, 120) : null;
 
   return NextResponse.json({ answers: nextAnswers, note });
 }

@@ -64,10 +64,10 @@ export function DnaDashboard() {
   const textures = strongestDimensions(dna, TEXTURE_DIMS);
 
   const lede = signedIn
-    ? "Saved to your profile. Rate more dishes to refine how you get matched."
+    ? "Saved to your profile. Rate more dishes to sharpen matches."
     : isSupabaseConfigured()
-      ? "Built from ratings on this device. Keep using Mood Taster free. A profile lets you keep and customize this Taste DNA."
-      : "Built from ratings on this device. No account required.";
+      ? "Built from ratings on this device. A free profile keeps it with you."
+      : "Built from ratings on this device. No account needed.";
 
   if (evidenced.length === 0) {
     return (
@@ -75,14 +75,13 @@ export function DnaDashboard() {
         <p className="eyebrow">
           <Sparkles size={16} strokeWidth={1.5} aria-hidden /> Your Taste
         </p>
-        <h1 className="dna-title">Nothing learned yet</h1>
+        <h1 className="dna-title">Nothing yet</h1>
         <p className="dna-lede">
-          Finish a session and rate a dish. Your Taste DNA builds from those
-          ratings on this device. No account needed to start.
+          Rate a dish. Your Taste DNA grows from that.
         </p>
         <div className="result-actions">
           <Link className="cta" href="/taste">
-            Start a session
+            Show me
           </Link>
         </div>
         <ProfileNudge context="dna" />
@@ -155,11 +154,11 @@ export function DnaDashboard() {
 
       <div className="result-actions">
         <Link className="cta" href="/taste">
-          Another session
+          Try again
         </Link>
         <button type="button" className="reject-btn" onClick={onReset}>
           <RotateCcw size={20} strokeWidth={1.5} aria-hidden />
-          Reset profile
+          Reset
         </button>
       </div>
     </section>

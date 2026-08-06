@@ -47,10 +47,10 @@ export function ProfileNudge({ context = "dna" }: ProfileNudgeProps) {
 
   const copy =
     context === "result"
-      ? "Like how this is shaping up? Save a free profile so your Taste DNA follows you, and you can tune it over time."
+      ? "Want this Taste DNA to follow you? Save a free profile."
       : context === "home"
-        ? "No account needed to find a dish. A free profile saves your Taste DNA so matches get more you."
-        : "This Taste DNA lives on this device for now. Save a free profile to keep it, sync it, and customize how you get matched.";
+        ? "No account needed. A free profile saves your Taste DNA."
+        : "This Taste DNA lives on this device. Save a free profile to keep it.";
 
   return (
     <aside className="profile-nudge" aria-label="Save your taste profile">
@@ -62,7 +62,7 @@ export function ProfileNudge({ context = "dna" }: ProfileNudgeProps) {
         <Link className="text-link" href="/login">
           Sign in
         </Link>
-        <span className="profile-nudge-aside">Optional. You can keep going.</span>
+        <span className="profile-nudge-aside">Optional.</span>
       </div>
     </aside>
   );

@@ -7,7 +7,7 @@ export function SiteFooter() {
       <p className="foot-brand">
         <Image
           className="foot-mark"
-          src="/brand/mark-yellow-sm.png"
+          src="/brand/mark-purple-sm.png"
           alt=""
           width={28}
           height={23}

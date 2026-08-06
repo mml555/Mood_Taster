@@ -3,16 +3,14 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
+import { ChevronDown, MapPin, Sparkles } from "lucide-react";
 import {
-  Check,
-  ChevronDown,
-  MapPin,
-  Minus,
-  RefreshCw,
-  Sparkles,
-  X,
-} from "lucide-react";
-import { useCallback, useEffect, useRef, useState } from "react";
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  type PointerEvent as ReactPointerEvent,
+} from "react";
 import {
   applyRating,
   labelDimension,
@@ -41,11 +39,18 @@ type ResultViewProps = {
   food: Food;
 };
 
+const SWIPE_THRESHOLD = 80;
+
 /** Always available, needs no key and no permission. The floor under Places. */
 function mapsSearchUrl(food: Food): string {
   return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
     `${food.name} restaurant`,
   )}`;
+}
+
+function prefersReducedMotion(): boolean {
+  if (typeof window === "undefined") return false;
+  return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 }
 
 type PlacesState = "locating" | "loading" | "ready" | "fallback";
@@ -75,14 +80,22 @@ export function ResultView({ food }: ResultViewProps) {
   const [places, setPlaces] = useState<NearbyPlace[]>([]);
   const [placesState, setPlacesState] = useState<PlacesState>("locating");
 
-  const [rejectOpen, setRejectOpen] = useState(false);
+  const [whyPanelOpen, setWhyPanelOpen] = useState(false);
   const [rejectNoteText, setRejectNoteText] = useState("");
   const [adjusting, setAdjusting] = useState(false);
   const [adjustNote, setAdjustNote] = useState<string | null>(null);
 
+  const [dragX, setDragX] = useState(0);
+  const [dragging, setDragging] = useState(false);
+  const [exitDir, setExitDir] = useState<"left" | "right" | null>(null);
+
   // Identifies the current dish render, so a slow reply about a previous dish
   // cannot overwrite the copy for the one now on screen.
   const renderId = useRef(0);
+  const pointerId = useRef<number | null>(null);
+  const startX = useRef(0);
+  const dragXRef = useRef(0);
+  const busyRef = useRef(false);
 
   useEffect(() => {
     renderId.current += 1;
@@ -95,8 +108,13 @@ export function ResultView({ food }: ResultViewProps) {
       setRated(false);
       setEmptyAlts(false);
       setRiff(null);
-      setRejectOpen(false);
+      setWhyPanelOpen(false);
       setRejectNoteText("");
+      setDragX(0);
+      setDragging(false);
+      setExitDir(null);
+      busyRef.current = false;
+      dragXRef.current = 0;
       setExplanation(food.description);
       setAttrs(
         [...food.flavorTags.map(capitalize), capitalize(food.heaviness)].slice(
@@ -223,6 +241,7 @@ export function ResultView({ food }: ResultViewProps) {
       const next = nextAfterReject(answers, readDna(), session, food.id);
       if (!next) {
         setEmptyAlts(true);
+        busyRef.current = false;
         return;
       }
       writeSession({
@@ -235,16 +254,19 @@ export function ResultView({ food }: ResultViewProps) {
   );
 
   const onReject = useCallback(() => {
+    if (busyRef.current) return;
     const current = readSession();
     if (!current) {
       router.push("/taste");
       return;
     }
+    busyRef.current = true;
     goToNext(current, current.answers);
   }, [goToNext, router]);
 
   /** Reject with a reason. The model moves the axes, the engine still ranks. */
   const onRejectWithNote = useCallback(async () => {
+    if (busyRef.current) return;
     const current = readSession();
     if (!current) {
       router.push("/taste");
@@ -253,11 +275,13 @@ export function ResultView({ food }: ResultViewProps) {
 
     const note = rejectNoteText.trim();
     if (!note) {
+      busyRef.current = true;
       goToNext(current, current.answers);
       return;
     }
 
     setAdjusting(true);
+    busyRef.current = true;
     try {
       const res = await fetch("/api/adjust", {
         method: "POST",
@@ -297,14 +321,127 @@ export function ResultView({ food }: ResultViewProps) {
     [food],
   );
 
+  const animateExitThen = useCallback(
+    (dir: "left" | "right", after: () => void) => {
+      if (prefersReducedMotion()) {
+        after();
+        return;
+      }
+      setExitDir(dir);
+      window.setTimeout(after, 320);
+    },
+    [],
+  );
+
+  const onLike = useCallback(() => {
+    if (busyRef.current || rated) return;
+    busyRef.current = true;
+    onRate("nailed");
+    busyRef.current = false;
+  }, [onRate, rated]);
+
+  const onNope = useCallback(() => {
+    if (busyRef.current || rated) return;
+    const current = readSession();
+    if (!current) {
+      router.push("/taste");
+      return;
+    }
+    busyRef.current = true;
+    onRate("nope");
+    animateExitThen("left", () => {
+      goToNext(current, current.answers);
+    });
+  }, [animateExitThen, goToNext, onRate, rated, router]);
+
+  const onTryAgain = useCallback(() => {
+    if (busyRef.current) return;
+    const current = readSession();
+    if (!current) {
+      router.push("/taste");
+      return;
+    }
+    busyRef.current = true;
+    animateExitThen("left", () => {
+      goToNext(current, current.answers);
+    });
+  }, [animateExitThen, goToNext, router]);
+
+  const onPointerDown = useCallback(
+    (e: ReactPointerEvent<HTMLDivElement>) => {
+      if (!hasSession || rated || busyRef.current || exitDir) return;
+      if (e.button !== 0) return;
+      pointerId.current = e.pointerId;
+      startX.current = e.clientX;
+      dragXRef.current = 0;
+      setDragging(true);
+      e.currentTarget.setPointerCapture(e.pointerId);
+    },
+    [exitDir, hasSession, rated],
+  );
+
+  const onPointerMove = useCallback(
+    (e: ReactPointerEvent<HTMLDivElement>) => {
+      if (!dragging || pointerId.current !== e.pointerId) return;
+      const next = e.clientX - startX.current;
+      dragXRef.current = next;
+      setDragX(next);
+    },
+    [dragging],
+  );
+
+  const endDrag = useCallback(
+    (e: ReactPointerEvent<HTMLDivElement>) => {
+      if (pointerId.current !== e.pointerId) return;
+      pointerId.current = null;
+      setDragging(false);
+      const x = dragXRef.current;
+      dragXRef.current = 0;
+      setDragX(0);
+
+      if (Math.abs(x) < SWIPE_THRESHOLD) return;
+
+      if (x > 0) {
+        onLike();
+        return;
+      }
+      onNope();
+    },
+    [onLike, onNope],
+  );
+
+  const swipeHint =
+    dragX > SWIPE_THRESHOLD / 2
+      ? "like"
+      : dragX < -SWIPE_THRESHOLD / 2
+        ? "nope"
+        : null;
+
+  const cardClass = [
+    "result-card",
+    dragging ? "is-dragging" : "",
+    swipeHint === "like" ? "is-like" : "",
+    swipeHint === "nope" ? "is-nope" : "",
+    exitDir === "left" ? "is-exit-left" : "",
+    exitDir === "right" ? "is-exit-right" : "",
+  ]
+    .filter(Boolean)
+    .join(" ");
+
+  const cardStyle =
+    exitDir || dragX === 0
+      ? undefined
+      : {
+          transform: `translateX(${dragX}px) rotate(${dragX / 28}deg)`,
+        };
+
   if (emptyAlts) {
     return (
       <section className="result">
         <p className="eyebrow">That&apos;s the list</p>
-        <h1 className="result-title">No more matches for this craving</h1>
+        <h1 className="result-title">Nothing left</h1>
         <p className="result-desc">
-          You worked through the strong candidates. Start a fresh session or
-          tweak your Taste DNA.
+          You saw the strong matches. Start over or check Taste DNA.
         </p>
         <div className="result-actions">
           <Link className="cta" href="/taste">
@@ -321,40 +458,67 @@ export function ResultView({ food }: ResultViewProps) {
   return (
     <section className="result">
       <p className="eyebrow">
-        {adjustNote ??
-          (rejectNote ? "Okay, different direction." : "We got it.")}
+        {adjustNote ?? (rejectNote ? "Different one." : "Your match")}
       </p>
 
-      <div className="result-media">
-        {imgFailed ? (
-          <div className="result-fallback" role="img" aria-label={food.imageAlt}>
-            <span>{food.name}</span>
-          </div>
-        ) : (
-          <Image
-            key={food.image}
-            src={food.image}
-            alt={food.imageAlt}
-            width={800}
-            height={800}
-            priority
-            sizes="(max-width: 390px) 100vw, 640px"
-            className="result-image"
-            onError={() => setImgFailed(true)}
-          />
-        )}
+      <div
+        className={cardClass}
+        style={cardStyle}
+        onPointerDown={hasSession ? onPointerDown : undefined}
+        onPointerMove={hasSession ? onPointerMove : undefined}
+        onPointerUp={hasSession ? endDrag : undefined}
+        onPointerCancel={hasSession ? endDrag : undefined}
+        role={hasSession ? "group" : undefined}
+        aria-roledescription={hasSession ? "Swipeable recommendation" : undefined}
+        aria-label={
+          hasSession
+            ? `${food.name}. Swipe right to like, left for not for me.`
+            : undefined
+        }
+      >
+        <span className="result-card-hint result-card-hint-like" aria-hidden>
+          Like
+        </span>
+        <span className="result-card-hint result-card-hint-nope" aria-hidden>
+          Nope
+        </span>
+
+        <div className="result-media">
+          {imgFailed ? (
+            <div
+              className="result-fallback"
+              role="img"
+              aria-label={food.imageAlt}
+            >
+              <span>{food.name}</span>
+            </div>
+          ) : (
+            <Image
+              key={food.image}
+              src={food.image}
+              alt={food.imageAlt}
+              width={800}
+              height={800}
+              priority
+              sizes="(max-width: 390px) 100vw, 640px"
+              className="result-image"
+              onError={() => setImgFailed(true)}
+              draggable={false}
+            />
+          )}
+        </div>
+
+        <h1 className="result-title">{food.name}</h1>
+        <p className="result-desc">{food.description}</p>
+
+        {attrs.length > 0 ? (
+          <ul className="result-attrs" aria-label="Matched attributes">
+            {attrs.map((a) => (
+              <li key={a}>{a}</li>
+            ))}
+          </ul>
+        ) : null}
       </div>
-
-      <h1 className="result-title">{food.name}</h1>
-      <p className="result-desc">{food.description}</p>
-
-      {attrs.length > 0 ? (
-        <ul className="result-attrs" aria-label="Matched attributes">
-          {attrs.map((a) => (
-            <li key={a}>{a}</li>
-          ))}
-        </ul>
-      ) : null}
 
       {riff ? <p className="result-riff">{riff}</p> : null}
 
@@ -378,40 +542,69 @@ export function ResultView({ food }: ResultViewProps) {
           </button>
           {whyOpen ? <p className="result-why">{explanation}</p> : null}
 
-          <div className="result-actions" role="group" aria-label="Feedback">
+          <div className="reaction-bar" role="group" aria-label="Reactions">
             <button
               type="button"
-              className="feedback-btn"
-              onClick={() => onRate("nailed")}
-              disabled={rated}
+              className="reaction-btn reaction-btn-nope"
+              onClick={onNope}
+              disabled={rated || adjusting}
+              aria-label="Not for me"
             >
-              <Check size={20} strokeWidth={1.5} aria-hidden />
-              Nailed it
+              <span className="reaction-icon" aria-hidden>
+                ×
+              </span>
+              Not for me
             </button>
             <button
               type="button"
-              className="feedback-btn"
-              onClick={() => onRate("kinda")}
-              disabled={rated}
+              className="reaction-btn"
+              onClick={onTryAgain}
+              disabled={adjusting}
+              aria-label="Try again"
             >
-              <Minus size={20} strokeWidth={1.5} aria-hidden />
+              <span className="reaction-icon" aria-hidden>
+                ↻
+              </span>
+              Try again
+            </button>
+            <button
+              type="button"
+              className="reaction-btn reaction-btn-like"
+              onClick={onLike}
+              disabled={rated || adjusting}
+              aria-label="I like it"
+            >
+              <span className="reaction-icon" aria-hidden>
+                ♡
+              </span>
+              I like it
+            </button>
+          </div>
+
+          <div className="reaction-quiet">
+            <button
+              type="button"
+              className="text-link"
+              onClick={() => onRate("kinda")}
+              disabled={rated || adjusting}
+            >
               Kinda
             </button>
             <button
               type="button"
-              className="feedback-btn"
-              onClick={() => onRate("nope")}
-              disabled={rated}
+              className="text-link"
+              onClick={() => setWhyPanelOpen((v) => !v)}
+              aria-expanded={whyPanelOpen}
+              disabled={adjusting}
             >
-              <X size={20} strokeWidth={1.5} aria-hidden />
-              Nope
+              Why?
             </button>
           </div>
 
-          {rejectOpen ? (
+          {whyPanelOpen ? (
             <div className="reject-panel">
               <label className="reject-label" htmlFor="reject-note">
-                What&apos;s off about it?
+                What&apos;s off?
               </label>
               <input
                 id="reject-note"
@@ -443,24 +636,15 @@ export function ResultView({ food }: ResultViewProps) {
                   onClick={onReject}
                   disabled={adjusting}
                 >
-                  Just show me another
+                  Skip
                 </button>
               </div>
             </div>
-          ) : (
-            <button
-              type="button"
-              className="reject-btn"
-              onClick={() => setRejectOpen(true)}
-            >
-              <RefreshCw size={20} strokeWidth={1.5} aria-hidden />
-              Not feeling it
-            </button>
-          )}
+          ) : null}
 
           {deltas && deltas.length > 0 ? (
             <p className="dna-toast" role="status">
-              Your Taste DNA changed.{" "}
+              Taste DNA updated.{" "}
               {deltas
                 .map(
                   (d) =>
@@ -471,7 +655,7 @@ export function ResultView({ food }: ResultViewProps) {
             </p>
           ) : rated ? (
             <p className="dna-toast" role="status">
-              Feedback saved.
+              Got it.
             </p>
           ) : null}
 
@@ -487,11 +671,10 @@ export function ResultView({ food }: ResultViewProps) {
       ) : (
         <div className="result-actions">
           <p className="result-desc">
-            Open this dish on its own. Start a session to get a match for how
-            you want food to feel right now.
+            Start a session to match how you feel right now.
           </p>
           <Link className="cta" href="/taste">
-            Start a session
+            Show me
           </Link>
         </div>
       )}
@@ -511,7 +694,7 @@ function NearbySection({
   if (state === "locating" || state === "loading") {
     return (
       <div className="nearby">
-        <p className="nearby-label">Where to get it</p>
+        <p className="nearby-label">Nearby</p>
         <p className="nearby-status" role="status">
           {state === "locating" ? "Finding you" : "Looking nearby"}
         </p>
@@ -524,7 +707,7 @@ function NearbySection({
   if (state !== "ready" || places.length === 0) {
     return (
       <div className="nearby">
-        <p className="nearby-label">Where to get it</p>
+        <p className="nearby-label">Nearby</p>
         <a
           className="nearby-link"
           href={mapsSearchUrl(food)}
@@ -540,7 +723,7 @@ function NearbySection({
 
   return (
     <div className="nearby">
-      <p className="nearby-label">Where to get it</p>
+      <p className="nearby-label">Nearby</p>
       <ul className="nearby-list">
         {places.map((p) => (
           <li key={`${p.name}-${p.address}`}>

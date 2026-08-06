@@ -17,7 +17,7 @@ import {
 const STEPS = [
   {
     key: "flavor" as const,
-    question: "What kind of flavor?",
+    question: "What flavor?",
     options: [
       { value: "savory", label: "Savory" },
       { value: "spicy", label: "Spicy" },
@@ -27,7 +27,7 @@ const STEPS = [
   },
   {
     key: "texture" as const,
-    question: "What texture sounds right?",
+    question: "What texture?",
     options: [
       { value: "crunchy", label: "Crunchy" },
       { value: "creamy", label: "Creamy" },
@@ -42,15 +42,15 @@ const STEPS = [
       { value: "light", label: "Light" },
       { value: "medium", label: "Medium" },
       { value: "filling", label: "Filling" },
-      { value: "any", label: "I don't care" },
+      { value: "any", label: "Any" },
     ],
   },
   {
     key: "adventure" as const,
-    question: "How adventurous?",
+    question: "How wild?",
     options: [
-      { value: "safe", label: "Safe favorite" },
-      { value: "curious", label: "A little different" },
+      { value: "safe", label: "Safe" },
+      { value: "curious", label: "A little new" },
       { value: "surprise", label: "Surprise me" },
     ],
   },

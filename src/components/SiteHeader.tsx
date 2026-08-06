@@ -41,7 +41,7 @@ export function SiteHeader({ current = "home" }: SiteHeaderProps) {
       <Link className="mark" href="/">
         <Image
           className="mark-lockup"
-          src="/brand/lockup-yellow-sm.png"
+          src="/brand/lockup-purple-sm.png"
           alt="Mood Taster"
           width={200}
           height={26}

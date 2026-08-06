@@ -1,32 +1,33 @@
 import { NextResponse } from "next/server";
-import { askForLine, isAiConfigured } from "@/lib/ai";
+import { ask, isAiConfigured, parseJsonObject, sanitizeLine } from "@/lib/ai";
 import { CATALOG } from "@/lib/catalog";
 import { buildExplanation } from "@/lib/explain";
 import { parseAnswers } from "@/lib/validate";
 
 /**
  * Rewrites the deterministic explanation into something warmer, and adds a
- * short riff about the dish.
+ * short practical tip about the dish.
+ *
+ * Both lines come from ONE request. An earlier version issued two calls in
+ * parallel, which doubled the quota cost and, on a cold instance, doubled the
+ * TLS handshakes for no benefit. One call is the single biggest latency win
+ * available here short of precomputing.
  *
  * This endpoint is pure enhancement. The result screen has already rendered a
- * correct explanation before this is ever called, so every failure path here
- * returns 200 with nulls rather than an error the client has to handle.
+ * correct explanation before it is ever called, so every failure path returns
+ * 200 with nulls rather than an error the client has to handle.
  */
 
-const WHY_RULES = [
-  "You write one sentence for a food recommendation app.",
-  "Explain why this dish fits what the person asked for.",
-  "Speak to them as 'you'. Warm, plain, specific.",
-  "Name the qualities they asked for. Never mention scores, matching, or algorithms.",
-  "One sentence, under 25 words. No em dashes. No quotes. No markdown.",
-].join(" ");
-
-const RIFF_RULES = [
-  "You write one short sentence for a food recommendation app.",
-  "Give a practical tip about eating this dish: what to pair with it,",
-  "how to order it, or what makes a good one. Concrete, never generic praise.",
-  "Do not repeat why it was recommended. Do not use the word 'perfect'.",
-  "One sentence, under 20 words. No em dashes. No quotes. No markdown.",
+const RULES = [
+  "You write copy for a food recommendation app.",
+  "Return ONLY a JSON object, no markdown fence, with exactly two keys:",
+  '"why": one sentence saying why this dish fits what the person asked for.',
+  "Speak to them as 'you'. Name the qualities they asked for.",
+  "Never mention scores, matching, or algorithms. Under 25 words.",
+  '"riff": one sentence with a practical tip: what to pair with it, how to',
+  "order it, or what makes a good one. Concrete, never generic praise.",
+  "Do not repeat the why. Do not use the word 'perfect'. Under 20 words.",
+  "No em dashes anywhere.",
 ].join(" ");
 
 export async function POST(request: Request) {
@@ -54,34 +55,35 @@ export async function POST(request: Request) {
 
   const heaviness =
     answers.heaviness === "any" ? "no preference" : answers.heaviness;
-  const context = [
-    `Dish: ${food.name}.`,
-    `What it is: ${food.description}.`,
-    `They asked for: ${answers.flavor}, ${answers.texture}, ${heaviness},`,
-    `feeling ${answers.adventure}.`,
-  ].join(" ");
 
-  // Both calls are independent, so a slow riff must not delay the why line.
-  const [why, riff] = await Promise.all([
-    askForLine({
-      instructions: WHY_RULES,
-      input: `${context} Current line: ${buildExplanation(food, answers)}`,
-      maxOutputTokens: 400,
-      // Measured latency for this deployment is ~4s. This fires after paint on
-      // an already-complete result screen, so waiting costs the user nothing.
-      timeoutMs: 8000,
-      maxLength: 160,
-    }),
-    askForLine({
-      instructions: RIFF_RULES,
-      input: context,
-      maxOutputTokens: 400,
-      // Measured latency for this deployment is ~4s. This fires after paint on
-      // an already-complete result screen, so waiting costs the user nothing.
-      timeoutMs: 8000,
-      maxLength: 140,
-    }),
-  ]);
+  const raw = await ask({
+    instructions: RULES,
+    input: [
+      `Dish: ${food.name}.`,
+      `What it is: ${food.description}.`,
+      `They asked for: ${answers.flavor}, ${answers.texture}, ${heaviness},`,
+      `feeling ${answers.adventure}.`,
+      `Current line: ${buildExplanation(food, answers)}`,
+    ].join(" "),
+    maxOutputTokens: 500,
+    json: true,
+  });
+
+  if (raw === null) {
+    return NextResponse.json({ why: null, riff: null });
+  }
+
+  const parsed = parseJsonObject(raw);
+  if (!parsed) {
+    return NextResponse.json({ why: null, riff: null });
+  }
+
+  // Each line is sanitized independently, so a bad riff cannot cost us a good
+  // why line.
+  const why =
+    typeof parsed.why === "string" ? sanitizeLine(parsed.why, 160) : null;
+  const riff =
+    typeof parsed.riff === "string" ? sanitizeLine(parsed.riff, 140) : null;
 
   return NextResponse.json({ why, riff });
 }
