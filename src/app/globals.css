@@ -1160,6 +1160,31 @@ a {
   font-size: 1.35rem;
 }
 
+.profile-nudge {
+  margin-top: var(--space-6);
+  padding: var(--space-5) 0 0;
+  max-width: 32rem;
+}
+
+.profile-nudge-copy {
+  margin: 0;
+  color: var(--paper-muted);
+  font-size: 0.95rem;
+}
+
+.profile-nudge-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-4);
+  margin-top: var(--space-4);
+}
+
+.profile-nudge-aside {
+  color: var(--paper-quiet);
+  font-size: 0.85rem;
+}
+
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
@@ -1171,4 +1196,126 @@ a {
     animation: none !important;
     transition: none !important;
   }
+}
+
+/* --- AI riff, nearby places, conversational reject -----------------------
+   Two tones only. Regions detach with tone steps and space, never borders,
+   shadows, or radius. See .cursor/rules/design-system.mdc. */
+
+.result-riff {
+  margin: var(--space-4) 0 0;
+  max-width: 34ch;
+  color: var(--paper-muted);
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+.nearby {
+  margin-top: var(--space-6);
+}
+
+.nearby-label {
+  margin: 0 0 var(--space-3);
+  color: var(--accent);
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.nearby-status {
+  margin: 0;
+  color: var(--paper-quiet);
+  font-size: 0.95rem;
+}
+
+.nearby-link {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--paper);
+  font-size: 1rem;
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
+
+.nearby-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.nearby-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.nearby-head a,
+.nearby-name {
+  color: var(--paper);
+  font-size: 1.05rem;
+  font-weight: 500;
+}
+
+.nearby-meta {
+  flex-shrink: 0;
+  color: var(--paper-quiet);
+  font-size: 0.85rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.nearby-address {
+  display: block;
+  margin-top: var(--space-1);
+  color: var(--paper-quiet);
+  font-size: 0.9rem;
+}
+
+/* The panel detaches with a tone step, which is the system's substitute for
+   an outlined card. */
+.reject-panel {
+  margin-top: var(--space-5);
+  padding: var(--space-4);
+  background: var(--ink-raised);
+}
+
+.reject-label {
+  display: block;
+  margin-bottom: var(--space-2);
+  color: var(--paper-muted);
+  font-size: 0.9rem;
+}
+
+.reject-input {
+  width: 100%;
+  padding: var(--space-3) 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: var(--paper);
+  font-family: var(--font-body);
+  font-size: 1.05rem;
+}
+
+.reject-input::placeholder {
+  color: var(--paper-quiet);
+}
+
+.reject-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  margin-top: var(--space-3);
+  flex-wrap: wrap;
+}
+
+.reject-actions .cta:disabled,
+.reject-actions .text-link:disabled {
+  opacity: 0.5;
+  cursor: default;
 }

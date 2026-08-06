@@ -3,7 +3,7 @@ import { SiteHeader } from "@/components/SiteHeader";
 import { SignupForm } from "@/components/SignupForm";
 
 export const metadata = {
-  title: "Create account",
+  title: "Save your taste",
 };
 
 export default function SignupPage() {
@@ -14,11 +14,12 @@ export default function SignupPage() {
         <section className="auth" aria-labelledby="signup-title">
           <p className="eyebrow">Account</p>
           <h1 id="signup-title" className="dna-title">
-            Create account
+            Save your taste
           </h1>
           <p className="dna-lede">
-            Save your Taste DNA to your profile so it follows you across
-            devices. Guests can still use the quiz with local storage only.
+            Optional. The quiz works without this. A free profile keeps your
+            Taste DNA, syncs it across devices, and lets you customize how
+            matches learn from you.
           </p>
           <SignupForm />
         </section>

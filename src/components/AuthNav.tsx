@@ -91,13 +91,13 @@ export function AuthNav({ current }: { current?: string }) {
 
   return (
     <>
+      <Link href="/signup">Save taste</Link>
       <Link
         href="/login"
         aria-current={current === "account" ? "page" : undefined}
       >
         Sign in
       </Link>
-      <Link href="/signup">Join</Link>
     </>
   );
 }

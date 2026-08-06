@@ -137,11 +137,14 @@ export function SignupForm() {
       ) : null}
 
       <button type="submit" className="cta auth-submit" disabled={pending}>
-        {pending ? "Creating…" : "Create account"}
+        {pending ? "Saving…" : "Save my taste"}
       </button>
 
       <p className="auth-switch">
-        Already have one? <Link href="/login">Sign in</Link>
+        Prefer to keep going as a guest?{" "}
+        <Link href="/taste">Back to the quiz</Link>
+        {" · "}
+        Already have a profile? <Link href="/login">Sign in</Link>
       </p>
     </form>
   );

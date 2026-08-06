@@ -11,7 +11,8 @@ import {
   strongestDimensions,
 } from "@/lib/dna";
 import { loadDnaForUser, resetDnaEverywhere } from "@/lib/dna-sync";
-import { isSupabaseConfigured } from "@/lib/supabase/client";
+import { ProfileNudge } from "@/components/ProfileNudge";
+import { createClient, isSupabaseConfigured } from "@/lib/supabase/client";
 import type { DnaDimension, DnaProfile } from "@/lib/taste-types";
 
 const FLAVOR_DIMS: DnaDimension[] = ["savory", "spicy", "sweet", "fresh"];
@@ -19,18 +20,25 @@ const TEXTURE_DIMS: DnaDimension[] = ["crunchy", "creamy", "juicy", "soft"];
 
 export function DnaDashboard() {
   const [dna, setDna] = useState<DnaProfile | null>(null);
-  const [cloudHint, setCloudHint] = useState<string | null>(null);
+  const [signedIn, setSignedIn] = useState(false);
 
   useEffect(() => {
     queueMicrotask(async () => {
       const loaded = await loadDnaForUser();
       setDna(loaded);
-      if (isSupabaseConfigured()) {
-        setCloudHint(
-          "Signed-in profiles sync Taste DNA to your account. Guests stay on this device only.",
-        );
-      } else {
-        setCloudHint("Built from ratings on this device. No account required.");
+
+      if (!isSupabaseConfigured()) {
+        setSignedIn(false);
+        return;
+      }
+      try {
+        const supabase = createClient();
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
+        setSignedIn(Boolean(user));
+      } catch {
+        setSignedIn(false);
       }
     });
   }, []);
@@ -55,6 +63,12 @@ export function DnaDashboard() {
   const flavors = strongestDimensions(dna, FLAVOR_DIMS);
   const textures = strongestDimensions(dna, TEXTURE_DIMS);
 
+  const lede = signedIn
+    ? "Saved to your profile. Rate more dishes to refine how you get matched."
+    : isSupabaseConfigured()
+      ? "Built from ratings on this device. Keep using Mood Taster free. A profile lets you keep and customize this Taste DNA."
+      : "Built from ratings on this device. No account required.";
+
   if (evidenced.length === 0) {
     return (
       <section className="dna">
@@ -64,22 +78,14 @@ export function DnaDashboard() {
         <h1 className="dna-title">Nothing learned yet</h1>
         <p className="dna-lede">
           Finish a session and rate a dish. Your Taste DNA builds from those
-          ratings
-          {isSupabaseConfigured()
-            ? ", and syncs to your account when you are signed in"
-            : ", locally on this device"}
-          .
+          ratings on this device. No account needed to start.
         </p>
         <div className="result-actions">
           <Link className="cta" href="/taste">
             Start a session
           </Link>
-          {isSupabaseConfigured() ? (
-            <Link className="text-link" href="/signup">
-              Create an account
-            </Link>
-          ) : null}
         </div>
+        <ProfileNudge context="dna" />
       </section>
     );
   }
@@ -93,7 +99,7 @@ export function DnaDashboard() {
       <p className="dna-discovery">
         <span className="dna-discovery-value">{discovery}%</span> discovered
       </p>
-      <p className="dna-lede">{cloudHint}</p>
+      <p className="dna-lede">{lede}</p>
 
       {flavors.length > 0 ? (
         <div className="dna-block">
@@ -144,6 +150,8 @@ export function DnaDashboard() {
           })}
         </ul>
       </div>
+
+      <ProfileNudge context="dna" />
 
       <div className="result-actions">
         <Link className="cta" href="/taste">

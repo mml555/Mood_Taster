@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { SiteFooter } from "@/components/SiteFooter";
 import { SiteHeader } from "@/components/SiteHeader";
+import { ProfileNudge } from "@/components/ProfileNudge";
 
 export default function HomePage() {
   return (
@@ -13,7 +14,7 @@ export default function HomePage() {
           <p className="lede">
             Let&apos;s figure out what you actually want. Four quick taps about
             flavor, texture, weight, and how far you want to wander. One
-            specific dish. Not another endless menu.
+            specific dish. Not another endless menu. No account required.
           </p>
           <div className="cta-row">
             <Link className="cta" href="/taste">
@@ -67,6 +68,7 @@ export default function HomePage() {
               Find a dish
             </Link>
           </div>
+          <ProfileNudge context="home" />
         </section>
       </main>
       <SiteFooter />
