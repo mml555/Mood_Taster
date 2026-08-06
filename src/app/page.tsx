@@ -11,18 +11,13 @@ export default function HomePage() {
           <h1 id="brand">Mood Taster</h1>
           <p className="lede">
             Figure out what you actually want to eat in under 30 seconds. A few
-            quick questions about how you feel — then one specific pick, not
+            quick questions about how you feel, then one specific pick. Not
             another endless menu.
           </p>
           <div className="cta-row">
             <a className="cta" href="#how">
               Start with your mood
             </a>
-          </div>
-          <div className="hero-plane" aria-hidden="true">
-            <div className="ring ring-a" />
-            <div className="ring ring-b" />
-            <div className="bloom" />
           </div>
         </section>
 
@@ -36,8 +31,8 @@ export default function HomePage() {
               <span className="step">01</span>
               <h3>Mood</h3>
               <p>
-                Say how you want food to feel — hot, crunchy, spicy, light — in
-                five questions or fewer.
+                Say how you want food to feel: hot, crunchy, spicy, light. Five
+                questions or fewer.
               </p>
             </li>
             <li>
@@ -76,7 +71,7 @@ export default function HomePage() {
             </div>
             <div>
               <dt>Grab a snack</dt>
-              <dd>Small, fast, and specific — for the in-between hunger.</dd>
+              <dd>Small, fast, and specific. For the in-between hunger.</dd>
             </div>
           </dl>
         </section>
@@ -85,7 +80,7 @@ export default function HomePage() {
           <h2 id="about-title">Built for the craving, not the calorie</h2>
           <p>
             Mood Taster is a tasting companion. It starts with how you feel and
-            ends with something you can actually do — a dish, a place, or a
+            ends with something you can actually do: a dish, a place, or a
             flavor direction. Not a wellness score. Not sponsored clutter. No
             accounts, streaks, or feeds to maintain.
           </p>

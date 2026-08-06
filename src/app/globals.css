@@ -1,11 +1,31 @@
+/*
+ * Mood Taster design system. See .cursor/rules/design-system.mdc
+ * Two tones (ink + paper), one accent, flat fills, spacing-led separation.
+ * No gradients, borders, or shadows.
+ */
+
 :root {
+  /* Tones */
   --ink: #14110f;
-  --ink-soft: #2a2420;
   --paper: #f2ebe0;
-  --paper-dim: #d9cfc0;
-  --saffron: #e4a01a;
-  --zest: #b8c85a;
-  --smoke: rgba(242, 235, 224, 0.72);
+  --accent: #e4a01a;
+
+  /* Neutrals are mixes of the two tones, never a new hue */
+  --paper-muted: color-mix(in srgb, var(--paper) 72%, var(--ink));
+  --paper-quiet: color-mix(in srgb, var(--paper) 45%, var(--ink));
+  --ink-raised: color-mix(in srgb, var(--ink) 92%, var(--paper));
+
+  /* Spacing ramp */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 2rem;
+  --space-6: 3rem;
+  --space-7: 4rem;
+  --space-8: clamp(4rem, 12vh, 7rem);
+  --page-inset: clamp(1.25rem, 4vw, 3rem);
+
   --font-display: var(--font-fraunces), "Times New Roman", serif;
   --font-body: var(--font-sora), system-ui, sans-serif;
   --ease: cubic-bezier(0.22, 1, 0.36, 1);
@@ -24,17 +44,15 @@ html {
 body {
   margin: 0;
   min-height: 100vh;
+  background: var(--ink);
   color: var(--paper);
   font-family: var(--font-body);
   font-weight: 400;
   line-height: 1.55;
-  background:
-    radial-gradient(120% 80% at 80% 0%, #3a2a14 0%, transparent 55%),
-    radial-gradient(90% 70% at 10% 90%, #1e2a18 0%, transparent 50%),
-    linear-gradient(165deg, #1a1612 0%, var(--ink) 45%, #0c0a09 100%);
   overflow-x: hidden;
 }
 
+/* Brand texture: monochrome noise, not a tint or a gradient. */
 .grain {
   pointer-events: none;
   position: fixed;
@@ -51,13 +69,20 @@ a {
   text-underline-offset: 0.2em;
 }
 
+/* Accessibility exception: keyboard focus must stay visible. */
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
 .top {
   position: relative;
   z-index: 2;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 1.25rem clamp(1.25rem, 4vw, 3rem);
+  gap: var(--space-4);
+  padding: var(--space-4) var(--page-inset);
   animation: rise 0.9s var(--ease) both;
 }
 
@@ -71,20 +96,24 @@ a {
 
 .top nav {
   display: flex;
-  gap: 1.5rem;
+  gap: var(--space-5);
   font-size: 0.85rem;
   font-weight: 500;
 }
 
 .top nav a {
   text-decoration: none;
-  opacity: 0.75;
-  transition: opacity 0.2s ease;
+  color: var(--paper-muted);
+  transition: color 0.2s ease;
 }
 
 .top nav a:hover,
 .top nav a:focus-visible {
-  opacity: 1;
+  color: var(--paper);
+}
+
+.top nav a[aria-current="page"] {
+  color: var(--accent);
 }
 
 .hero {
@@ -94,18 +123,17 @@ a {
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
-  padding: clamp(2rem, 8vh, 5rem) clamp(1.25rem, 4vw, 3rem)
-    clamp(3rem, 10vh, 6rem);
   max-width: 52rem;
+  padding: var(--space-7) var(--page-inset) var(--space-8);
 }
 
 .eyebrow {
-  margin: 0 0 0.75rem;
+  margin: 0 0 var(--space-3);
   font-size: 0.8rem;
   font-weight: 500;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: var(--zest);
+  color: var(--accent);
   animation: rise 1s var(--ease) 0.1s both;
 }
 
@@ -121,84 +149,36 @@ a {
 }
 
 .lede {
-  margin: 1.35rem 0 0;
+  margin: var(--space-5) 0 0;
   max-width: 28rem;
   font-size: clamp(1rem, 2.4vw, 1.2rem);
-  color: var(--smoke);
+  color: var(--paper-muted);
   animation: rise 1s var(--ease) 0.28s both;
 }
 
 .cta-row {
-  margin-top: 2rem;
+  margin-top: var(--space-6);
   animation: rise 1s var(--ease) 0.4s both;
 }
 
+/* The one filled element in the system: tones inverted. */
 .cta {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 0.9rem 1.4rem;
-  border: 1px solid color-mix(in srgb, var(--saffron) 70%, white);
-  background: var(--saffron);
+  padding: var(--space-3) var(--space-5);
+  background: var(--paper);
   color: var(--ink);
   font-size: 0.95rem;
   font-weight: 600;
   text-decoration: none;
-  border-radius: 2px;
   transition: transform 0.25s var(--ease), background 0.2s ease;
 }
 
 .cta:hover,
 .cta:focus-visible {
-  background: #f0b53a;
+  background: color-mix(in srgb, var(--paper) 88%, var(--ink));
   transform: translateY(-2px);
-}
-
-.hero-plane {
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-  overflow: hidden;
-  pointer-events: none;
-}
-
-.bloom {
-  position: absolute;
-  right: -10%;
-  top: 10%;
-  width: min(70vw, 34rem);
-  height: min(70vw, 34rem);
-  border-radius: 50%;
-  background: radial-gradient(
-    circle,
-    color-mix(in srgb, var(--saffron) 35%, transparent) 0%,
-    transparent 68%
-  );
-  filter: blur(8px);
-  animation: pulse 8s ease-in-out infinite alternate;
-}
-
-.ring {
-  position: absolute;
-  right: 8%;
-  top: 18%;
-  border: 1px solid color-mix(in srgb, var(--paper) 18%, transparent);
-  border-radius: 50%;
-}
-
-.ring-a {
-  width: min(52vw, 26rem);
-  height: min(52vw, 26rem);
-  animation: spin 48s linear infinite;
-}
-
-.ring-b {
-  width: min(38vw, 18rem);
-  height: min(38vw, 18rem);
-  right: 14%;
-  top: 26%;
-  border-color: color-mix(in srgb, var(--zest) 35%, transparent);
-  animation: spin 36s linear infinite reverse;
 }
 
 .how,
@@ -206,9 +186,12 @@ a {
 .about {
   position: relative;
   z-index: 1;
-  padding: clamp(3.5rem, 10vh, 6rem) clamp(1.25rem, 4vw, 3rem);
-  border-top: 1px solid color-mix(in srgb, var(--paper) 12%, transparent);
   max-width: 64rem;
+  padding: var(--space-8) var(--page-inset) 0;
+}
+
+.about {
+  padding-bottom: var(--space-8);
 }
 
 .how h2,
@@ -223,37 +206,32 @@ a {
 
 .section-lede,
 .about p {
-  margin: 0.85rem 0 0;
+  margin: var(--space-4) 0 0;
   max-width: 36rem;
-  color: var(--smoke);
+  color: var(--paper-muted);
 }
 
 .flow {
   list-style: none;
-  margin: 2.5rem 0 0;
+  margin: var(--space-7) 0 0;
   padding: 0;
   display: grid;
-  gap: 1.75rem;
+  gap: var(--space-6);
 }
 
 @media (min-width: 720px) {
   .flow {
     grid-template-columns: repeat(3, 1fr);
-    gap: 2rem;
+    gap: var(--space-5);
   }
-}
-
-.flow li {
-  padding-top: 1rem;
-  border-top: 1px solid color-mix(in srgb, var(--paper) 14%, transparent);
 }
 
 .step {
   display: block;
   font-size: 0.75rem;
   letter-spacing: 0.12em;
-  color: var(--saffron);
-  margin-bottom: 0.65rem;
+  color: var(--accent);
+  margin-bottom: var(--space-3);
 }
 
 .flow h3 {
@@ -264,21 +242,16 @@ a {
 }
 
 .flow p {
-  margin: 0.5rem 0 0;
-  color: var(--smoke);
+  margin: var(--space-2) 0 0;
+  color: var(--paper-muted);
   font-size: 0.95rem;
 }
 
 .lane-list {
-  margin: 2.5rem 0 0;
+  margin: var(--space-7) 0 0;
   display: grid;
-  gap: 1.5rem;
+  gap: var(--space-6);
   max-width: 40rem;
-}
-
-.lane-list div {
-  padding-top: 1rem;
-  border-top: 1px solid color-mix(in srgb, var(--paper) 14%, transparent);
 }
 
 .lane-list dt {
@@ -288,8 +261,8 @@ a {
 }
 
 .lane-list dd {
-  margin: 0.4rem 0 0;
-  color: var(--smoke);
+  margin: var(--space-2) 0 0;
+  color: var(--paper-muted);
   font-size: 0.95rem;
 }
 
@@ -298,11 +271,10 @@ a {
   z-index: 1;
   display: flex;
   flex-wrap: wrap;
-  gap: 0.75rem 1.5rem;
+  gap: var(--space-3) var(--space-5);
   align-items: baseline;
   justify-content: space-between;
-  padding: 2rem clamp(1.25rem, 4vw, 3rem) 2.5rem;
-  border-top: 1px solid color-mix(in srgb, var(--paper) 12%, transparent);
+  padding: var(--space-7) var(--page-inset) var(--space-6);
 }
 
 .foot-brand {
@@ -314,7 +286,7 @@ a {
 .foot-meta {
   margin: 0;
   font-size: 0.85rem;
-  opacity: 0.7;
+  color: var(--paper-quiet);
 }
 
 .foot-meta a {
@@ -337,35 +309,18 @@ a {
   }
 }
 
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-@keyframes pulse {
-  from {
-    transform: scale(1);
-    opacity: 0.85;
-  }
-  to {
-    transform: scale(1.08);
-    opacity: 1;
-  }
-}
-
-/* —— Document / PRD pages —— */
+/* Document pages (PRD, Strategy) */
 
 .doc-page .doc {
   position: relative;
   z-index: 1;
   max-width: 44rem;
   margin: 0 auto;
-  padding: 0 clamp(1.25rem, 4vw, 3rem) clamp(3rem, 8vh, 5rem);
+  padding: 0 var(--page-inset) var(--space-8);
 }
 
 .doc-hero {
-  padding: clamp(2rem, 6vh, 3.5rem) 0 1.5rem;
+  padding: var(--space-6) 0 var(--space-5);
   animation: rise 0.9s var(--ease) both;
 }
 
@@ -379,36 +334,36 @@ a {
 }
 
 .doc-hero .lede {
-  margin-top: 1rem;
+  margin-top: var(--space-4);
   max-width: 36rem;
 }
 
 .doc-meta {
-  margin: 1.25rem 0 0;
+  margin: var(--space-5) 0 0;
   font-size: 0.85rem;
-  color: var(--smoke);
+  color: var(--paper-quiet);
 }
 
+/* Detaches by tone step, not by a rule or a stroke. */
 .callout {
-  margin: 0 0 2rem;
-  padding: 1.25rem 1.35rem;
-  border-left: 3px solid var(--saffron);
-  background: color-mix(in srgb, var(--saffron) 10%, transparent);
+  margin: 0 0 var(--space-6);
+  padding: var(--space-4) var(--space-5);
+  background: var(--ink-raised);
   animation: rise 1s var(--ease) 0.08s both;
 }
 
 .callout-label {
-  margin: 0 0 0.5rem;
+  margin: 0 0 var(--space-2);
   font-size: 0.75rem;
   font-weight: 500;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: var(--saffron);
+  color: var(--accent);
 }
 
 .callout p {
-  margin: 0 0 0.75rem;
-  color: var(--smoke);
+  margin: 0 0 var(--space-3);
+  color: var(--paper-muted);
 }
 
 .callout p:last-child {
@@ -420,19 +375,17 @@ a {
 }
 
 .toc {
-  margin: 0 0 2.5rem;
-  padding: 1.25rem 0 0;
-  border-top: 1px solid color-mix(in srgb, var(--paper) 12%, transparent);
+  margin: 0 0 var(--space-7);
   animation: rise 1s var(--ease) 0.12s both;
 }
 
 .toc-label {
-  margin: 0 0 0.75rem;
+  margin: 0 0 var(--space-3);
   font-size: 0.75rem;
   font-weight: 500;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: var(--zest);
+  color: var(--accent);
 }
 
 .toc ol {
@@ -440,13 +393,13 @@ a {
   padding: 0;
   list-style: none;
   display: grid;
-  gap: 0.45rem;
+  gap: var(--space-2);
   font-size: 0.95rem;
 }
 
 .toc a {
   text-decoration: none;
-  color: var(--smoke);
+  color: var(--paper-muted);
   transition: color 0.2s ease;
 }
 
@@ -457,13 +410,12 @@ a {
 }
 
 .doc-body section {
-  padding: 2rem 0 0.5rem;
-  border-top: 1px solid color-mix(in srgb, var(--paper) 10%, transparent);
-  scroll-margin-top: 1.25rem;
+  padding: var(--space-7) 0 0;
+  scroll-margin-top: var(--space-4);
 }
 
 .doc-body h2 {
-  margin: 0 0 0.85rem;
+  margin: 0 0 var(--space-4);
   font-family: var(--font-display);
   font-size: clamp(1.45rem, 3.5vw, 1.85rem);
   font-weight: 500;
@@ -471,31 +423,31 @@ a {
 }
 
 .doc-body h3 {
-  margin: 1.5rem 0 0.65rem;
+  margin: var(--space-5) 0 var(--space-3);
   font-family: var(--font-display);
   font-size: 1.15rem;
   font-weight: 500;
-  color: var(--saffron);
+  color: var(--accent);
 }
 
 .doc-body p,
 .doc-body li,
 .doc-body dd {
-  color: var(--smoke);
+  color: var(--paper-muted);
 }
 
 .doc-body p {
-  margin: 0 0 1rem;
+  margin: 0 0 var(--space-4);
 }
 
 .doc-body ul,
 .doc-body ol:not(.req-flow) {
-  margin: 0 0 1rem;
+  margin: 0 0 var(--space-4);
   padding-left: 1.2rem;
 }
 
 .doc-body li {
-  margin-bottom: 0.45rem;
+  margin-bottom: var(--space-2);
 }
 
 .doc-body strong {
@@ -506,12 +458,7 @@ a {
 .user-list {
   margin: 0;
   display: grid;
-  gap: 1.25rem;
-}
-
-.user-list div {
-  padding-top: 0.85rem;
-  border-top: 1px solid color-mix(in srgb, var(--paper) 10%, transparent);
+  gap: var(--space-5);
 }
 
 .user-list dt {
@@ -522,21 +469,16 @@ a {
 }
 
 .user-list dd {
-  margin: 0.4rem 0 0;
+  margin: var(--space-2) 0 0;
 }
 
 .req-flow {
-  margin: 0 0 1rem;
+  margin: 0 0 var(--space-4);
   padding-left: 1.2rem;
 }
 
 .req-flow li {
-  margin-bottom: 0.75rem;
-}
-
-.top nav a[aria-current="page"] {
-  opacity: 1;
-  color: var(--saffron);
+  margin-bottom: var(--space-3);
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -79,6 +79,17 @@ These are accessibility features, not decoration, and must survive:
   element. Never set `outline: none` without an equivalent replacement
 - `box-sizing: border-box`
 - Underlines on inline text links
+- The `.grain` overlay — monochrome noise, no hue and no gradient. It is brand
+  texture, not a substitute for structure. Do not add a second texture
+
+## Sponsored placements
+
+The Strategy doc (`/strategy`) requires paid placements to be unmistakably
+labeled. Under this system, that label is **type, not a badge box**:
+
+- Use an accent eyebrow — `Sponsored match` — in the same style as `.eyebrow`
+- Never build a bordered pill, tinted chip, or shadowed card to carry it
+- Never make the sponsored label quieter than the organic one it sits beside
 
 ## Motion
 

@@ -6,7 +6,7 @@ import { StrategyArticle } from "@/content/strategy-article";
 export const metadata: Metadata = {
   title: "Go-to-Market Strategy",
   description:
-    "Mood Taster go-to-market, growth, and monetization strategy — craving-intent advertising with trust first.",
+    "Mood Taster go-to-market, growth, and monetization strategy: craving-intent advertising with trust first.",
 };
 
 export default function StrategyPage() {
@@ -19,7 +19,7 @@ export default function StrategyPage() {
           <h1>Go-to-Market, Growth &amp; Monetization</h1>
           <p className="lede">
             How Mood Taster enters the market, earns trust, and builds toward a
-            high-intent food advertising platform — without selling attention.
+            high-intent food advertising platform, without selling attention.
           </p>
           <p className="doc-meta">
             Status: v1.0 · Last updated: August 6, 2026 · Mobile-first web ·{" "}
