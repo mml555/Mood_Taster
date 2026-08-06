@@ -1,105 +1,117 @@
 ---
-description: Visual design system for Mood Taster. Two-tone, flat, spacing-led
+description: Visual design system for Mood Taster. Brand Guide v1
 alwaysApply: true
 ---
 
 # Design system
 
-Mood Taster looks like a well-set page, not a dashboard. Two tones, flat fills,
-and generous space do all the work. If a change needs a line or a gradient to
-read clearly, the spacing or the type is wrong.
+Mood Taster should feel minimal, playful, fast, premium, and simple.
+Content first, controls second. Don't make me think. Let me react.
 
-## Palette: two tones and one accent
+## Palette
 
 | Token | Value | Role |
 |-------|-------|------|
-| `--ink` | `#14110f` | Tone 1. Every surface. |
-| `--paper` | `#f2ebe0` | Tone 2. Every piece of content. |
-| `--accent` | `#e4a01a` | Saffron. Small marks only. |
+| `--paper` | `#fdfaff` | Ghost White. Main canvas ~80%. |
+| `--ink` | `#510c85` | Indigo Purple. Primary brand / actions ~20%. |
+| `--accent` | `#ffdf6e` | Royal Gold. Highlight, sparingly. |
 
-Every neutral in the UI is a **mix of the two tones**, never a new hue:
+Every neutral is a **mix of paper and ink**, never a new hue:
 
 ```css
---paper-muted: color-mix(in srgb, var(--paper) 72%, var(--ink));
---paper-quiet: color-mix(in srgb, var(--paper) 45%, var(--ink));
---ink-raised:  color-mix(in srgb, var(--ink) 92%, var(--paper));
+--paper-muted: color-mix(in srgb, var(--ink) 62%, var(--paper));
+--paper-quiet: color-mix(in srgb, var(--ink) 38%, var(--paper));
+--ink-raised:  color-mix(in srgb, var(--ink) 7%, var(--paper));
 ```
 
-Accent rules:
+Rules:
 
-- Saffron is for **small marks**: eyebrows, step numbers, one emphasis per section
-- It must never fill a surface, a button, or any large area. Roughly 1% of a
-  viewport's painted area is the ceiling
-- Never introduce a fourth hue. No zest, no status greens, no semantic reds.
-  Failure and success read through copy, weight, and placement
+- Ghost White dominates. Screens stay bright and open, not purple-heavy
+- Indigo for primary CTAs, active states, selected items, and brand moments
+- Gold for a great match, special highlight, or tiny mark. Never a second primary
+- If a screen feels colorful, we used too much color
+- No status greens or semantic reds. Feedback reads through copy and placement
+
+## Shape language
+
+```css
+--radius-sm: 12px;
+--radius-btn: 14px;
+--radius-card: 20px;
+--radius-lg: 24px;
+--radius-pill: 999px;
+```
+
+## Spacing (8px system)
+
+```css
+--space-2: 0.5rem;  /* 8 */
+--space-3: 1rem;    /* 16 */
+--space-4: 1.5rem;  /* 24 */
+--space-5: 2rem;    /* 32 */
+--space-6: 3rem;    /* 48 */
+--space-7: 4rem;    /* 64 */
+--space-8: clamp(4rem, 12vh, 7rem);
+```
+
+Most component spacing uses 16px or 24px. Give content room to breathe.
+
+## Buttons
+
+- **Primary:** indigo fill, light text. No border. No shadow normally
+- **Secondary:** soft purple tint, indigo text. No border
+- **Highlight:** gold fill, indigo text. Special actions only
+- Avoid outlined buttons. Keep copy tiny (Show me, Try again, I like it)
+
+## Icons
+
+Teach the interaction. Prefer icon + 1–3 words. No emojis in product UI.
+
+♡ like · × not for me · ↻ try again · ← → browse · ＋ add · ✓ confirm · ⌕ search
+
+## Cards and swipe
+
+Cards are large, clean, content-driven. Avoid nested cards and heavy metadata.
+Shadows are rare. If used, they mean: look here (main recommendation only).
+
+Result reactions: swipe right / ♡ like, swipe left / × nope, ↻ try again.
+Favor swipes and taps over forms. Honor `prefers-reduced-motion: reduce`.
 
 ## Never
 
-- **No gradients.** No `linear-gradient`, `radial-gradient`, `conic-gradient`,
-  color washes, blurred blooms, or tinted overlays. Solid fills only
-- **No borders as decoration.** No hairline dividers, no `border-top` section
-  rules, no outlined cards, no stroked circles or rings
-- **No box shadows.** Depth is not a substitute for a border
-- **No card grids** built out of boxes. Group with space and alignment
-- **No `border-radius` above `2px`.** Prefer `0`
+- No gradients
+- No decorative borders or outlined buttons/pills
+- No constant drop shadows or card grids
+- No emojis in UI
+- No fourth hue for status
 
-## Instead: separate with space and tone
+## Copy
 
-Reach for these, in order:
-
-1. **Space.** A section break is `--space-8`, not a 1px line
-2. **Type.** Size, weight, and family carry hierarchy
-3. **Tone.** Step a surface to `--ink-raised`, or invert to paper-on-ink, when a
-   region genuinely needs to detach
-
-Primary actions **invert the tones**: paper background, ink text. That is the
-only "filled" element in the system.
-
-## Spacing scale
-
-Use the ramp; do not invent one-off values.
-
-```css
---space-1: 0.25rem;  --space-5: 2rem;
---space-2: 0.5rem;   --space-6: 3rem;
---space-3: 0.75rem;  --space-7: 4rem;
---space-4: 1rem;     --space-8: clamp(4rem, 12vh, 7rem);
-```
-
-Section padding uses `--space-8` on the block axis and the shared page inset on
-the inline axis. Related items sit `--space-4` apart; unrelated groups sit
-`--space-6` or more apart. When something feels cramped, add space before adding
-a divider.
-
-## Required exceptions
-
-These are accessibility features, not decoration, and must survive:
-
-- `:focus-visible` outlines: keep a visible 2px focus ring on every interactive
-  element. Never set `outline: none` without an equivalent replacement
-- `box-sizing: border-box`
-- Underlines on inline text links
-- The `.grain` overlay: monochrome noise, no hue and no gradient. It is brand
-  texture, not a substitute for structure. Do not add a second texture
-
-## Sponsored placements
-
-The Strategy doc (`/strategy`) requires paid placements to be unmistakably
-labeled. Under this system, that label is **type, not a badge box**:
-
-- Use an accent eyebrow, `Sponsored match`, in the same style as `.eyebrow`
-- Never build a bordered pill, tinted chip, or shadowed card to carry it
-- Never make the sponsored label quieter than the organic one it sits beside
+Write for a third grader. Headlines 2–6 words. Body rarely over two short
+sentences. No em dashes. User words: mood, taste, match, pick.
 
 ## Motion
 
-Entrance `rise` only, and one shared `--ease`. No spinning, pulsing, or looping
-ambient animation. Honor `prefers-reduced-motion: reduce`.
+Entrance `rise` only, plus intentional swipe exit on the result card. One shared
+`--ease`. No spinning, pulsing, or looping ambient animation.
+
+## Required exceptions
+
+- `:focus-visible` outlines on every interactive element
+- `box-sizing: border-box`
+- Underlines on inline text links
+- Monochrome `.grain` overlay (brand texture only)
+
+## Sponsored placements
+
+Label with type, not a badge box: accent eyebrow `Sponsored match` in `.eyebrow`
+style. Never quieter than the organic label beside it.
 
 ## Checklist before shipping UI
 
-- [ ] No gradient, border, or shadow added
-- [ ] Any new color is `--ink`, `--paper`, `--accent`, or a mix of the first two
-- [ ] Accent used only as a small mark
-- [ ] Spacing values come from the ramp
+- [ ] Ghost White dominates; indigo drives actions; gold is sparse
+- [ ] Radii and spacing come from the system
+- [ ] No emoji; icons explain actions
+- [ ] One clear primary CTA per screen
+- [ ] Copy stays short
 - [ ] Focus states still visible on keyboard nav

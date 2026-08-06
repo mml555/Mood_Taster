@@ -5,7 +5,7 @@ import { SiteHeader } from "@/components/SiteHeader";
 export const metadata: Metadata = {
   title: "Brand Guide",
   description:
-    "Mood Taster brand rules and design guidelines: two tones, no borders, sharp corners, and voice that stays brief and human.",
+    "Mood Taster Brand Guide v1: Ghost White, Indigo Purple, Royal Gold. Minimal, playful, fast. See, react, swipe.",
 };
 
 export default function BrandPage() {
@@ -14,15 +14,14 @@ export default function BrandPage() {
       <SiteHeader current="brand" />
       <main className="doc">
         <header className="doc-hero">
-          <p className="eyebrow">Brand guide · v1.0</p>
-          <h1>Brand rules &amp; design guidelines</h1>
+          <p className="eyebrow">Brand guide · v1</p>
+          <h1>Don&apos;t make me think. Let me react.</h1>
           <p className="lede">
-            Mood Taster looks like a well-set page, not a dashboard. Two tones
-            and generous space do all the work. If a change needs a line or a
-            gradient to read clearly, the spacing or the type is wrong.
+            Mood Taster should feel minimal, playful, fast, premium, and simple.
+            See → React → Swipe → Get something better.
           </p>
           <p className="doc-meta">
-            Status: v1.0 · Last updated: August 6, 2026 ·{" "}
+            Status: v1 · Last updated: August 6, 2026 ·{" "}
             <a href="/prd">PRD</a> · <a href="/strategy">Strategy</a> ·{" "}
             <a href="https://github.com/mml555/Mood_Taster">GitHub</a>
           </p>
@@ -31,9 +30,10 @@ export default function BrandPage() {
         <aside className="callout" aria-label="Hard visual rules">
           <p className="callout-label">Hard rules</p>
           <p>
-            Two tones (<strong>ink</strong> and <strong>paper</strong>), one
-            saffron accent for small marks. No borders. No rounded corners. No
-            gradients. No shadows.
+            Ghost White dominates. Indigo drives actions. Gold is a surprise,
+            not a second primary. One radius system. 8px spacing. No emojis. No
+            outlined buttons. Almost no shadows. Short copy. One primary CTA per
+            screen.
           </p>
         </aside>
 
@@ -41,83 +41,321 @@ export default function BrandPage() {
           <p className="toc-label">On this page</p>
           <ol>
             <li>
-              <a href="#stance">1. Stance</a>
+              <a href="#feel">1. Brand feel</a>
             </li>
             <li>
-              <a href="#voice">2. Voice</a>
+              <a href="#palette">2. Color</a>
             </li>
             <li>
-              <a href="#logo">3. Logo</a>
+              <a href="#philosophy">3. UI philosophy</a>
             </li>
             <li>
-              <a href="#palette">4. Palette</a>
+              <a href="#shape">4. Shape &amp; spacing</a>
             </li>
             <li>
-              <a href="#never">5. Never / Instead</a>
+              <a href="#buttons">5. Buttons &amp; icons</a>
             </li>
             <li>
-              <a href="#type">6. Type</a>
+              <a href="#swipe">6. Swipe &amp; cards</a>
             </li>
             <li>
-              <a href="#spacing">7. Spacing</a>
+              <a href="#copy">7. Copy</a>
             </li>
             <li>
-              <a href="#motion">8. Motion</a>
+              <a href="#logo">8. Logo</a>
             </li>
             <li>
-              <a href="#sponsored">9. Sponsored placements</a>
-            </li>
-            <li>
-              <a href="#checklist">10. Ship checklist</a>
+              <a href="#checklist">9. Ship checklist</a>
             </li>
           </ol>
         </nav>
 
         <article className="doc-body brand-guide">
-          <section id="stance" aria-labelledby="stance-title">
-            <h2 id="stance-title">1. Stance</h2>
+          <section id="feel" aria-labelledby="feel-title">
+            <h2 id="feel-title">1. Brand feel</h2>
             <p>
-              Start from mood, not menus or macros. Recommendations should feel
-              human, brief, and actionable. Prefer explainable picks (“why this
-              fits”) over black-box scores.
+              Minimal. Playful. Fast. Premium. Simple. The product should feel
+              almost effortless. Users should rarely need to stop and figure out
+              what something means.
             </p>
             <p>
-              Mood Taster is not a therapist, a delivery service, or a calorie
-              counter. The core flow stays mood → match → act.
+              Think dating-app speed, built around discovering things that match
+              your mood. Core flow stays mood → match → act.
             </p>
           </section>
 
-          <section id="voice" aria-labelledby="voice-title">
-            <h2 id="voice-title">2. Voice</h2>
+          <section id="palette" aria-labelledby="palette-title">
+            <h2 id="palette-title">2. Color</h2>
             <p>
-              One idea per sentence. Short support lines. Speak like someone who
-              already knows what you want, not like a coach or a catalog.
+              If a screen feels colorful, we probably used too much color.
+              Neutrals are mixes of Ghost White and Indigo only.
             </p>
+
+            <ul className="swatch-grid" aria-label="Brand color tokens">
+              <li>
+                <span className="swatch swatch-paper" aria-hidden="true" />
+                <span className="swatch-name">Ghost White</span>
+                <span className="swatch-meta">
+                  <code>--paper</code> · #FDFAFF · Canvas ~80%
+                </span>
+              </li>
+              <li>
+                <span className="swatch swatch-ink" aria-hidden="true" />
+                <span className="swatch-name">Indigo Purple</span>
+                <span className="swatch-meta">
+                  <code>--ink</code> · #510C85 · Primary ~20%
+                </span>
+              </li>
+              <li>
+                <span className="swatch swatch-accent" aria-hidden="true" />
+                <span className="swatch-name">Royal Gold</span>
+                <span className="swatch-meta">
+                  <code>--accent</code> · #FFDF6E · Highlight, sparingly
+                </span>
+              </li>
+              <li>
+                <span
+                  className="swatch swatch-paper-muted"
+                  aria-hidden="true"
+                />
+                <span className="swatch-name">Muted</span>
+                <span className="swatch-meta">
+                  <code>--paper-muted</code> · mix ink into paper
+                </span>
+              </li>
+              <li>
+                <span
+                  className="swatch swatch-paper-quiet"
+                  aria-hidden="true"
+                />
+                <span className="swatch-name">Quiet</span>
+                <span className="swatch-meta">
+                  <code>--paper-quiet</code> · quieter mix
+                </span>
+              </li>
+              <li>
+                <span
+                  className="swatch swatch-ink-raised"
+                  aria-hidden="true"
+                />
+                <span className="swatch-name">Raised</span>
+                <span className="swatch-meta">
+                  <code>--ink-raised</code> · soft surface step
+                </span>
+              </li>
+            </ul>
+
+            <h3>Usage</h3>
             <ul>
               <li>
-                User-facing words: <strong>mood</strong>, <strong>taste</strong>,{" "}
-                <strong>match</strong>, <strong>pick</strong>
+                <strong>Ghost White</strong> is the default background. Screens
+                stay bright and open, not purple-heavy.
               </li>
               <li>
-                Avoid: “algorithm,” “optimization,” “wellness score”
+                <strong>Indigo</strong> for primary CTAs, active states,
+                selected items, headings when emphasis is needed, and major
+                brand moments.
               </li>
               <li>
-                No em dashes anywhere. Use a period, comma, or colon.
-                Parentheses for a true aside.
-              </li>
-              <li>
-                En dashes are fine for numeric ranges only (18-35, 50-150)
+                <strong>Gold</strong> for a great match, special recommendation,
+                selected highlight, or a tiny mark the user should notice. Never
+                let it compete with purple.
               </li>
             </ul>
           </section>
 
-          <section id="logo" aria-labelledby="logo-title">
-            <h2 id="logo-title">3. Logo</h2>
+          <section id="philosophy" aria-labelledby="philosophy-title">
+            <h2 id="philosophy-title">3. UI philosophy</h2>
+            <p>Content first, controls second. Keep screens spacious.</p>
+            <p>Every element should answer one of three questions:</p>
+            <ul>
+              <li>What is this?</li>
+              <li>Do I like it?</li>
+              <li>What do I do next?</li>
+            </ul>
+            <p>If it does not help answer one of those, remove it.</p>
+
+            <div className="brand-demos" aria-label="Visual examples">
+              <div className="brand-demo">
+                <p className="brand-demo-label">Do</p>
+                <div className="brand-demo-do">
+                  <p className="eyebrow">Your match</p>
+                  <p className="brand-demo-title">One pick. React.</p>
+                  <p className="brand-demo-copy">
+                    Space, type, and tone. One clear next step.
+                  </p>
+                  <span className="brand-demo-cta">Show me</span>
+                </div>
+              </div>
+              <div className="brand-demo">
+                <p className="brand-demo-label">Don&apos;t</p>
+                <div className="brand-demo-dont">
+                  <p>
+                    Boxes inside boxes, long forms, competing CTAs, and copy
+                    that needs a dictionary. If we can make it simpler, make it
+                    simpler.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section id="shape" aria-labelledby="shape-title">
+            <h2 id="shape-title">4. Shape &amp; spacing</h2>
             <p>
-              The mark is a stylized tongue. Use yellow on ink surfaces, purple
-              on paper or light fields. Never stretch, rotate, or add a stroke.
-              Clear space around the mark should be at least the height of the
-              cleft.
+              One rounded language. Nothing extremely sharp or overly bubbly.
+            </p>
+            <ul>
+              <li>
+                Cards: <code>--radius-card</code> 20px
+              </li>
+              <li>
+                Large containers / modals: <code>--radius-lg</code> 24px
+              </li>
+              <li>
+                Buttons / inputs: <code>--radius-btn</code> 14–16px
+              </li>
+              <li>
+                Small controls: <code>--radius-sm</code> 12px
+              </li>
+              <li>
+                Pills: <code>--radius-pill</code> fully rounded
+              </li>
+            </ul>
+            <p>
+              Spacing uses an 8px system: 8 → 16 → 24 → 32 → 48 → 64. Most
+              component spacing uses 16px or 24px. Give important content room
+              to breathe.
+            </p>
+            <ul className="space-ramp" aria-label="Spacing scale">
+              <li>
+                <span className="space-bar" style={{ width: "0.5rem" }} />
+                <code>--space-2</code> 8px
+              </li>
+              <li>
+                <span className="space-bar" style={{ width: "1rem" }} />
+                <code>--space-3</code> 16px
+              </li>
+              <li>
+                <span className="space-bar" style={{ width: "1.5rem" }} />
+                <code>--space-4</code> 24px
+              </li>
+              <li>
+                <span className="space-bar" style={{ width: "2rem" }} />
+                <code>--space-5</code> 32px
+              </li>
+              <li>
+                <span className="space-bar" style={{ width: "3rem" }} />
+                <code>--space-6</code> 48px
+              </li>
+              <li>
+                <span className="space-bar" style={{ width: "4rem" }} />
+                <code>--space-7</code> 64px
+              </li>
+            </ul>
+          </section>
+
+          <section id="buttons" aria-labelledby="buttons-title">
+            <h2 id="buttons-title">5. Buttons &amp; icons</h2>
+            <h3>Buttons</h3>
+            <ul>
+              <li>
+                <strong>Primary:</strong> Indigo background, light text. No
+                border. No shadow normally.
+              </li>
+              <li>
+                <strong>Secondary:</strong> Soft purple tint, indigo text. No
+                border.
+              </li>
+              <li>
+                <strong>Highlight:</strong> Gold background, indigo text.
+                Special actions only.
+              </li>
+            </ul>
+            <p>
+              Avoid outlined buttons. Button copy stays tiny: Show me, Try
+              again, I like it, Not for me, Pick this, Next.
+            </p>
+
+            <h3>Icons</h3>
+            <p>
+              Icons teach how the app works. Prefer icon + 1–3 words. No emojis
+              in product UI.
+            </p>
+            <ul>
+              <li>♡ Like</li>
+              <li>× Not for me</li>
+              <li>↻ Try something else</li>
+              <li>← → Browse / swipe</li>
+              <li>＋ Add</li>
+              <li>✓ Pick / confirm</li>
+              <li>⌕ Search</li>
+            </ul>
+          </section>
+
+          <section id="swipe" aria-labelledby="swipe-title">
+            <h2 id="swipe-title">6. Swipe &amp; cards</h2>
+            <p>
+              Personality comes from physical reactions instead of menus. A
+              recommendation appears:
+            </p>
+            <ul>
+              <li>Swipe right / ♡ → Like</li>
+              <li>Swipe left / × → Not for me</li>
+              <li>↻ → Try again</li>
+              <li>Tap → Learn more</li>
+            </ul>
+            <p>
+              Favor swipes, taps, and choices over forms. The user should feel
+              like they are teaching Mood Taster their taste simply by using it.
+            </p>
+            <h3>Cards</h3>
+            <p>
+              Large, clean, content-driven. Avoid heavy borders, constant drop
+              shadows, nested cards, and tiny buttons everywhere. Shadows are
+              rare. If we use one, it means: look here, this is important. The
+              main recommendation card may get subtle elevation. Everything else
+              stays flat.
+            </p>
+          </section>
+
+          <section id="copy" aria-labelledby="copy-title">
+            <h2 id="copy-title">7. Copy</h2>
+            <p>
+              Write for a third grader. Short sentences. Common words. One idea
+              at a time. Headlines ideally 2–6 words. Body rarely more than two
+              short sentences.
+            </p>
+            <ul>
+              <li>
+                Instead of &quot;Tell us your current emotional state…&quot;
+                use <strong>How do you feel?</strong>
+              </li>
+              <li>
+                Instead of &quot;We couldn&apos;t find any results…&quot; use{" "}
+                <strong>Nothing yet. Try again.</strong>
+              </li>
+              <li>
+                Instead of &quot;Would you like us to generate an
+                alternative…&quot; use <strong>Want another one?</strong>
+              </li>
+            </ul>
+            <p>
+              User-facing words: mood, taste, match, pick. Avoid algorithm,
+              optimization, wellness score. No em dashes anywhere.
+            </p>
+            <p>
+              Each screen: one main idea, one main action, one obvious next
+              step.
+            </p>
+          </section>
+
+          <section id="logo" aria-labelledby="logo-title">
+            <h2 id="logo-title">8. Logo</h2>
+            <p>
+              The mark is a stylized tongue. Use yellow on indigo surfaces,
+              purple on Ghost White fields. Never stretch, rotate, or add a
+              stroke.
             </p>
 
             <ul className="logo-grid" aria-label="Logo variants">
@@ -132,9 +370,7 @@ export default function BrandPage() {
                   />
                 </div>
                 <span className="swatch-name">Mark · yellow</span>
-                <span className="swatch-meta">
-                  Default on ink. Favicon and compact UI.
-                </span>
+                <span className="swatch-meta">On indigo surfaces.</span>
               </li>
               <li>
                 <div className="logo-tile logo-tile-paper">
@@ -147,24 +383,7 @@ export default function BrandPage() {
                   />
                 </div>
                 <span className="swatch-name">Mark · purple</span>
-                <span className="swatch-meta">
-                  On paper or light surfaces.
-                </span>
-              </li>
-              <li>
-                <div className="logo-tile logo-tile-ink logo-tile-wide">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src="/brand/lockup-yellow-sm.png"
-                    alt=""
-                    width={280}
-                    height={36}
-                  />
-                </div>
-                <span className="swatch-name">Lockup · yellow</span>
-                <span className="swatch-meta">
-                  Icon + wordmark. Site header default.
-                </span>
+                <span className="swatch-meta">On Ghost White. Site default.</span>
               </li>
               <li>
                 <div className="logo-tile logo-tile-paper logo-tile-wide">
@@ -177,346 +396,39 @@ export default function BrandPage() {
                   />
                 </div>
                 <span className="swatch-name">Lockup · purple</span>
-                <span className="swatch-meta">
-                  Icon + wordmark on light fields.
-                </span>
+                <span className="swatch-meta">Header on light canvas.</span>
               </li>
               <li>
                 <div className="logo-tile logo-tile-ink logo-tile-wide">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
-                    src="/brand/wordmark-yellow-sm.png"
+                    src="/brand/lockup-yellow-sm.png"
                     alt=""
                     width={280}
-                    height={35}
+                    height={36}
                   />
                 </div>
-                <span className="swatch-name">Wordmark · yellow</span>
-                <span className="swatch-meta">Type only. Comfortaa, lowercase.</span>
-              </li>
-              <li>
-                <div className="logo-tile logo-tile-paper logo-tile-wide">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src="/brand/wordmark-purple-sm.png"
-                    alt=""
-                    width={280}
-                    height={35}
-                  />
-                </div>
-                <span className="swatch-name">Wordmark · purple</span>
-                <span className="swatch-meta">Type only on light fields.</span>
-              </li>
-            </ul>
-
-            <h3>Logo colors</h3>
-            <ul className="swatch-grid" aria-label="Logo color tokens">
-              <li>
-                <span className="swatch swatch-grape" aria-hidden="true" />
-                <span className="swatch-name">Grape</span>
-                <span className="swatch-meta">
-                  <code>--grape</code> · #580098 · Logo purple
-                </span>
-              </li>
-              <li>
-                <span className="swatch swatch-zest" aria-hidden="true" />
-                <span className="swatch-name">Zest</span>
-                <span className="swatch-meta">
-                  <code>--zest</code> · #fcdc6c · Logo yellow
-                </span>
-              </li>
-            </ul>
-            <p>
-              Grape and zest live in the logo system. The product UI still uses
-              ink, paper, and saffron until a full palette merge is decided.
-            </p>
-          </section>
-
-          <section id="palette" aria-labelledby="palette-title">
-            <h2 id="palette-title">4. Palette</h2>
-            <p>
-              Two tones and one accent. Every neutral is a mix of the two tones,
-              never a new hue.
-            </p>
-
-            <ul className="swatch-grid" aria-label="Brand color tokens">
-              <li>
-                <span
-                  className="swatch swatch-ink"
-                  aria-hidden="true"
-                />
-                <span className="swatch-name">Ink</span>
-                <span className="swatch-meta">
-                  <code>--ink</code> · #14110f · Tone 1. Every surface.
-                </span>
-              </li>
-              <li>
-                <span
-                  className="swatch swatch-paper"
-                  aria-hidden="true"
-                />
-                <span className="swatch-name">Paper</span>
-                <span className="swatch-meta">
-                  <code>--paper</code> · #f2ebe0 · Tone 2. Every piece of
-                  content.
-                </span>
-              </li>
-              <li>
-                <span
-                  className="swatch swatch-accent"
-                  aria-hidden="true"
-                />
-                <span className="swatch-name">Saffron</span>
-                <span className="swatch-meta">
-                  <code>--accent</code> · #e4a01a · Small marks only.
-                </span>
-              </li>
-              <li>
-                <span
-                  className="swatch swatch-paper-muted"
-                  aria-hidden="true"
-                />
-                <span className="swatch-name">Paper muted</span>
-                <span className="swatch-meta">
-                  <code>--paper-muted</code> · mix 72% paper / ink
-                </span>
-              </li>
-              <li>
-                <span
-                  className="swatch swatch-paper-quiet"
-                  aria-hidden="true"
-                />
-                <span className="swatch-name">Paper quiet</span>
-                <span className="swatch-meta">
-                  <code>--paper-quiet</code> · mix 45% paper / ink
-                </span>
-              </li>
-              <li>
-                <span
-                  className="swatch swatch-ink-raised"
-                  aria-hidden="true"
-                />
-                <span className="swatch-name">Ink raised</span>
-                <span className="swatch-meta">
-                  <code>--ink-raised</code> · mix 92% ink / paper
-                </span>
-              </li>
-            </ul>
-
-            <h3>Accent rules</h3>
-            <ul>
-              <li>
-                Saffron is for small marks: eyebrows, step numbers, one emphasis
-                per section
-              </li>
-              <li>
-                It must never fill a surface, a button, or any large area.
-                Roughly 1% of a viewport’s painted area is the ceiling
-              </li>
-              <li>
-                Never introduce a fourth hue. No zest, no status greens, no
-                semantic reds. Failure and success read through copy, weight,
-                and placement
-              </li>
-            </ul>
-          </section>
-
-          <section id="never" aria-labelledby="never-title">
-            <h2 id="never-title">5. Never / Instead</h2>
-
-            <h3>Never</h3>
-            <ul>
-              <li>
-                <strong>No borders</strong> as decoration. No hairline dividers,
-                outlined cards, or stroked rings
-              </li>
-              <li>
-                <strong>No rounded corners</strong>. Prefer{" "}
-                <code>border-radius: 0</code>. Never above 2px
-              </li>
-              <li>
-                <strong>No gradients</strong>. Solid fills only
-              </li>
-              <li>
-                <strong>No box shadows</strong>. Depth is not a substitute for a
-                border
-              </li>
-              <li>
-                <strong>No card grids</strong> built out of boxes. Group with
-                space and alignment
-              </li>
-            </ul>
-
-            <h3>Instead</h3>
-            <p>Reach for these, in order:</p>
-            <ol>
-              <li>
-                <strong>Space.</strong> A section break is{" "}
-                <code>--space-8</code>, not a 1px line
-              </li>
-              <li>
-                <strong>Type.</strong> Size, weight, and family carry hierarchy
-              </li>
-              <li>
-                <strong>Tone.</strong> Step a surface to{" "}
-                <code>--ink-raised</code>, or invert to paper-on-ink, when a
-                region genuinely needs to detach
-              </li>
-            </ol>
-
-            <div className="brand-demos" aria-label="Visual examples">
-              <div className="brand-demo">
-                <p className="brand-demo-label">Do</p>
-                <div className="brand-demo-do">
-                  <p className="eyebrow">Taste by feeling</p>
-                  <p className="brand-demo-title">One pick. Why it fits.</p>
-                  <p className="brand-demo-copy">
-                    Separate with space and a tone step, not a stroke.
-                  </p>
-                  <span className="brand-demo-cta">Start with your mood</span>
-                </div>
-              </div>
-              <div className="brand-demo">
-                <p className="brand-demo-label">Don’t</p>
-                <div className="brand-demo-dont">
-                  <p>
-                    Outlined cards, rounded pills, hairline rules, tinted
-                    badges, and fourth hues break the system. If it needs a
-                    border to read, fix the spacing.
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <p>
-              Primary actions <strong>invert the tones</strong>: paper
-              background, ink text. That is the only “filled” element in the
-              system.
-            </p>
-          </section>
-
-          <section id="type" aria-labelledby="type-title">
-            <h2 id="type-title">6. Type</h2>
-            <p>
-              One face: <strong>Comfortaa</strong>. Regular (400) is the default
-              for body and UI. Heavier weights carry display hierarchy. Both{" "}
-              <code>--font-display</code> and <code>--font-body</code> point at
-              the same family.
-            </p>
-            <dl className="user-list">
-              <div>
-                <dt className="type-sample-display">Comfortaa Bold</dt>
-                <dd>
-                  Display. Brand name and section titles. Size and weight do the
-                  work.
-                </dd>
-              </div>
-              <div>
-                <dt className="type-sample-body">Comfortaa Regular</dt>
-                <dd>
-                  Body and UI. Support lines, lists, nav. Default weight 400.
-                </dd>
-              </div>
-            </dl>
-            <p>
-              Hierarchy comes from size and weight within Comfortaa. Do not lean
-              on underlines or rules to invent structure.
-            </p>
-          </section>
-
-          <section id="spacing" aria-labelledby="spacing-title">
-            <h2 id="spacing-title">7. Spacing</h2>
-            <p>
-              Use the ramp. Do not invent one-off values. Related items sit{" "}
-              <code>--space-4</code> apart; unrelated groups sit{" "}
-              <code>--space-6</code> or more apart. When something feels
-              cramped, add space before adding a divider.
-            </p>
-            <ul className="space-ramp" aria-label="Spacing scale">
-              <li>
-                <span className="space-bar" style={{ width: "0.25rem" }} />
-                <code>--space-1</code> 0.25rem
-              </li>
-              <li>
-                <span className="space-bar" style={{ width: "0.5rem" }} />
-                <code>--space-2</code> 0.5rem
-              </li>
-              <li>
-                <span className="space-bar" style={{ width: "0.75rem" }} />
-                <code>--space-3</code> 0.75rem
-              </li>
-              <li>
-                <span className="space-bar" style={{ width: "1rem" }} />
-                <code>--space-4</code> 1rem
-              </li>
-              <li>
-                <span className="space-bar" style={{ width: "2rem" }} />
-                <code>--space-5</code> 2rem
-              </li>
-              <li>
-                <span className="space-bar" style={{ width: "3rem" }} />
-                <code>--space-6</code> 3rem
-              </li>
-              <li>
-                <span className="space-bar" style={{ width: "4rem" }} />
-                <code>--space-7</code> 4rem
-              </li>
-              <li>
-                <span className="space-bar space-bar-wide" />
-                <code>--space-8</code> clamp(4rem, 12vh, 7rem)
-              </li>
-            </ul>
-          </section>
-
-          <section id="motion" aria-labelledby="motion-title">
-            <h2 id="motion-title">8. Motion</h2>
-            <p>
-              Entrance <code>rise</code> only, and one shared{" "}
-              <code>--ease</code>. No spinning, pulsing, or looping ambient
-              animation. Honor <code>prefers-reduced-motion: reduce</code>.
-            </p>
-          </section>
-
-          <section id="sponsored" aria-labelledby="sponsored-title">
-            <h2 id="sponsored-title">9. Sponsored placements</h2>
-            <p>
-              Paid placements must be unmistakably labeled. The label is type,
-              not a badge box.
-            </p>
-            <div className="brand-sponsored-sample">
-              <p className="eyebrow">Sponsored match</p>
-              <p className="brand-demo-title">Crispy chili noodles</p>
-              <p className="brand-demo-copy">
-                Hot, crunchy, and close. Fits the craving you just named.
-              </p>
-            </div>
-            <ul>
-              <li>
-                Use an accent eyebrow, <strong>Sponsored match</strong>, in the
-                same style as <code>.eyebrow</code>
-              </li>
-              <li>
-                Never build a bordered pill, tinted chip, or shadowed card to
-                carry it
-              </li>
-              <li>
-                Never make the sponsored label quieter than the organic one it
-                sits beside
+                <span className="swatch-name">Lockup · yellow</span>
+                <span className="swatch-meta">On indigo fills.</span>
               </li>
             </ul>
           </section>
 
           <section id="checklist" aria-labelledby="checklist-title">
-            <h2 id="checklist-title">10. Ship checklist</h2>
+            <h2 id="checklist-title">9. Ship checklist</h2>
             <ul className="brand-checklist">
-              <li>No gradient, border, or shadow added</li>
-              <li>
-                Any new color is <code>--ink</code>, <code>--paper</code>,{" "}
-                <code>--accent</code>, or a mix of the first two
-              </li>
-              <li>Accent used only as a small mark</li>
-              <li>Corners stay sharp (<code>border-radius: 0</code>)</li>
-              <li>Spacing values come from the ramp</li>
+              <li>Ghost White dominates the interface</li>
+              <li>Purple drives actions and branding</li>
+              <li>Gold is an accent, not a second primary</li>
+              <li>One consistent radius system</li>
+              <li>8px spacing system</li>
+              <li>No emojis</li>
+              <li>No unnecessary borders or outlined buttons</li>
+              <li>Almost no shadows</li>
+              <li>Icons explain actions</li>
+              <li>Favor swipes, taps, and reactions over forms</li>
+              <li>One clear primary CTA per screen</li>
+              <li>Copy stays extremely short</li>
               <li>Focus states still visible on keyboard nav</li>
             </ul>
             <p>

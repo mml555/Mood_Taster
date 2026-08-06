@@ -39,7 +39,7 @@ settled. Raise an objection before you start, not in a PR.
 
 | Ticket text says | We are doing | Why |
 |---|---|---|
-| Tailwind, deep purple, poppy yellow, large rounded controls | The existing ink, paper, saffron system. No Tailwind. Flat fills, square corners, spacing led | `.cursor/rules/design-system.mdc` and `CLAUDE.md` are checked in and win |
+| Tailwind, deep purple, poppy yellow, large rounded controls | Brand Guide v1 without Tailwind: Ghost White / Indigo / Gold, CSS variables, rounded cards and buttons | `/brand` and `.cursor/rules/design-system.mdc` are source of truth |
 | "Create the Next.js application" | It already exists (Next 16, React 19, TypeScript). Ticket 1 shrinks to stubbing four routes and confirming the deploy | Repo state |
 | Homepage is the marketing hero | `/` becomes the app entry ("Hungry?"). `/prd` and `/strategy` stay reachable from the footer | Saves a tap in a three minute demo |
 | `PRD.md` lists Taste DNA as out of scope | `PRD.md` is knowingly left stale. Time goes to code | Deliberate call, noted here so nobody "fixes" it mid build |
@@ -485,10 +485,30 @@ a judge.
 
 Two providers, two phases, and they do not overlap.
 
-| Phase | Provider | Runs | Ships to production |
-|---|---|---|---|
-| Build time | Gemini free tier | Once, as a script | No. Only its committed output |
-| Runtime | Azure OpenAI | On the result screen | Yes, as optional enhancement |
+Runtime uses a **provider chain: Gemini first, Azure OpenAI as backup.** Measured per call,
+including connection setup:
+
+| Provider | Latency | Notes |
+|---|---|---|
+| Gemini 3.1 Flash Lite | 1.8s to 2.2s | Free, and the faster of the two. One call in three hung outright during testing |
+| Azure `gpt-5.6-terra` | 2.0s to 3.9s | ~1.0s of that is generation. Billed, but did not fail once |
+
+Gemini leads because it is faster and free. Azure sits behind it because Gemini is the less
+reliable of the two. Gemini's timeout is 6s, Azure's is 8s.
+
+**Where the latency actually goes.** Generation is only about 1s. Connection setup (DNS, TCP,
+TLS) measured 0.7s to 1.3s per cold connection, which is 20% to 35% of the total. Node's global
+fetch agent pools connections, so warm instances skip it. Do not introduce custom agents.
+
+Two changes cut real time:
+
+- **One request, not two.** `/api/explain` originally issued parallel calls for the why line and
+  the riff. It now asks for both in a single JSON reply. That halves quota cost and, on a cold
+  instance, halves the handshakes. End to end this took the route from about 4s to **1.3s cold
+  and 0.7s warm**.
+- **Timeouts sized to measurement, not to guesswork.** The original 2.5s ceiling was below
+  Azure's actual latency, so every call aborted and the feature silently did nothing while
+  appearing wired up.
 
 ### Why explanations are precomputed
 
@@ -600,11 +620,24 @@ Rules:
   | `AZURE_OPENAI_REASONING_EFFORT` | runtime | Defaults to `low` in code. The model's own default is `medium`, which costs latency |
   | `GOOGLE_PLACES_API_KEY` | runtime | **Must not carry an HTTP referrer restriction.** See below |
 
-  **The Places key cannot be a browser-restricted key.** Server calls send no referrer, so a
-  referrer-restricted key returns `403 API_KEY_HTTP_REFERRER_BLOCKED` and every nearby lookup
-  silently falls back to the maps link. In the GCP console set Application restrictions to
-  None, and scope the key with API restrictions (Places API New) instead. This is safe here
-  because the key is only ever read server side in `/api/places`.
+  **The Places key is referrer restricted, and that is handled in code.** Google enforces the
+  restriction against the `Referer` header, which a server side request does not send by
+  default, producing `403 API_KEY_HTTP_REFERRER_BLOCKED`. `/api/places` therefore sets `Referer`
+  explicitly from `PLACES_REFERRER`, and uses `node:https` rather than `fetch` so the header
+  goes out verbatim.
+
+  **A shell-exported variable beats `.env`.** `~/.zshrc` exported a different
+  `GOOGLE_PLACES_API_KEY` (twice), and because `process.env` wins over `.env` files, the app
+  silently used the wrong key and returned `403 PERMISSION_DENIED` on every lookup while `.env`
+  looked correct. If Places fails, check for an ambient export before you touch anything else:
+
+  ```
+  echo $GOOGLE_PLACES_API_KEY          # should be empty
+  grep -n GOOGLE_PLACES_API_KEY ~/.zshrc
+  ```
+
+  The route logs the first ten characters of the key it actually used on a non-200, which makes
+  this visible instead of silent.
 
   The three Azure variables are all-or-nothing. Two of three means "Azure not configured" and
   the call is skipped, not attempted and failed.
@@ -623,52 +656,46 @@ Rules:
 
 ## 8. Design system
 
-`.cursor/rules/design-system.mdc` governs every screen. Two tones plus one accent, flat fills,
-separation by space and type.
+`.cursor/rules/design-system.mdc` and `/brand` govern every screen. Brand Guide v1:
+Ghost White canvas, Indigo primary, Royal Gold highlight.
 
-- `--ink` `#14110f`, `--paper` `#f2ebe0`, `--accent` `#e4a01a` (saffron, small marks only).
-  Every other neutral is a `color-mix` of the first two. No fourth hue.
-- **No gradients, no borders, no shadows, no card grids, no `border-radius` above 2px.**
+- `--paper` `#fdfaff`, `--ink` `#510c85`, `--accent` `#ffdf6e`.
+  Every other neutral is a `color-mix` of paper and ink. No fourth hue.
+- Rounded language: cards 20px, buttons 14px, pills fully rounded. 8px spacing.
+- No gradients. No outlined buttons. Shadows rare (main result card only).
 - Extend `src/app/globals.css`. Use the existing spacing ramp, do not invent values.
-- Primary actions invert the tones (paper background, ink text). That is the only filled
-  element in the system, and `.cta` already implements it.
+- Primary actions: indigo fill, light text (`.cta`). Highlight: gold fill, indigo text.
 - Keep `:focus-visible` rings on everything interactive.
 
-**Quiz choices are the trap.** A four option question wants bordered pills. Build it as a large
-type list separated by the spacing ramp. Selected state reads as tone and weight (`--paper`
-against `--paper-quiet`), never a ring or a box. The progress indicator reuses the accent
-`.step` treatment as "01 / 04".
+**Quiz choices.** Soft rounded selectable rows (`--ink-raised`). Selected state is
+indigo fill with light text. Progress reads as "01 / 04".
 
-**Feedback buttons are type, not colored chips.** There is no success green or failure red in
-this palette. Nailed it and Nope are distinguished by placement and weight.
+**Result reactions.** Swipe right / ♡ = like (`nailed`). Swipe left / × = nope then
+next. ↻ = try again without rating. Quiet links keep Kinda and conversational Why?.
+No success green or failure red.
 
 ### Icons
 
-`lucide-react` is the icon set and the only new runtime dependency in the build. No emoji
+Unicode reaction marks (♡ × ↻) plus `lucide-react` where needed. No emoji
 anywhere in the product.
 
-- Icons inherit `currentColor` and sit in ink or paper. Never saffron, which is reserved for
-  small type marks.
-- One stroke width across the app (`strokeWidth={1.5}`), sizes from a short set (16, 20, 24).
-- Icons are functional, never decorative. If an icon sits next to a label that already says the
-  same thing, drop the icon.
+- Icons inherit `currentColor`. Gold is for highlights, not every icon.
+- One stroke width for lucide (`strokeWidth={1.5}`), sizes from a short set (16, 20, 24).
+- Icons are functional, never decorative.
 - Every icon-only control needs an `aria-label`. Icons inside a labelled button get
   `aria-hidden`.
 
-Working map, adjust in the ticket:
+Working map:
 
-| Surface | Icon |
+| Surface | Control |
 |---|---|
-| Quiz back control | `ArrowLeft` |
-| Not feeling it | `RefreshCw` |
+| Quiz back | `ArrowLeft` / ← |
+| Like | ♡ |
+| Not for me | × |
+| Try again | ↻ |
 | Why this? (expand) | `ChevronDown` |
-| Nailed it / Kinda / Nope | `Check` / `Minus` / `X` |
 | Taste DNA link and dashboard | `Sparkles` |
-| Reset profile | `RotateCcw` |
-
-The rating trio is the place to be careful. `Check` and `X` read as green and red in most
-products, and this palette has neither. They stay ink on paper, distinguished by placement and
-weight, exactly like the labels beside them.
+| Reset | `RotateCcw` |
 
 ### Food images
 
@@ -686,18 +713,15 @@ discover a CDN timeout, and it avoids `remotePatterns` config, rate limits, and 
 photo being taken down between now and judging. Total payload lands around 3MB, which is fine
 in `public/`.
 
-**Rendering, and this is where the design system bites:**
+**Rendering:**
 
 - Use `next/image` with explicit `width` and `height`, `sizes` set for a 390px viewport, and
   `priority` on the result screen hero so it is not the thing the judge waits for.
-- Square corners. No border, no shadow, no rounded mask, no gradient scrim over the photo. A
-  photo is content, so it is allowed to be the one rich element on the screen, but it does not
-  get decoration layered on it.
-- Full bleed to the page inset, with the dish name below it and not overlaid. Text over
-  photography needs a scrim to stay legible, and scrims are banned.
+- Inside the recommendation card, media uses `--radius-card` masking. No gradient scrim over
+  the photo. Dish name sits below, not overlaid.
 - `imageAlt` is required on every food. Empty alt is not acceptable here, the photo carries
   real information.
-- **Ship a fallback.** If an image 404s or is still being sourced, render a flat `--paper-quiet`
+- **Ship a fallback.** If an image 404s or is still being sourced, render a flat `--ink-soft`
   block at the same aspect ratio with the dish name in it. A broken image icon on stage is
   worse than no image.
 
@@ -711,7 +735,7 @@ to put a burger under "poke bowl". This needs a human pass, not a search-and-pas
 | # | Risk | Mitigation |
 |---|---|---|
 | 1 | **Hydration mismatch.** Every screen reads `sessionStorage` or `localStorage`. A read during render blanks the page | All storage reads go inside `useEffect`. Render a neutral first paint |
-| 2 | **Quiz UI versus the design system.** Borders and rounded pills are banned | Section 8. Tone and weight carry selection |
+| 2 | **Quiz UI versus the design system.** Outlined pills fight Brand Guide v1 | Section 8. Soft rounded rows, indigo selected fill |
 | 3 | **Catalog coverage.** Fewer than five matches on a path returns something obviously wrong | Ticket 2 ships a coverage assertion, not just 30 rows |
 | 4 | **DNA learning rate.** A flat delta lets one rating swing a dimension and fails Ticket 7 | Decaying rate, section 5 |
 | 5 | **The explanation generation run is a schedule bottleneck.** It cannot start until both the catalog and the engine are done, and a catalog edit afterwards means regenerating | Freeze the catalog before the run. Batch at 10 per request so a regeneration costs ~96 of the 500 daily requests, not 960 |

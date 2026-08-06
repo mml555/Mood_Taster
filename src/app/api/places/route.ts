@@ -1,3 +1,4 @@
+import { request as httpsRequest } from "node:https";
 import { NextResponse } from "next/server";
 import { CATALOG } from "@/lib/catalog";
 import { parseCoordinate } from "@/lib/validate";
@@ -44,6 +45,50 @@ const FIELD_MASK = [
 ].join(",");
 
 const SEARCH_RADIUS_METRES = 8000;
+
+const REQUEST_TIMEOUT_MS = 4000;
+
+/**
+ * node:https rather than fetch, so the request goes out with exactly the
+ * headers set here and nothing added or normalised on the way. The referrer is
+ * what satisfies this key's restriction, so it has to survive verbatim.
+ */
+function postJson(
+  url: string,
+  headers: Record<string, string>,
+  payload: unknown,
+): Promise<{ status: number; body: string }> {
+  return new Promise((resolve, reject) => {
+    const data = JSON.stringify(payload);
+    const target = new URL(url);
+
+    const req = httpsRequest(
+      {
+        hostname: target.hostname,
+        path: target.pathname + target.search,
+        method: "POST",
+        headers: { ...headers, "Content-Length": Buffer.byteLength(data) },
+      },
+      (res) => {
+        let body = "";
+        res.setEncoding("utf8");
+        res.on("data", (chunk: string) => {
+          body += chunk;
+        });
+        res.on("end", () =>
+          resolve({ status: res.statusCode ?? 0, body }),
+        );
+      },
+    );
+
+    req.setTimeout(REQUEST_TIMEOUT_MS, () => {
+      req.destroy(new Error("timeout"));
+    });
+    req.on("error", reject);
+    req.write(data);
+    req.end();
+  });
+}
 
 type PlacesResponse = {
   places?: Array<{
@@ -100,19 +145,16 @@ export async function GET(request: Request) {
     return NextResponse.json({ places: [] });
   }
 
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 4000);
-
   try {
-    const res = await fetch(ENDPOINT, {
-      method: "POST",
-      headers: {
+    const { status, body: text } = await postJson(
+      ENDPOINT,
+      {
         "Content-Type": "application/json",
         "X-Goog-Api-Key": apiKey,
         "X-Goog-FieldMask": FIELD_MASK,
         Referer: placesReferrer(),
       },
-      body: JSON.stringify({
+      {
         textQuery: `${food.name} restaurant`,
         locationBias: {
           circle: {
@@ -121,16 +163,21 @@ export async function GET(request: Request) {
           },
         },
         maxResultCount: 3,
-      }),
-      signal: controller.signal,
-    });
+      },
+    );
 
-    if (!res.ok) {
-      const detail = await res.text();
-      return NextResponse.json({ places: [], _debug: { status: res.status, detail: detail.slice(0, 300) } });
+    if (status !== 200) {
+      // 403 here is almost always the key, not the request. Log the head of it
+      // so a shell-exported key shadowing .env is visible rather than silent.
+      console.warn(
+        "[places] responded %d using key %s...",
+        status,
+        apiKey.slice(0, 10),
+      );
+      return NextResponse.json({ places: [] });
     }
 
-    const body = (await res.json()) as PlacesResponse;
+    const body = JSON.parse(text) as PlacesResponse;
 
     const places: NearbyPlace[] = (body.places ?? [])
       .map((p) => {
@@ -152,10 +199,7 @@ export async function GET(request: Request) {
 
     return NextResponse.json({ places });
   } catch (err) {
-    const aborted = err instanceof Error && err.name === "AbortError";
-    console.warn("[places] request failed", aborted ? "timeout" : err);
+    console.warn("[places] request failed", err);
     return NextResponse.json({ places: [] });
-  } finally {
-    clearTimeout(timeout);
   }
 }

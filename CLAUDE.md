@@ -19,8 +19,9 @@ Mood Taster recommends what to eat or drink based on how you feel. Mood first, m
 
 - Next.js App Router + TypeScript in `src/`
 - Production: [Vercel](https://mood-taster.vercel.app/)
-- Shared styles in `src/app/globals.css`: two tones (`--ink`, `--paper`) plus
-  `--accent`, flat fills, spacing ramp; no gradients, borders, or shadows
+- Shared styles in `src/app/globals.css`: Ghost White (`--paper`), Indigo
+  (`--ink`), Royal Gold (`--accent`); rounded radii; 8px spacing; no gradients;
+  almost no shadows
 
 ## Safety
 

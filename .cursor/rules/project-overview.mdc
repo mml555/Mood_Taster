@@ -16,8 +16,8 @@ Mood Taster matches how you feel to what you should taste (food, drink, or recip
 
 ## Visual stance
 
-- Two tones (ink + paper) and one saffron accent, nothing else
-- Flat and spacing-led: no gradients, borders, or shadows
+- Ghost White canvas, Indigo primary, Royal Gold highlight (Brand Guide v1)
+- Content first, rounded, 8px spacing; almost no shadows
 - Full system in `design-system.mdc`
 
 ## Agent defaults
