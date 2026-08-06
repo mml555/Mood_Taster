@@ -44,10 +44,11 @@ export default function PrdPage() {
           <section id="solution" aria-labelledby="solution-title">
             <h2 id="solution-title">Solution</h2>
             <p>
-              Mood Taster is a mobile-first web app. You answer four short
-              questions about flavor, texture, heaviness, and adventure, then
-              get one dish-level recommendation with a plain-English &quot;why
-              this fits.&quot; Not feeling it? Take another pick without
+              Mood Taster is a mobile-first web app. You pick eat out or cook,
+              then answer four short craving questions about flavor, texture,
+              heaviness, and adventure. You get one dish with a plain-English
+              &quot;why this fits.&quot; Eat out shows nearby spots. Cook shows
+              ingredients and steps. Not feeling it? Take another pick without
               restarting. Rating the result updates a local Taste DNA profile
               that shapes the next session.
             </p>
@@ -57,8 +58,15 @@ export default function PrdPage() {
             <h2 id="features-title">Core features (V1)</h2>
             <ul>
               <li>
-                Craving quiz (exactly four questions) → one primary food
+                Intent step (Eat out / Cook) plus craving quiz → one primary food
                 recommendation with &quot;why this fits&quot;
+              </li>
+              <li>
+                Cook mode: catalog recipes with ingredients and steps on the
+                result
+              </li>
+              <li>
+                Eat out mode: nearby places for the recommended dish
               </li>
               <li>
                 &quot;Not feeling it&quot; alternate pick without restarting the
@@ -83,10 +91,10 @@ export default function PrdPage() {
             <h2 id="oos-title">Out of scope</h2>
             <ul>
               <li>
-                Restaurant maps, Google Places UX, delivery, or reservations
+                Delivery or reservation booking
               </li>
               <li>
-                Recipes, lanes (Go Out / Make / Snack), or live menus
+                Snack lane, live menus
               </li>
               <li>Native iOS/Android apps</li>
               <li>
@@ -137,11 +145,12 @@ export default function PrdPage() {
           <section id="success" aria-labelledby="success-title">
             <h2 id="success-title">Success criteria</h2>
             <p>
-              A judge on their phone completes Start → four craving questions →
-              receives one specific dish with a why line, taps &quot;Not feeling
-              it&quot; for an alternate, rates feedback, sees Taste DNA update,
-              then starts another session where the recommendation shifted. All
-              live, under three minutes, no account.
+              A judge on their phone completes Start → Eat out or Cook → four
+              craving questions → receives one specific dish with a why line,
+              taps &quot;Not feeling it&quot; for an alternate, rates feedback,
+              sees Taste DNA update, then starts another session where the
+              recommendation shifted. All live, under three minutes, no
+              account.
             </p>
           </section>
 

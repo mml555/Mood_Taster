@@ -54,7 +54,7 @@ Quiz answers live in `sessionStorage`. Taste DNA lives in `localStorage`, and sy
 
 ## Out of scope (for now)
 
-Maps/Places UX, recipes, lanes, native apps, social features.
+Snack lane, live menus, delivery booking, native apps, social features.
 
 ## What comes next
 

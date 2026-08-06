@@ -3,6 +3,7 @@ import type { Food } from "./taste-types";
 /**
  * ~30 specific dishes covering every quiz direction.
  * Images live in public/food/<id>.jpg
+ * Dishes with `recipe` are eligible for Cook mode.
  */
 export const CATALOG: Food[] = [
   {
@@ -20,6 +21,28 @@ export const CATALOG: Food[] = [
     imageCredit: "Chad Montano / Unsplash",
     reasonTemplate:
       "{flavor} and {texture}, and it eats {heaviness}. Hot honey does the rest.",
+    recipe: {
+      servings: 2,
+      timeMinutes: 40,
+      ingredients: [
+        "2 boneless chicken thighs",
+        "1 cup buttermilk",
+        "1 cup flour",
+        "1 tsp paprika",
+        "1/4 cup honey",
+        "1 tsp hot sauce",
+        "2 soft buns",
+        "Pickle slices",
+        "Oil for frying",
+      ],
+      steps: [
+        "Soak chicken in buttermilk for 20 minutes.",
+        "Mix flour and paprika. Dredge chicken.",
+        "Fry in hot oil until golden and cooked through.",
+        "Warm honey with hot sauce. Brush on chicken.",
+        "Toast buns. Stack chicken and pickles. Serve hot.",
+      ],
+    },
   },
   {
     id: "spicy-vodka-rigatoni",
@@ -36,6 +59,28 @@ export const CATALOG: Food[] = [
     imageCredit: "Chad Montano / Unsplash",
     reasonTemplate:
       "{flavor} with a {texture} sauce, and it eats {heaviness}.",
+    recipe: {
+      servings: 3,
+      timeMinutes: 30,
+      ingredients: [
+        "12 oz rigatoni",
+        "2 tbsp olive oil",
+        "3 garlic cloves, minced",
+        "1/2 tsp red pepper flakes",
+        "1 cup tomato sauce",
+        "1/4 cup vodka",
+        "1/2 cup heavy cream",
+        "1/2 cup grated parmesan",
+        "Salt",
+      ],
+      steps: [
+        "Boil pasta in salted water until al dente. Save 1/2 cup pasta water.",
+        "Warm oil. Soften garlic and pepper flakes.",
+        "Add tomato sauce. Simmer 5 minutes.",
+        "Stir in vodka. Cook 2 minutes. Add cream.",
+        "Toss pasta with sauce, pasta water, and parmesan. Serve.",
+      ],
+    },
   },
   {
     id: "birria-tacos",
@@ -52,6 +97,29 @@ export const CATALOG: Food[] = [
     imageCredit: "Emilio Sanchez / Unsplash",
     reasonTemplate:
       "{flavor} and {texture}, dipped and {heaviness}. A little more adventurous than a standard taco.",
+    recipe: {
+      servings: 4,
+      timeMinutes: 180,
+      ingredients: [
+        "2 lb beef chuck",
+        "3 dried guajillo chiles",
+        "2 dried ancho chiles",
+        "1 onion, quartered",
+        "4 garlic cloves",
+        "1 tsp cumin",
+        "1 tsp oregano",
+        "8 corn tortillas",
+        "1 cup shredded cheese",
+        "Salt",
+      ],
+      steps: [
+        "Toast chiles. Soften in hot water. Blend with onion, garlic, and spices.",
+        "Season beef. Cover with chile sauce and water. Simmer 2.5 hours until shreddy.",
+        "Shred beef. Keep broth for dipping.",
+        "Dip tortillas in broth. Fill with beef and cheese.",
+        "Crisp on a hot skillet. Serve with consommé.",
+      ],
+    },
   },
   {
     id: "poke-bowl",
@@ -68,6 +136,26 @@ export const CATALOG: Food[] = [
     imageCredit: "Louis Hansel / Unsplash",
     reasonTemplate:
       "{flavor} and {texture}, and it eats {heaviness}. Clean and cold.",
+    recipe: {
+      servings: 2,
+      timeMinutes: 35,
+      ingredients: [
+        "8 oz sushi-grade tuna, cubed",
+        "2 cups cooked rice, cooled",
+        "2 tbsp soy sauce",
+        "1 tsp sesame oil",
+        "1 avocado, sliced",
+        "1 cucumber, diced",
+        "1 green onion, sliced",
+        "1 tbsp sesame seeds",
+      ],
+      steps: [
+        "Mix soy sauce and sesame oil. Toss with tuna. Chill 10 minutes.",
+        "Divide rice into bowls.",
+        "Top with tuna, avocado, and cucumber.",
+        "Finish with green onion and sesame seeds. Serve cold.",
+      ],
+    },
   },
   {
     id: "grilled-cheese-tomato-soup",
@@ -84,6 +172,25 @@ export const CATALOG: Food[] = [
     imageCredit: "Calum Lewis / Unsplash",
     reasonTemplate:
       "{flavor} and {texture}, and it eats {heaviness}. Safe favorite energy.",
+    recipe: {
+      servings: 2,
+      timeMinutes: 25,
+      ingredients: [
+        "4 slices sandwich bread",
+        "2 tbsp butter",
+        "4 slices cheddar",
+        "1 can crushed tomatoes (14 oz)",
+        "1 cup milk or cream",
+        "1 garlic clove",
+        "Salt and pepper",
+      ],
+      steps: [
+        "Simmer tomatoes with garlic 10 minutes. Blend smooth. Stir in milk. Season.",
+        "Butter bread. Stack cheese between slices.",
+        "Cook sandwiches in a skillet until both sides are golden and cheese melts.",
+        "Serve soup hot with the sandwiches.",
+      ],
+    },
   },
   {
     id: "sour-gummy-candy",
@@ -100,6 +207,24 @@ export const CATALOG: Food[] = [
     imageCredit: "Sharon McCutcheon / Unsplash",
     reasonTemplate:
       "{flavor} with a {texture} chew, and it eats {heaviness}.",
+    recipe: {
+      servings: 4,
+      timeMinutes: 90,
+      ingredients: [
+        "1/2 cup fruit juice",
+        "2 tbsp sugar",
+        "2 tbsp lemon juice",
+        "3 tbsp gelatin powder",
+        "1/4 cup sugar mixed with 1 tsp citric acid for coating",
+      ],
+      steps: [
+        "Bloom gelatin in half the juice for 5 minutes.",
+        "Warm remaining juice with sugar and lemon until dissolved.",
+        "Stir in bloomed gelatin until smooth.",
+        "Pour into a small pan. Chill 1 hour until set.",
+        "Cut into bites. Toss in sour sugar. Serve at room temp.",
+      ],
+    },
   },
   {
     id: "mango-with-tajin",
@@ -116,6 +241,20 @@ export const CATALOG: Food[] = [
     imageCredit: "Charles Deluvio / Unsplash",
     reasonTemplate:
       "{flavor} and {texture}, and it eats {heaviness}. Sweet heat, no commitment.",
+    recipe: {
+      servings: 2,
+      timeMinutes: 10,
+      ingredients: [
+        "2 ripe mangos",
+        "2 tsp Tajín or chili-lime salt",
+        "1 lime, cut into wedges",
+      ],
+      steps: [
+        "Peel mangos. Cut into spears.",
+        "Arrange on a plate. Dust with Tajín.",
+        "Squeeze lime over the top. Serve cold.",
+      ],
+    },
   },
   {
     id: "garlic-butter-noodles",
@@ -132,6 +271,24 @@ export const CATALOG: Food[] = [
     imageCredit: "Dan Gold / Unsplash",
     reasonTemplate:
       "{flavor} and {texture}, and it eats {heaviness}. Comfort without drama.",
+    recipe: {
+      servings: 2,
+      timeMinutes: 20,
+      ingredients: [
+        "8 oz spaghetti or egg noodles",
+        "4 tbsp butter",
+        "4 garlic cloves, minced",
+        "2 tbsp chopped parsley",
+        "1/4 cup grated parmesan",
+        "Salt and pepper",
+      ],
+      steps: [
+        "Boil noodles in salted water. Save 1/3 cup pasta water.",
+        "Melt butter. Soften garlic 1 minute. Do not brown hard.",
+        "Toss noodles with butter, pasta water, and parmesan.",
+        "Add parsley, salt, and pepper. Serve hot.",
+      ],
+    },
   },
   {
     id: "miso-ramen",
@@ -148,6 +305,25 @@ export const CATALOG: Food[] = [
     imageCredit: "Mae Mu / Unsplash",
     reasonTemplate:
       "{flavor} and {texture}, and it eats {heaviness}. Broth does the heavy lifting.",
+    recipe: {
+      servings: 2,
+      timeMinutes: 35,
+      ingredients: [
+        "4 cups chicken or veggie broth",
+        "3 tbsp white miso",
+        "1 tbsp soy sauce",
+        "1 tsp sesame oil",
+        "2 packs ramen noodles (discard seasoning)",
+        "2 soft-boiled eggs",
+        "2 green onions, sliced",
+      ],
+      steps: [
+        "Warm broth. Whisk in miso, soy sauce, and sesame oil. Do not boil hard after miso.",
+        "Cook noodles per package. Drain.",
+        "Divide noodles into bowls. Ladle broth over.",
+        "Top with halved eggs and green onion. Serve hot.",
+      ],
+    },
   },
   {
     id: "avocado-toast",
@@ -164,6 +340,22 @@ export const CATALOG: Food[] = [
     imageCredit: "Joseph Gonzalez / Unsplash",
     reasonTemplate:
       "{flavor} and {texture}, and it eats {heaviness}.",
+    recipe: {
+      servings: 2,
+      timeMinutes: 10,
+      ingredients: [
+        "2 slices sourdough",
+        "1 ripe avocado",
+        "1/2 lemon",
+        "Pinch of chili flakes",
+        "Salt",
+      ],
+      steps: [
+        "Toast the bread.",
+        "Mash avocado with lemon juice and salt.",
+        "Spread on toast. Add chili flakes. Serve.",
+      ],
+    },
   },
   {
     id: "korean-fried-chicken",
@@ -180,6 +372,26 @@ export const CATALOG: Food[] = [
     imageCredit: "Eiliv Aceron / Unsplash",
     reasonTemplate:
       "{flavor} and {texture}, and it eats {heaviness}. Sticky heat.",
+    recipe: {
+      servings: 3,
+      timeMinutes: 50,
+      ingredients: [
+        "2 lb chicken wings",
+        "1/2 cup cornstarch",
+        "2 tbsp gochujang",
+        "2 tbsp honey",
+        "1 tbsp soy sauce",
+        "1 garlic clove, minced",
+        "Oil for frying",
+      ],
+      steps: [
+        "Pat wings dry. Toss in cornstarch.",
+        "Fry once at medium heat until pale gold. Rest 5 minutes.",
+        "Fry again until deep crisp.",
+        "Warm gochujang, honey, soy, and garlic into a glaze.",
+        "Toss hot wings in glaze. Serve.",
+      ],
+    },
   },
   {
     id: "caprese-salad",
@@ -196,6 +408,22 @@ export const CATALOG: Food[] = [
     imageCredit: "Jennifer Pallian / Unsplash",
     reasonTemplate:
       "{flavor} and {texture}, and it eats {heaviness}.",
+    recipe: {
+      servings: 2,
+      timeMinutes: 10,
+      ingredients: [
+        "2 ripe tomatoes",
+        "8 oz fresh mozzarella",
+        "Handful of basil leaves",
+        "2 tbsp olive oil",
+        "Salt and pepper",
+      ],
+      steps: [
+        "Slice tomatoes and mozzarella.",
+        "Layer with basil on a plate.",
+        "Drizzle olive oil. Season. Serve at room temp.",
+      ],
+    },
   },
   {
     id: "chocolate-lava-cake",
@@ -212,6 +440,25 @@ export const CATALOG: Food[] = [
     imageCredit: "Alex Lvrs / Unsplash",
     reasonTemplate:
       "{flavor} and {texture}, and it eats {heaviness}.",
+    recipe: {
+      servings: 2,
+      timeMinutes: 30,
+      ingredients: [
+        "4 oz dark chocolate",
+        "4 tbsp butter",
+        "2 eggs",
+        "1/4 cup sugar",
+        "2 tbsp flour",
+        "Butter and cocoa for ramekins",
+      ],
+      steps: [
+        "Heat oven to 425°F. Butter two ramekins. Dust with cocoa.",
+        "Melt chocolate and butter. Cool slightly.",
+        "Whisk eggs and sugar. Stir in chocolate, then flour.",
+        "Fill ramekins. Bake 12 minutes until edges set and center jiggles.",
+        "Rest 1 minute. Invert onto plates. Serve warm.",
+      ],
+    },
   },
   {
     id: "ceviche",
@@ -228,6 +475,24 @@ export const CATALOG: Food[] = [
     imageCredit: "Farhad Ibrahimzade / Unsplash",
     reasonTemplate:
       "{flavor} and {texture}, and it eats {heaviness}. Bright and a little wild.",
+    recipe: {
+      servings: 3,
+      timeMinutes: 45,
+      ingredients: [
+        "1 lb raw shrimp, peeled and chopped",
+        "1 cup fresh lime juice",
+        "1/2 red onion, minced",
+        "1 jalapeño, minced",
+        "1/4 cup chopped cilantro",
+        "Salt",
+      ],
+      steps: [
+        "Cover shrimp with lime juice in a bowl. Chill 20 to 30 minutes until opaque.",
+        "Drain most of the lime juice.",
+        "Mix in onion, jalapeño, cilantro, and salt.",
+        "Taste and chill. Serve cold.",
+      ],
+    },
   },
   {
     id: "mac-and-cheese",
@@ -244,6 +509,26 @@ export const CATALOG: Food[] = [
     imageCredit: "Nathan Dumlao / Unsplash",
     reasonTemplate:
       "{flavor} and {texture}, and it eats {heaviness}. The safe call.",
+    recipe: {
+      servings: 4,
+      timeMinutes: 45,
+      ingredients: [
+        "12 oz elbow pasta",
+        "3 tbsp butter",
+        "3 tbsp flour",
+        "2 cups milk",
+        "2 cups shredded cheddar",
+        "1/2 cup breadcrumbs",
+        "Salt",
+      ],
+      steps: [
+        "Heat oven to 375°F. Cook pasta until just shy of done.",
+        "Melt butter. Whisk in flour 1 minute. Add milk. Thicken.",
+        "Stir in most of the cheese. Season. Mix with pasta.",
+        "Pour into a baking dish. Top with remaining cheese and breadcrumbs.",
+        "Bake 20 minutes until bubbly and golden.",
+      ],
+    },
   },
   {
     id: "falafel-wrap",
@@ -260,6 +545,27 @@ export const CATALOG: Food[] = [
     imageCredit: "Alan Hardman / Unsplash",
     reasonTemplate:
       "{flavor} and {texture}, and it eats {heaviness}.",
+    recipe: {
+      servings: 4,
+      timeMinutes: 40,
+      ingredients: [
+        "1 can chickpeas, drained",
+        "1/2 onion",
+        "2 garlic cloves",
+        "1/2 cup parsley",
+        "1 tsp cumin",
+        "3 tbsp flour",
+        "4 flatbreads",
+        "1/4 cup tahini",
+        "Oil for frying",
+      ],
+      steps: [
+        "Pulse chickpeas, onion, garlic, parsley, cumin, and flour into a coarse mix.",
+        "Form small patties. Chill 10 minutes.",
+        "Fry until deep brown on both sides.",
+        "Warm flatbreads. Spread tahini. Add falafel and wrap. Serve.",
+      ],
+    },
   },
   {
     id: "thai-green-curry",
@@ -276,6 +582,27 @@ export const CATALOG: Food[] = [
     imageCredit: "Marissa Grootes / Unsplash",
     reasonTemplate:
       "{flavor} and {texture}, and it eats {heaviness}. Coconut heat.",
+    recipe: {
+      servings: 3,
+      timeMinutes: 35,
+      ingredients: [
+        "1 lb chicken thigh, sliced",
+        "2 tbsp green curry paste",
+        "1 can coconut milk (14 oz)",
+        "1 cup sliced zucchini or bell pepper",
+        "Handful of basil",
+        "2 cups cooked jasmine rice",
+        "1 tbsp oil",
+        "Salt",
+      ],
+      steps: [
+        "Warm oil. Fry curry paste 1 minute.",
+        "Add chicken. Cook until no longer pink.",
+        "Pour in coconut milk. Simmer 8 minutes.",
+        "Add vegetables. Cook until tender. Season.",
+        "Stir in basil. Serve over rice.",
+      ],
+    },
   },
   {
     id: "soft-serve-cone",
@@ -292,6 +619,22 @@ export const CATALOG: Food[] = [
     imageCredit: "Ian Dooley / Unsplash",
     reasonTemplate:
       "{flavor} and {texture}, and it eats {heaviness}.",
+    recipe: {
+      servings: 4,
+      timeMinutes: 15,
+      ingredients: [
+        "2 frozen bananas, sliced",
+        "1/2 cup Greek yogurt",
+        "1 tsp vanilla",
+        "1 tbsp honey",
+        "4 ice cream cones",
+      ],
+      steps: [
+        "Blend frozen bananas, yogurt, vanilla, and honey until thick and soft.",
+        "Scoop or pipe into cones right away.",
+        "Serve cold before it melts.",
+      ],
+    },
   },
   {
     id: "shakshuka",
@@ -308,6 +651,28 @@ export const CATALOG: Food[] = [
     imageCredit: "Toa Heftiba / Unsplash",
     reasonTemplate:
       "{flavor} and {texture}, and it eats {heaviness}.",
+    recipe: {
+      servings: 2,
+      timeMinutes: 30,
+      ingredients: [
+        "1 tbsp olive oil",
+        "1/2 onion, diced",
+        "1 red pepper, diced",
+        "2 garlic cloves",
+        "1 tsp cumin",
+        "1/2 tsp paprika",
+        "1 can crushed tomatoes (14 oz)",
+        "4 eggs",
+        "Bread for dipping",
+        "Salt",
+      ],
+      steps: [
+        "Cook onion and pepper in oil until soft. Add garlic and spices.",
+        "Pour in tomatoes. Simmer 10 minutes. Season.",
+        "Make wells. Crack in eggs. Cover until whites set.",
+        "Serve hot with bread.",
+      ],
+    },
   },
   {
     id: "crispy-pork-belly-bao",
@@ -324,6 +689,25 @@ export const CATALOG: Food[] = [
     imageCredit: "Charles Deluvio / Unsplash",
     reasonTemplate:
       "{flavor} and {texture}, and it eats {heaviness}.",
+    recipe: {
+      servings: 4,
+      timeMinutes: 90,
+      ingredients: [
+        "1 lb pork belly",
+        "2 tbsp soy sauce",
+        "1 tbsp honey",
+        "8 steamed bao buns (store-bought ok)",
+        "1/2 cup pickled cucumber or carrot",
+        "3 tbsp hoisin",
+        "Salt",
+      ],
+      steps: [
+        "Season pork with salt, soy, and honey. Roast at 375°F until tender, about 70 minutes.",
+        "Broil briefly to crisp the top. Slice.",
+        "Warm bao buns.",
+        "Spread hoisin. Add pork and pickles. Serve.",
+      ],
+    },
   },
   {
     id: "watermelon-feta-salad",
@@ -340,6 +724,22 @@ export const CATALOG: Food[] = [
     imageCredit: "Louis Hansel / Unsplash",
     reasonTemplate:
       "{flavor} and {texture}, and it eats {heaviness}.",
+    recipe: {
+      servings: 3,
+      timeMinutes: 15,
+      ingredients: [
+        "4 cups cubed watermelon",
+        "4 oz feta, crumbled",
+        "Handful of mint leaves",
+        "2 tbsp olive oil",
+        "Pinch of salt",
+      ],
+      steps: [
+        "Cube watermelon into a bowl.",
+        "Add feta and torn mint.",
+        "Drizzle olive oil. Light salt. Toss gently. Serve cold.",
+      ],
+    },
   },
   {
     id: "loaded-nachos",
@@ -356,6 +756,22 @@ export const CATALOG: Food[] = [
     imageCredit: "Amirali Mirhashemian / Unsplash",
     reasonTemplate:
       "{flavor} and {texture}, and it eats {heaviness}.",
+    recipe: {
+      servings: 4,
+      timeMinutes: 20,
+      ingredients: [
+        "1 large bag tortilla chips",
+        "2 cups shredded cheese",
+        "1/2 cup salsa",
+        "1/4 cup sliced jalapeños",
+        "1/4 cup sour cream or crema",
+      ],
+      steps: [
+        "Heat oven to 400°F. Spread chips on a sheet pan.",
+        "Scatter cheese. Bake 8 minutes until melted.",
+        "Top with salsa, jalapeños, and crema. Serve hot.",
+      ],
+    },
   },
   {
     id: "matcha-latte",
@@ -372,6 +788,22 @@ export const CATALOG: Food[] = [
     imageCredit: "Ash Edmonds / Unsplash",
     reasonTemplate:
       "{flavor} and {texture}, and it eats {heaviness}. A sip, not a meal.",
+    recipe: {
+      servings: 1,
+      timeMinutes: 5,
+      ingredients: [
+        "1 tsp matcha powder",
+        "2 tbsp hot water",
+        "1 cup cold milk",
+        "1 tsp honey or sugar",
+        "Ice",
+      ],
+      steps: [
+        "Whisk matcha with hot water until smooth.",
+        "Fill a glass with ice and cold milk. Sweeten.",
+        "Pour matcha over the top. Stir and sip.",
+      ],
+    },
   },
   {
     id: "beef-pho",
@@ -388,6 +820,27 @@ export const CATALOG: Food[] = [
     imageCredit: "Anh Nguyen / Unsplash",
     reasonTemplate:
       "{flavor} and {texture}, and it eats {heaviness}.",
+    recipe: {
+      servings: 3,
+      timeMinutes: 50,
+      ingredients: [
+        "6 cups beef broth",
+        "1 onion, halved",
+        "2 inch ginger, sliced",
+        "1 star anise or 1 tsp five-spice",
+        "8 oz rice noodles",
+        "8 oz thinly sliced rare beef",
+        "Bean sprouts, basil, lime",
+        "Fish sauce and salt",
+      ],
+      steps: [
+        "Char onion and ginger in a dry pan. Simmer in broth with spice 20 minutes. Season.",
+        "Cook noodles. Divide into bowls.",
+        "Lay raw beef slices on noodles.",
+        "Ladle boiling broth over to cook the beef.",
+        "Top with sprouts, basil, and lime. Serve.",
+      ],
+    },
   },
   {
     id: "churro-bites",
@@ -404,6 +857,25 @@ export const CATALOG: Food[] = [
     imageCredit: "Fernando Andrade / Unsplash",
     reasonTemplate:
       "{flavor} and {texture}, and it eats {heaviness}.",
+    recipe: {
+      servings: 4,
+      timeMinutes: 35,
+      ingredients: [
+        "1 cup water",
+        "4 tbsp butter",
+        "1 tbsp sugar",
+        "1 cup flour",
+        "2 eggs",
+        "1/2 cup sugar mixed with 1 tsp cinnamon",
+        "Oil for frying",
+      ],
+      steps: [
+        "Boil water, butter, and sugar. Stir in flour until a ball forms. Cool slightly.",
+        "Beat in eggs one at a time.",
+        "Pipe or spoon small sticks into hot oil. Fry until golden.",
+        "Roll in cinnamon sugar while warm. Serve.",
+      ],
+    },
   },
   {
     id: "sashimi-plate",
@@ -420,6 +892,21 @@ export const CATALOG: Food[] = [
     imageCredit: "Zyanya Citrón / Unsplash",
     reasonTemplate:
       "{flavor} and {texture}, and it eats {heaviness}. Clean and precise.",
+    recipe: {
+      servings: 2,
+      timeMinutes: 15,
+      ingredients: [
+        "8 oz sushi-grade salmon",
+        "Soy sauce",
+        "Wasabi",
+        "Pickled ginger (optional)",
+      ],
+      steps: [
+        "Chill salmon well. Use a sharp knife.",
+        "Slice against the grain into 1/4 inch pieces.",
+        "Arrange on a cold plate with wasabi and soy. Serve right away.",
+      ],
+    },
   },
   {
     id: "mushroom-risotto",
@@ -436,6 +923,26 @@ export const CATALOG: Food[] = [
     imageCredit: "Chad Montano / Unsplash",
     reasonTemplate:
       "{flavor} and {texture}, and it eats {heaviness}.",
+    recipe: {
+      servings: 3,
+      timeMinutes: 40,
+      ingredients: [
+        "1 cup arborio rice",
+        "4 cups warm veggie broth",
+        "8 oz mushrooms, sliced",
+        "1/2 onion, diced",
+        "2 tbsp butter",
+        "1/2 cup grated parmesan",
+        "1 tbsp olive oil",
+        "Salt",
+      ],
+      steps: [
+        "Sear mushrooms in oil. Set aside.",
+        "Soften onion in butter. Add rice. Toast 1 minute.",
+        "Add broth one ladle at a time, stirring, until rice is creamy and tender.",
+        "Fold in mushrooms and parmesan. Season. Serve hot.",
+      ],
+    },
   },
   {
     id: "elote",
@@ -452,6 +959,22 @@ export const CATALOG: Food[] = [
     imageCredit: "Alex Lvrs / Unsplash",
     reasonTemplate:
       "{flavor} and {texture}, and it eats {heaviness}.",
+    recipe: {
+      servings: 4,
+      timeMinutes: 20,
+      ingredients: [
+        "4 ears of corn",
+        "1/4 cup mayo",
+        "1/3 cup crumbled cotija",
+        "1 tsp chili powder",
+        "2 limes",
+      ],
+      steps: [
+        "Grill or broil corn until charred in spots.",
+        "Brush with mayo while hot.",
+        "Roll in cotija. Dust with chili. Squeeze lime. Serve.",
+      ],
+    },
   },
   {
     id: "pad-thai",
@@ -468,6 +991,27 @@ export const CATALOG: Food[] = [
     imageCredit: "Marissa Grootes / Unsplash",
     reasonTemplate:
       "{flavor} and {texture}, and it eats {heaviness}.",
+    recipe: {
+      servings: 2,
+      timeMinutes: 30,
+      ingredients: [
+        "6 oz rice noodles",
+        "8 oz shrimp, peeled",
+        "2 eggs",
+        "2 tbsp tamarind paste or lime juice plus brown sugar",
+        "1 tbsp fish sauce",
+        "1 tbsp oil",
+        "1/4 cup chopped peanuts",
+        "Bean sprouts and lime",
+      ],
+      steps: [
+        "Soak noodles in warm water until pliable. Drain.",
+        "Mix tamarind, fish sauce, and a pinch of sugar for the sauce.",
+        "Stir-fry shrimp in oil. Push aside. Scramble eggs.",
+        "Add noodles and sauce. Toss until coated.",
+        "Top with peanuts, sprouts, and lime. Serve.",
+      ],
+    },
   },
   {
     id: "affogato",
@@ -484,6 +1028,19 @@ export const CATALOG: Food[] = [
     imageCredit: "Nathan Dumlao / Unsplash",
     reasonTemplate:
       "{flavor} and {texture}, and it eats {heaviness}. Hot on cold.",
+    recipe: {
+      servings: 1,
+      timeMinutes: 5,
+      ingredients: [
+        "1 scoop vanilla gelato or ice cream",
+        "1 shot hot espresso (or 1/4 cup strong coffee)",
+      ],
+      steps: [
+        "Put gelato in a small bowl or glass.",
+        "Pour hot espresso over the top.",
+        "Eat right away while hot meets cold.",
+      ],
+    },
   },
 ];
 

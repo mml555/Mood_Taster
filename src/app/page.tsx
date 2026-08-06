@@ -42,7 +42,7 @@ export default function HomePage() {
           <p className="eyebrow">Taste by feeling</p>
           <h1 id="brand">Hungry?</h1>
           <p className="lede">
-            How do you feel? Four quick taps. One dish. Swipe if it is not
+            Eat out or cook. Five quick taps. One dish. Swipe if it is not
             right.
           </p>
           <div className="cta-row">
@@ -80,7 +80,7 @@ export default function HomePage() {
               <span className="step">01</span>
               <h3>Feel</h3>
               <p>
-                Pick how you want food to feel. Hot, crunchy, light. Four
+                Pick eat out or cook, then how you want food to feel. Five
                 taps.
               </p>
             </li>

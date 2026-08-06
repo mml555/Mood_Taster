@@ -183,7 +183,7 @@ export function TasteQuiz() {
       </p>
       <div className="quiz-question-block">
         <span className="quiz-question-icon" aria-hidden>
-          <StepIcon size={22} strokeWidth={1.5} />
+          <StepIcon size={20} strokeWidth={1.5} />
         </span>
         <h1 id="quiz-question" className="quiz-question">
           {current.question}
@@ -205,7 +205,7 @@ export function TasteQuiz() {
               >
                 {Icon ? (
                   <span className="quiz-option-icon" aria-hidden>
-                    <Icon size={20} strokeWidth={1.5} />
+                    <Icon size={18} strokeWidth={1.5} />
                   </span>
                 ) : null}
                 <span className="quiz-option-label">{opt.label}</span>

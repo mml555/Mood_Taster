@@ -8,11 +8,13 @@ When people are hungry but don't know what they want, they scroll delivery apps,
 
 ## Solution
 
-Mood Taster is a mobile-first web app. You answer four short questions about flavor, texture, heaviness, and adventure, then get one dish-level recommendation with a plain-English "why this fits." Not feeling it? Take another pick without restarting. Rating the result updates a local Taste DNA profile that shapes the next session.
+Mood Taster is a mobile-first web app. You pick eat out or cook, then answer four short craving questions about flavor, texture, heaviness, and adventure. You get one dish with a plain-English "why this fits." Eat out shows nearby spots. Cook shows ingredients and steps. Not feeling it? Take another pick without restarting. Rating the result updates a local Taste DNA profile that shapes the next session.
 
 ## Core features (V1)
 
-- Craving quiz (exactly four questions) → one primary food recommendation with "why this fits"
+- Intent step (Eat out / Cook) plus craving quiz → one primary food recommendation with "why this fits"
+- Cook mode: catalog recipes with ingredients and steps on the result
+- Eat out mode: nearby places for the recommended dish
 - "Not feeling it" alternate pick without restarting the quiz
 - Nailed it / Kinda / Nope feedback on the result
 - Local Taste DNA that persists on device and affects later rankings
@@ -22,8 +24,8 @@ Mood Taster is a mobile-first web app. You answer four short questions about fla
 
 ## Out of scope
 
-- Restaurant maps, Google Places UX, delivery, or reservations
-- Recipes, lanes (Go Out / Make / Snack), or live menus
+- Delivery or reservation booking
+- Snack lane, live menus
 - Native iOS/Android apps
 - Commercial products for Ship Night: affiliate handoffs, verified visit codes, restaurant SaaS, and aggregate taste intelligence products (future model on `/strategy`; never sell personal Taste DNA)
 - Social feed, streaks, calorie tracking
@@ -40,7 +42,7 @@ Mood Taster is a mobile-first web app. You answer four short questions about fla
 
 ## Success criteria
 
-A judge on their phone completes Start → four craving questions → receives one specific dish with a why line, taps "Not feeling it" for an alternate, rates feedback, sees Taste DNA update, then starts another session where the recommendation shifted. All live, under three minutes, no account.
+A judge on their phone completes Start → Eat out or Cook → four craving questions → receives one specific dish with a why line, taps "Not feeling it" for an alternate, rates feedback, sees Taste DNA update, then starts another session where the recommendation shifted. All live, under three minutes, no account.
 
 ## Tech stack
 

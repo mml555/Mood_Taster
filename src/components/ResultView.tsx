@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { ChevronDown, MapPin, Search, Sparkles } from "lucide-react";
+import { ArrowRight, ChefHat, ChevronDown, Clock, MapPin, Search, Sparkles } from "lucide-react";
 import {
   useCallback,
   useEffect,
@@ -31,7 +31,9 @@ import type {
   Answers,
   DnaProfile,
   Food,
+  Intent,
   Rating,
+  Recipe,
   SessionState,
 } from "@/lib/taste-types";
 
@@ -73,21 +75,22 @@ export function ResultView({ food }: ResultViewProps) {
   const [whyOpen, setWhyOpen] = useState(false);
   const [imgFailed, setImgFailed] = useState(false);
   const [deltas, setDeltas] = useState<DnaDelta[] | null>(null);
-  const [rated, setRated] = useState(false);
+  const [lastRating, setLastRating] = useState<Rating | null>(null);
   const [emptyAlts, setEmptyAlts] = useState(false);
 
   const [riff, setRiff] = useState<string | null>(null);
   const [places, setPlaces] = useState<NearbyPlace[]>([]);
   const [placesState, setPlacesState] = useState<PlacesState>("locating");
+  const [intent, setIntent] = useState<Intent | null>(null);
 
   const [whyPanelOpen, setWhyPanelOpen] = useState(false);
   const [rejectNoteText, setRejectNoteText] = useState("");
   const [adjusting, setAdjusting] = useState(false);
   const [adjustNote, setAdjustNote] = useState<string | null>(null);
 
-  const [dragX, setDragX] = useState(0);
   const [dragging, setDragging] = useState(false);
   const [exitDir, setExitDir] = useState<"left" | "right" | null>(null);
+  const [swipeHint, setSwipeHint] = useState<"like" | "nope" | null>(null);
 
   // Identifies the current dish render, so a slow reply about a previous dish
   // cannot overwrite the copy for the one now on screen.
@@ -96,6 +99,7 @@ export function ResultView({ food }: ResultViewProps) {
   const startX = useRef(0);
   const dragXRef = useRef(0);
   const busyRef = useRef(false);
+  const cardRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     renderId.current += 1;
@@ -105,16 +109,17 @@ export function ResultView({ food }: ResultViewProps) {
       setImgFailed(false);
       setWhyOpen(false);
       setDeltas(null);
-      setRated(false);
+      setLastRating(null);
       setEmptyAlts(false);
       setRiff(null);
       setWhyPanelOpen(false);
       setRejectNoteText("");
-      setDragX(0);
+      setSwipeHint(null);
       setDragging(false);
       setExitDir(null);
       busyRef.current = false;
       dragXRef.current = 0;
+      if (cardRef.current) cardRef.current.style.transform = "";
       setExplanation(food.description);
       setAttrs(
         [...food.flavorTags.map(capitalize), capitalize(food.heaviness)].slice(
@@ -128,6 +133,7 @@ export function ResultView({ food }: ResultViewProps) {
 
       if (!session) {
         setHasSession(false);
+        setIntent(null);
         setSessionReady(true);
         return;
       }
@@ -138,6 +144,7 @@ export function ResultView({ food }: ResultViewProps) {
 
       const active = readSession() ?? session;
       applySessionView(food, active, dna, setExplanation, setAttrs);
+      setIntent(active.answers.intent);
       setHasSession(true);
       setSessionReady(true);
 
@@ -169,9 +176,14 @@ export function ResultView({ food }: ResultViewProps) {
     }
   }, [food]);
 
-  // Places is about the dish, not the craving, so it loads independently of
-  // session state.
+  // Places only for Eat out. Cook mode shows the recipe instead.
   useEffect(() => {
+    if (intent !== "restaurant") {
+      setPlaces([]);
+      setPlacesState("fallback");
+      return;
+    }
+
     const token = renderId.current;
     let cancelled = false;
 
@@ -221,7 +233,7 @@ export function ResultView({ food }: ResultViewProps) {
     return () => {
       cancelled = true;
     };
-  }, [food]);
+  }, [food, intent]);
 
   // Surface the model's summary of what it changed, once, on the next dish.
   useEffect(() => {
@@ -316,10 +328,13 @@ export function ResultView({ food }: ResultViewProps) {
       );
       void persistDna(next);
       setDeltas(changes.filter((d) => d.direction !== "flat"));
-      setRated(true);
+      setLastRating(rating);
     },
     [food],
   );
+
+  const rated = lastRating !== null;
+  const showDone = lastRating === "nailed" || lastRating === "kinda";
 
   const animateExitThen = useCallback(
     (dir: "left" | "right", after: () => void) => {
@@ -385,7 +400,24 @@ export function ResultView({ food }: ResultViewProps) {
       if (!dragging || pointerId.current !== e.pointerId) return;
       const next = e.clientX - startX.current;
       dragXRef.current = next;
-      setDragX(next);
+
+      // Write the drag straight to the node. Routing every pointermove through
+      // state re-renders the card, its image and the whole nearby list on each
+      // frame, which is what makes the swipe stutter on a phone.
+      const node = cardRef.current;
+      if (node) {
+        node.style.transform = `translateX(${next}px) rotate(${next / 28}deg)`;
+      }
+
+      // State still drives the like / nope badge, but only on a band change,
+      // so a full swipe costs two renders instead of sixty.
+      const hint =
+        next > SWIPE_THRESHOLD / 2
+          ? "like"
+          : next < -SWIPE_THRESHOLD / 2
+            ? "nope"
+            : null;
+      setSwipeHint((prev) => (prev === hint ? prev : hint));
     },
     [dragging],
   );
@@ -395,9 +427,13 @@ export function ResultView({ food }: ResultViewProps) {
       if (pointerId.current !== e.pointerId) return;
       pointerId.current = null;
       setDragging(false);
+      setSwipeHint(null);
       const x = dragXRef.current;
       dragXRef.current = 0;
-      setDragX(0);
+
+      // Hand the transform back to CSS so the release springs home, and so the
+      // exit rule (which is !important) is not fighting an inline value.
+      if (cardRef.current) cardRef.current.style.transform = "";
 
       if (Math.abs(x) < SWIPE_THRESHOLD) return;
 
@@ -410,13 +446,6 @@ export function ResultView({ food }: ResultViewProps) {
     [onLike, onNope],
   );
 
-  const swipeHint =
-    dragX > SWIPE_THRESHOLD / 2
-      ? "like"
-      : dragX < -SWIPE_THRESHOLD / 2
-        ? "nope"
-        : null;
-
   const cardClass = [
     "result-card",
     dragging ? "is-dragging" : "",
@@ -427,13 +456,6 @@ export function ResultView({ food }: ResultViewProps) {
   ]
     .filter(Boolean)
     .join(" ");
-
-  const cardStyle =
-    exitDir || dragX === 0
-      ? undefined
-      : {
-          transform: `translateX(${dragX}px) rotate(${dragX / 28}deg)`,
-        };
 
   if (emptyAlts) {
     return (
@@ -459,12 +481,21 @@ export function ResultView({ food }: ResultViewProps) {
   return (
     <section className="result">
       <p className="eyebrow">
-        {adjustNote ?? (rejectNote ? "Different one." : "Your match")}
+        {showDone
+          ? "Your pick"
+          : (adjustNote ??
+            (rejectNote
+              ? "Different one."
+              : intent === "recipe"
+                ? "Cook this"
+                : intent === "restaurant"
+                  ? "Eat out"
+                  : "Your match"))}
       </p>
 
       <div
+        ref={cardRef}
         className={cardClass}
-        style={cardStyle}
         onPointerDown={hasSession ? onPointerDown : undefined}
         onPointerMove={hasSession ? onPointerMove : undefined}
         onPointerUp={hasSession ? endDrag : undefined}
@@ -523,70 +554,128 @@ export function ResultView({ food }: ResultViewProps) {
 
       {riff ? <p className="result-riff">{riff}</p> : null}
 
+      {intent === "recipe" && food.recipe && hasSession && !showDone ? (
+        <p className="result-act-link">
+          <a href="#recipe">
+            <ChefHat size={16} strokeWidth={1.5} aria-hidden />
+            See recipe
+          </a>
+        </p>
+      ) : null}
+
       {!sessionReady ? null : hasSession ? (
         <>
-          <div className="reaction-dock">
-            <div className="reaction-bar" role="group" aria-label="Reactions">
-              <button
-                type="button"
-                className="reaction-btn reaction-btn-nope"
-                onClick={onNope}
-                disabled={rated || adjusting}
-                aria-label="Not for me"
-              >
-                <span className="reaction-icon" aria-hidden>
-                  ×
-                </span>
-                <span className="reaction-label">Nope</span>
-              </button>
-              <button
-                type="button"
-                className="reaction-btn"
-                onClick={onTryAgain}
-                disabled={adjusting}
-                aria-label="Try again"
-              >
-                <span className="reaction-icon" aria-hidden>
-                  ↻
-                </span>
-                <span className="reaction-label">Again</span>
-              </button>
-              <button
-                type="button"
-                className="reaction-btn reaction-btn-like"
-                onClick={onLike}
-                disabled={rated || adjusting}
-                aria-label="I like it"
-              >
-                <span className="reaction-icon" aria-hidden>
-                  ♡
-                </span>
-                <span className="reaction-label">Like</span>
-              </button>
+          {showDone ? (
+            <div className="result-done" role="status" aria-live="polite">
+              <p className="result-done-mark" aria-hidden>
+                {lastRating === "nailed" ? "♡" : "✓"}
+              </p>
+              <h2 className="result-done-title">
+                {lastRating === "nailed" ? "Locked in" : "Close enough"}
+              </h2>
+              <p className="result-done-copy">
+                {deltas && deltas.length > 0
+                  ? `Taste DNA updated. ${deltas
+                      .map(
+                        (d) =>
+                          `${labelDimension(d.dimension)} ${d.direction === "up" ? "up" : "down"}`,
+                      )
+                      .join(", ")}.`
+                  : "Got it. Your Taste DNA learned from this pick."}
+              </p>
+              <div className="result-done-actions">
+                {intent === "recipe" && food.recipe ? (
+                  <a className="cta" href="#recipe">
+                    <ChefHat size={20} strokeWidth={1.5} aria-hidden />
+                    See recipe
+                  </a>
+                ) : (
+                  <a
+                    className="cta"
+                    href={mapsSearchUrl(food)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <MapPin size={20} strokeWidth={1.5} aria-hidden />
+                    Find nearby
+                  </a>
+                )}
+                <Link className="cta-secondary" href="/taste">
+                  New craving
+                  <ArrowRight size={20} strokeWidth={1.5} aria-hidden />
+                </Link>
+              </div>
+              <p className="result-done-dna">
+                <Link href="/dna">
+                  <Sparkles size={16} strokeWidth={1.5} aria-hidden />
+                  Your Taste DNA
+                </Link>
+              </p>
             </div>
+          ) : (
+            <div className="reaction-dock">
+              <div className="reaction-bar" role="group" aria-label="Reactions">
+                <button
+                  type="button"
+                  className="reaction-btn reaction-btn-nope"
+                  onClick={onNope}
+                  disabled={rated || adjusting}
+                  aria-label="Not for me"
+                >
+                  <span className="reaction-icon" aria-hidden>
+                    ×
+                  </span>
+                  <span className="reaction-label">Nope</span>
+                </button>
+                <button
+                  type="button"
+                  className="reaction-btn"
+                  onClick={onTryAgain}
+                  disabled={adjusting}
+                  aria-label="Try again"
+                >
+                  <span className="reaction-icon" aria-hidden>
+                    ↻
+                  </span>
+                  <span className="reaction-label">Again</span>
+                </button>
+                <button
+                  type="button"
+                  className="reaction-btn reaction-btn-like"
+                  onClick={onLike}
+                  disabled={rated || adjusting}
+                  aria-label="I like it"
+                >
+                  <span className="reaction-icon" aria-hidden>
+                    ♡
+                  </span>
+                  <span className="reaction-label">Like</span>
+                </button>
+              </div>
 
-            <div className="reaction-quiet">
-              <button
-                type="button"
-                className="text-link"
-                onClick={() => onRate("kinda")}
-                disabled={rated || adjusting}
-              >
-                Kinda
-              </button>
-              <button
-                type="button"
-                className="text-link"
-                onClick={() => setWhyPanelOpen((v) => !v)}
-                aria-expanded={whyPanelOpen}
-                disabled={adjusting}
-              >
-                Why?
-              </button>
+              <div className="reaction-quiet">
+                <button
+                  type="button"
+                  className="text-link"
+                  onClick={() => onRate("kinda")}
+                  disabled={rated || adjusting}
+                >
+                  Kinda
+                </button>
+                <button
+                  type="button"
+                  className="text-link"
+                  onClick={() => setWhyPanelOpen((v) => !v)}
+                  aria-expanded={whyPanelOpen}
+                  disabled={adjusting}
+                >
+                  Why?
+                </button>
+              </div>
             </div>
-          </div>
+          )}
 
-          {whyPanelOpen ? (
+          {!showDone && whyPanelOpen ? (
             <div className="reject-panel">
               <label className="reject-label" htmlFor="reject-note">
                 What&apos;s off?
@@ -644,33 +733,35 @@ export function ResultView({ food }: ResultViewProps) {
           </button>
           {whyOpen ? <p className="result-why">{explanation}</p> : null}
 
-          <NearbySection food={food} places={places} state={placesState} />
+          {intent === "recipe" ? (
+            food.recipe ? (
+              <RecipeSection recipe={food.recipe} />
+            ) : (
+              <div className="recipe" id="recipe">
+                <p className="recipe-label">
+                  <ChefHat size={16} strokeWidth={1.5} aria-hidden />
+                  Recipe
+                </p>
+                <p className="recipe-missing">
+                  No recipe for this one. Try again for another pick.
+                </p>
+                {!showDone ? (
+                  <button
+                    type="button"
+                    className="cta-secondary"
+                    onClick={onTryAgain}
+                    disabled={adjusting}
+                  >
+                    Try again
+                  </button>
+                ) : null}
+              </div>
+            )
+          ) : (
+            <NearbySection food={food} places={places} state={placesState} />
+          )}
 
-          {deltas && deltas.length > 0 ? (
-            <p className="dna-toast" role="status">
-              Taste DNA updated.{" "}
-              {deltas
-                .map(
-                  (d) =>
-                    `${labelDimension(d.dimension)} ${d.direction === "up" ? "up" : "down"}`,
-                )
-                .join(", ")}
-              .
-            </p>
-          ) : rated ? (
-            <p className="dna-toast" role="status">
-              Got it.
-            </p>
-          ) : null}
-
-          {rated ? <ProfileNudge context="result" /> : null}
-
-          <p className="result-dna-link">
-            <Link href="/dna">
-              <Sparkles size={16} strokeWidth={1.5} aria-hidden />
-              Your Taste DNA
-            </Link>
-          </p>
+          {showDone ? <ProfileNudge context="result" /> : null}
         </>
       ) : (
         <div className="result-actions">
@@ -684,6 +775,38 @@ export function ResultView({ food }: ResultViewProps) {
         </div>
       )}
     </section>
+  );
+}
+
+function RecipeSection({ recipe }: { recipe: Recipe }) {
+  return (
+    <div className="recipe" id="recipe">
+      <p className="recipe-label">
+        <ChefHat size={16} strokeWidth={1.5} aria-hidden />
+        Recipe
+      </p>
+      <p className="recipe-meta">
+        <span>
+          <Clock size={16} strokeWidth={1.5} aria-hidden />
+          {recipe.timeMinutes} min
+        </span>
+        <span>{recipe.servings} servings</span>
+      </p>
+
+      <h2 className="recipe-heading">Ingredients</h2>
+      <ul className="recipe-ingredients">
+        {recipe.ingredients.map((item) => (
+          <li key={item}>{item}</li>
+        ))}
+      </ul>
+
+      <h2 className="recipe-heading">Steps</h2>
+      <ol className="recipe-steps">
+        {recipe.steps.map((step) => (
+          <li key={step}>{step}</li>
+        ))}
+      </ol>
+    </div>
   );
 }
 

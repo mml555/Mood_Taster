@@ -21,7 +21,7 @@ This walk is the spec. If a change does not serve one of these ten steps, it is 
 
 1. Open the public URL in incognito. No login.
 2. Tap start.
-3. Answer four questions.
+3. Pick Eat out or Cook, then answer four craving questions.
 4. Receive a specific dish with a reason.
 5. Tap "Not feeling it".
 6. Receive a different dish that still matches the craving.
@@ -45,18 +45,23 @@ settled. Raise an objection before you start, not in a PR.
 | `PRD.md` lists Taste DNA as out of scope | `PRD.md` is knowingly left stale. Time goes to code | Deliberate call, noted here so nobody "fixes" it mid build |
 | "No external AI is required for the core flow" | Preserved exactly. AI is an enhancement layer and never a dependency | Ticket 4 |
 
-**Dropped, do not build:** the three lane structure (Go Out / Make Something / Grab a snack),
-recipes, and PostHog analytics.
+**Dropped, do not build:** the three lane snack path (Grab a snack), PostHog
+analytics, live menus, and delivery/reservation booking.
+
+**Now in scope (added after Ship Night tickets):** Eat out vs Cook as the first
+quiz step, and full catalog recipes (ingredients + steps) for Cook mode.
 
 **Added after the tickets were written**, on an explicit call, so the "not tonight" list in
 section 11 no longer governs these:
 
 | Surface | What it does |
 |---|---|
+| Eat out / Cook | First quiz step. Cook filters to dishes with recipes; Eat out keeps Nearby |
+| Catalog recipes | Ingredients and steps on the result when intent is Cook |
 | AI why line | Azure rewrites the deterministic explanation after paint |
 | AI riff | One practical tip about eating the dish |
 | Conversational reject | "Not feeling it" takes a reason ("too heavy"), and the model moves the craving axes. Ranking stays deterministic |
-| Google Places | Nearby spots on the result screen, auto-loaded on mount |
+| Google Places | Nearby spots on the Eat out result screen, auto-loaded on mount |
 
 Places auto-loads rather than waiting for a tap. That fires a location permission prompt inside
 the judged flow, which was raised and accepted. The mitigation is that the same slot renders a
@@ -359,7 +364,7 @@ are preserved when stepping backward. On completion, route to
 `/result/<primaryId>?f=&t=&h=&a=` with the answers in the query string (section 3).
 
 - [ ] Starts with no account
-- [ ] Exactly four questions
+- [ ] Intent step plus four craving questions (five taps total)
 - [ ] Usable one handed on mobile
 - [ ] Back does not restart the flow
 - [ ] Completed answers reach the engine
@@ -779,11 +784,14 @@ to put a burger under "poke bowl". This needs a human pass, not a search-and-pas
 
 No tickets, no branches, no "quick" additions:
 
-authentication, restaurants or map APIs, live menu search, recipes, saved history, favorites,
-quests, badges, XP, Food Passport, social functionality, native apps, image recognition.
+snack lane, live menu search, delivery or reservation booking, saved history,
+favorites, quests, badges, XP, Food Passport, social functionality, native apps,
+image recognition.
 
-Also dropped from earlier drafts of this project: Google Places, the three lane structure, and
-PostHog analytics.
+Eat out vs Cook, catalog recipes, Google Places on Eat out results, and optional
+auth are in scope now (see section 2).
+
+Also dropped from earlier drafts of this project: PostHog analytics.
 
 ---
 
