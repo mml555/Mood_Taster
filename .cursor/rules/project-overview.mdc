@@ -1,0 +1,24 @@
+---
+description: Mood Taster project overview and agent defaults
+alwaysApply: true
+---
+
+# Mood Taster
+
+Mood Taster matches how you feel to what you should taste — food, drink, or recipes — without diet dogma or endless menus.
+
+## Product stance
+
+- Start from mood, not menus or macros
+- Recommendations should feel human, brief, and actionable
+- Prefer explainable picks ("why this fits") over black-box scores
+- Not a therapist, delivery service, or calorie counter
+
+## Agent defaults
+
+- Prefer small, focused changes over broad rewrites
+- Match existing patterns before introducing new ones
+- Do not commit or push unless explicitly asked
+- Keep secrets out of the repo; use env examples only
+- Update docs when APIs, schema, or IA change materially
+- Regenerate GitHub Pages with `npm run build:pages` after site changes

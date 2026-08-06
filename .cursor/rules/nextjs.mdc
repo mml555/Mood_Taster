@@ -1,0 +1,13 @@
+---
+description: Next.js App Router conventions for Mood Taster
+globs: src/**/*.{ts,tsx,css}
+alwaysApply: false
+---
+
+# Next.js
+
+- App Router under `src/app/`; shared UI in `src/components/`
+- Use `next/link` for internal routes (respects `basePath`)
+- Static export only: no server actions, no default `next/image` optimizer
+- Production Pages build: `npm run build:pages` → writes `docs/`
+- Prefer server components by default; add `"use client"` only when needed

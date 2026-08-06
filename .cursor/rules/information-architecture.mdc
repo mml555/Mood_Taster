@@ -1,0 +1,44 @@
+---
+description: Information architecture rules for Mood Taster
+alwaysApply: true
+---
+
+# Information architecture
+
+## Core user flow
+
+1. **Mood** — capture how the user feels (quick pick, text, or voice later)
+2. **Match** — show a short ranked set of tastes/places/recipes
+3. **Act** — save, cook, or go (directions / details)
+4. **Remember** — optional history and preferences that improve future matches
+
+Keep this sequence intact. Do not bury mood capture behind long onboarding.
+
+## Site / app map (v0)
+
+| Area | Purpose | Notes |
+|------|---------|--------|
+| Home / landing | Brand + one CTA into mood flow | `src/app/page.tsx` |
+| PRD | Public product requirements | `src/app/prd/page.tsx` → `/prd/` |
+| Mood entry | Select or describe mood | Fast; one job |
+| Results | Short list with “why it fits” | No endless scroll walls |
+| Detail | Single pick: recipe, place, or tasting note | One primary action |
+| About / privacy | Trust and product stance | Linked from footer |
+
+## Content hierarchy
+
+- One job per screen/section; one headline; one short support line
+- Brand name must remain a primary signal on marketing surfaces
+- Prefer short ranked picks over filter-heavy catalogs
+- Secondary content (stats, schedules, promos) stays out of the first viewport
+
+## Navigation rules
+
+- Primary nav: Mood → Results path only until product expands
+- Footer: PRD, About, Privacy, GitHub
+- Avoid mega-menus, pill clusters, and competing CTAs on the same surface
+
+## Naming
+
+- User-facing: mood, taste, match, pick
+- Avoid: “algorithm,” “optimization,” “wellness score” in UI copy
