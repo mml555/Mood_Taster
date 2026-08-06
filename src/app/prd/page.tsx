@@ -22,7 +22,8 @@ export default function PrdPage() {
             private doc.
           </p>
           <p className="doc-meta">
-            Status: Draft · Last updated: August 6, 2026 ·{" "}
+            Status: Draft · Last updated: August 6, 2026 · Companion:{" "}
+            <a href="/strategy">GTM Strategy</a> ·{" "}
             <a href="https://github.com/mml555/Mood_Taster">Source repo</a>
           </p>
         </header>

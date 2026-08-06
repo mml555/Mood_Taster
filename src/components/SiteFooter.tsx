@@ -7,6 +7,8 @@ export function SiteFooter() {
       <p className="foot-meta">
         <Link href="/prd">PRD</Link>
         {" · "}
+        <Link href="/strategy">Strategy</Link>
+        {" · "}
         <a href="https://github.com/mml555/Mood_Taster">GitHub</a>
       </p>
     </footer>

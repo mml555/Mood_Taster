@@ -389,6 +389,36 @@ a {
   color: var(--smoke);
 }
 
+.callout {
+  margin: 0 0 2rem;
+  padding: 1.25rem 1.35rem;
+  border-left: 3px solid var(--saffron);
+  background: color-mix(in srgb, var(--saffron) 10%, transparent);
+  animation: rise 1s var(--ease) 0.08s both;
+}
+
+.callout-label {
+  margin: 0 0 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--saffron);
+}
+
+.callout p {
+  margin: 0 0 0.75rem;
+  color: var(--smoke);
+}
+
+.callout p:last-child {
+  margin-bottom: 0;
+}
+
+.callout strong {
+  color: var(--paper);
+}
+
 .toc {
   margin: 0 0 2.5rem;
   padding: 1.25rem 0 0;

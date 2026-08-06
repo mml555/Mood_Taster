@@ -1,10 +1,24 @@
 import Link from "next/link";
 
 type SiteHeaderProps = {
-  current?: "home" | "prd";
+  current?: "home" | "prd" | "strategy";
 };
 
 export function SiteHeader({ current = "home" }: SiteHeaderProps) {
+  const docs = (
+    <>
+      <Link href="/prd" aria-current={current === "prd" ? "page" : undefined}>
+        PRD
+      </Link>
+      <Link
+        href="/strategy"
+        aria-current={current === "strategy" ? "page" : undefined}
+      >
+        Strategy
+      </Link>
+    </>
+  );
+
   return (
     <header className="top">
       <Link className="mark" href="/">
@@ -15,14 +29,12 @@ export function SiteHeader({ current = "home" }: SiteHeaderProps) {
           <>
             <a href="#how">How it works</a>
             <a href="#lanes">Lanes</a>
-            <Link href="/prd">PRD</Link>
+            {docs}
           </>
         ) : (
           <>
             <Link href="/">Home</Link>
-            <Link href="/prd" aria-current="page">
-              PRD
-            </Link>
+            {docs}
           </>
         )}
       </nav>

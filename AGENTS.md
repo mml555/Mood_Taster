@@ -12,6 +12,9 @@ This file orients coding agents (Cursor, Claude, Codex, etc.).
 | Claude-specific notes | `CLAUDE.md` |
 | App source | `src/` (Next.js App Router) |
 | Deploy | Vercel — https://mood-taster.vercel.app/ |
+| Public PRD | `/prd` |
+| Public GTM strategy | `/strategy` |
+| Brand Guide | Planned — third companion doc with PRD + Strategy |
 
 ## Non-negotiables
 
