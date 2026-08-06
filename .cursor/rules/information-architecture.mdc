@@ -33,6 +33,7 @@ Keep this sequence intact. Do not bury mood capture behind long onboarding.
 - Brand name must remain a primary signal on marketing surfaces
 - Prefer short ranked picks over filter-heavy catalogs
 - Secondary content (stats, schedules, promos) stays out of the first viewport
+- Sections are separated by space, not dividers or boxes (`design-system.mdc`)
 
 ## Navigation rules
 

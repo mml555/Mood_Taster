@@ -9,6 +9,7 @@ Mood Taster recommends what to eat or drink based on how you feel. Mood first, m
 - Read `.cursor/rules/` and this file before large changes
 - Follow IA in `.cursor/rules/information-architecture.mdc`
 - Follow coding standards in `.cursor/rules/coding-standards.mdc`
+- Follow the visual system in `.cursor/rules/design-system.mdc`
 - Public source-of-truth pages: PRD (`/prd`), Strategy (`/strategy`); Brand Guide forthcoming
 - Prefer minimal diffs; do not refactor unrelated code
 - Do not invent product features that break the mood → match → act flow
@@ -18,7 +19,8 @@ Mood Taster recommends what to eat or drink based on how you feel. Mood first, m
 
 - Next.js App Router + TypeScript in `src/`
 - Production: [Vercel](https://mood-taster.vercel.app/)
-- Shared styles in `src/app/globals.css`
+- Shared styles in `src/app/globals.css` — two tones (`--ink`, `--paper`) plus
+  `--accent`, flat fills, spacing ramp; no gradients, borders, or shadows
 
 ## Safety
 

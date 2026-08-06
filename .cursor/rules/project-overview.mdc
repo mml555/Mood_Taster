@@ -14,6 +14,12 @@ Mood Taster matches how you feel to what you should taste — food, drink, or re
 - Prefer explainable picks ("why this fits") over black-box scores
 - Not a therapist, delivery service, or calorie counter
 
+## Visual stance
+
+- Two tones (ink + paper) and one saffron accent — nothing else
+- Flat and spacing-led: no gradients, borders, or shadows
+- Full system in `design-system.mdc`
+
 ## Agent defaults
 
 - Prefer small, focused changes over broad rewrites

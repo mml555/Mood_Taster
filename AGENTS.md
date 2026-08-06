@@ -9,6 +9,7 @@ This file orients coding agents (Cursor, Claude, Codex, etc.).
 | Project overview | `.cursor/rules/project-overview.mdc` |
 | Coding standards | `.cursor/rules/coding-standards.mdc` |
 | Information architecture | `.cursor/rules/information-architecture.mdc` |
+| Design system | `.cursor/rules/design-system.mdc` |
 | Claude-specific notes | `CLAUDE.md` |
 | App source | `src/` (Next.js App Router) |
 | Deploy | Vercel — https://mood-taster.vercel.app/ |
@@ -22,7 +23,8 @@ This file orients coding agents (Cursor, Claude, Codex, etc.).
 2. Validate inputs; no silent error swallowing
 3. No secrets in git
 4. Marketing surfaces: brand-first, one job per section
-5. Do not commit/push unless the user asks
+5. Two-tone flat visuals — no gradients, borders, or shadows anywhere
+6. Do not commit/push unless the user asks
 
 ## Stack bootstrap
 

@@ -1,0 +1,94 @@
+---
+description: Visual design system for Mood Taster — two-tone, flat, spacing-led
+alwaysApply: true
+---
+
+# Design system
+
+Mood Taster looks like a well-set page, not a dashboard. Two tones, flat fills,
+and generous space do all the work. If a change needs a line or a gradient to
+read clearly, the spacing or the type is wrong.
+
+## Palette — two tones and one accent
+
+| Token | Value | Role |
+|-------|-------|------|
+| `--ink` | `#14110f` | Tone 1. Every surface. |
+| `--paper` | `#f2ebe0` | Tone 2. Every piece of content. |
+| `--accent` | `#e4a01a` | Saffron. Small marks only. |
+
+Every neutral in the UI is a **mix of the two tones**, never a new hue:
+
+```css
+--paper-muted: color-mix(in srgb, var(--paper) 72%, var(--ink));
+--paper-quiet: color-mix(in srgb, var(--paper) 45%, var(--ink));
+--ink-raised:  color-mix(in srgb, var(--ink) 92%, var(--paper));
+```
+
+Accent rules:
+
+- Saffron is for **small marks**: eyebrows, step numbers, one emphasis per section
+- It must never fill a surface, a button, or any large area — roughly 1% of a
+  viewport's painted area is the ceiling
+- Never introduce a fourth hue. No zest, no status greens, no semantic reds.
+  Failure and success read through copy, weight, and placement
+
+## Never
+
+- **No gradients.** No `linear-gradient`, `radial-gradient`, `conic-gradient`,
+  color washes, blurred blooms, or tinted overlays. Solid fills only
+- **No borders as decoration.** No hairline dividers, no `border-top` section
+  rules, no outlined cards, no stroked circles or rings
+- **No box shadows.** Depth is not a substitute for a border
+- **No card grids** built out of boxes. Group with space and alignment
+- **No `border-radius` above `2px`.** Prefer `0`
+
+## Instead — separate with space and tone
+
+Reach for these, in order:
+
+1. **Space.** A section break is `--space-8`, not a 1px line
+2. **Type.** Size, weight, and family carry hierarchy
+3. **Tone.** Step a surface to `--ink-raised`, or invert to paper-on-ink, when a
+   region genuinely needs to detach
+
+Primary actions **invert the tones** — paper background, ink text. That is the
+only "filled" element in the system.
+
+## Spacing scale
+
+Use the ramp; do not invent one-off values.
+
+```css
+--space-1: 0.25rem;  --space-5: 2rem;
+--space-2: 0.5rem;   --space-6: 3rem;
+--space-3: 0.75rem;  --space-7: 4rem;
+--space-4: 1rem;     --space-8: clamp(4rem, 12vh, 7rem);
+```
+
+Section padding uses `--space-8` on the block axis and the shared page inset on
+the inline axis. Related items sit `--space-4` apart; unrelated groups sit
+`--space-6` or more apart. When something feels cramped, add space before adding
+a divider.
+
+## Required exceptions
+
+These are accessibility features, not decoration, and must survive:
+
+- `:focus-visible` outlines — keep a visible 2px focus ring on every interactive
+  element. Never set `outline: none` without an equivalent replacement
+- `box-sizing: border-box`
+- Underlines on inline text links
+
+## Motion
+
+Entrance `rise` only, and one shared `--ease`. No spinning, pulsing, or looping
+ambient animation. Honor `prefers-reduced-motion: reduce`.
+
+## Checklist before shipping UI
+
+- [ ] No gradient, border, or shadow added
+- [ ] Any new color is `--ink`, `--paper`, `--accent`, or a mix of the first two
+- [ ] Accent used only as a small mark
+- [ ] Spacing values come from the ramp
+- [ ] Focus states still visible on keyboard nav
