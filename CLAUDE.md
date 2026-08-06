@@ -13,7 +13,7 @@ Mood Taster recommends what to eat or drink based on how you feel. Mood first, m
 - Public source-of-truth pages: PRD (`/prd`), Strategy (`/strategy`), Brand Guide (`/brand`)
 - Prefer minimal diffs; do not refactor unrelated code
 - Do not invent product features that break the mood → match → act flow
-- Monetization must follow Strategy trust rules (organic primary rec; sponsors labeled)
+- Monetization must follow Strategy trust rules (organic primary rec; labeled paid surfaces; never sell personal Taste DNA; aggregate-only commercial intelligence)
 
 ## Stack
 

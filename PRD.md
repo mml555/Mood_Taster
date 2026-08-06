@@ -25,9 +25,18 @@ Mood Taster is a mobile-first web app. You answer four short questions about fla
 - Restaurant maps, Google Places UX, delivery, or reservations
 - Recipes, lanes (Go Out / Make / Snack), or live menus
 - Native iOS/Android apps
-- Paid/sponsored restaurant placements
+- Commercial products for Ship Night: affiliate handoffs, verified visit codes, restaurant SaaS, and aggregate taste intelligence products (future model on `/strategy`; never sell personal Taste DNA)
 - Social feed, streaks, calorie tracking
 - Voice input, couple/group matching, fridge/pantry scanning
+
+## Privacy and data
+
+- Taste DNA exists to improve matching for the user. It is not a sellable personal profile.
+- We never sell personal Taste DNA or individual taste profiles to third parties.
+- Future commercial intelligence, if any, is aggregate only, with cohort floors and no user-level export path for buyers.
+- Commercial analytics for aggregate products require explicit, unbundled consent, separate from using the core mood → match → act flow.
+- Guests keep Taste DNA locally. Optional accounts may sync Taste DNA to the profile. Deletion must actually delete account-held Taste DNA when requested.
+- Binding public detail: `/privacy`. Business framing: `/strategy`.
 
 ## Success criteria
 
@@ -35,4 +44,4 @@ A judge on their phone completes Start → four craving questions → receives o
 
 ## Tech stack
 
-Next.js + TypeScript on Vercel, built in Cursor. Ranking is a pure client-side function over a static catalog. No database.
+Next.js + TypeScript on Vercel, built in Cursor. Ranking is a pure client-side function over a static catalog. Optional accounts and cloud Taste DNA sync use Supabase when configured.

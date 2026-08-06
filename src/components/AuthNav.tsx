@@ -84,6 +84,7 @@ export function AuthNav({ current }: { current?: string }) {
       <Link
         className="nav-primary nav-with-icon"
         href="/account"
+        aria-label={state.username ? `Account @${state.username}` : "Account"}
         aria-current={current === "account" ? "page" : undefined}
       >
         <UserRound size={16} strokeWidth={1.5} aria-hidden />

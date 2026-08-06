@@ -36,6 +36,14 @@ function placesReferrer(): string {
   return vercel ? `https://${vercel}/` : "https://mood-taster.vercel.app/";
 }
 
+/**
+ * A stable short hash of the key. Enough to tell two keys apart in a log line,
+ * useless for reconstructing either.
+ */
+function keyFingerprint(key: string): string {
+  return createHash("sha256").update(key).digest("hex").slice(0, 8);
+}
+
 // Keeping the mask tight matters: Places bills by the fields requested.
 const FIELD_MASK = [
   "places.displayName",

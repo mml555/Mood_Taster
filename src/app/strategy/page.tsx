@@ -6,7 +6,7 @@ import { StrategyArticle } from "@/content/strategy-article";
 export const metadata: Metadata = {
   title: "Go-to-Market Strategy",
   description:
-    "Mood Taster go-to-market, growth, and monetization strategy: craving-intent advertising with trust first.",
+    "Mood Taster go-to-market, growth, and monetization: own the moment before the craving forms, then charge for outcomes.",
 };
 
 export default function StrategyPage() {
@@ -15,14 +15,14 @@ export default function StrategyPage() {
       <SiteHeader current="strategy" />
       <main className="doc">
         <header className="doc-hero">
-          <p className="eyebrow">Public strategy · v1.0</p>
+          <p className="eyebrow">Public strategy · v1.1</p>
           <h1>Go-to-Market, Growth &amp; Monetization</h1>
           <p className="lede">
-            How Mood Taster enters the market, earns trust, and builds toward a
-            high-intent food advertising platform, without selling attention.
+            How Mood Taster enters the market, earns trust, and builds outcome
+            revenue without selling attention or personal Taste DNA.
           </p>
           <p className="doc-meta">
-            Status: v1.0 · Last updated: August 6, 2026 · Mobile-first web ·{" "}
+            Status: v1.1 · Last updated: August 6, 2026 · Mobile-first web ·{" "}
             <a href="/brand">Brand</a> ·{" "}
             <a href="https://github.com/mml555/Mood_Taster">Source repo</a>
           </p>
@@ -32,12 +32,14 @@ export default function StrategyPage() {
           <p className="callout-label">Central business insight</p>
           <p>
             Mood Taster does not monetize attention. It monetizes{" "}
-            <strong>craving intent</strong>.
+            <strong>craving intent as outcomes</strong>, not impressions.
           </p>
           <p>
-            A person choosing between random content is not necessarily ready to
-            buy. A person who just said they want something hot, crunchy, spicy,
-            casual, and nearby is highly actionable.
+            Google owns &quot;pizza near me.&quot; Yelp owns &quot;best
+            pizza.&quot; Delivery apps own the order. We own the thirty seconds
+            before that thought exists. Because we shape the decision, we can
+            charge for the handoff, the visit, the subscription, and the
+            aggregate trend, not the banner.
           </p>
         </aside>
 
@@ -54,7 +56,7 @@ export default function StrategyPage() {
               <a href="#positioning">3. Commercial positioning</a>
             </li>
             <li>
-              <a href="#model">4. Business model</a>
+              <a href="#model">4. Four revenue streams</a>
             </li>
             <li>
               <a href="#order">5. Order of operations</a>
@@ -63,37 +65,43 @@ export default function StrategyPage() {
               <a href="#north-star">6. North star</a>
             </li>
             <li>
-              <a href="#market">7–10. Market, beachhead &amp; promise</a>
+              <a href="#trust">7. Trust &amp; data guardrails</a>
             </li>
             <li>
-              <a href="#phases">11. Go-to-market phases</a>
+              <a href="#market">8–11. Market, beachhead &amp; promise</a>
             </li>
             <li>
-              <a href="#acquisition">12–18. Acquisition &amp; free product</a>
+              <a href="#phases">12. Go-to-market phases</a>
             </li>
             <li>
-              <a href="#restaurants">19–25. Restaurant monetization</a>
+              <a href="#acquisition">13–19. Acquisition &amp; free product</a>
             </li>
             <li>
-              <a href="#brands">26–28. Brands &amp; commerce</a>
+              <a href="#affiliate">20. Affiliate routing</a>
             </li>
             <li>
-              <a href="#trust">29–30. Advertising trust</a>
+              <a href="#visits">21. Verified visits</a>
             </li>
             <li>
-              <a href="#media">31–42. Media, creators &amp; launch</a>
+              <a href="#saas">22. Restaurant software</a>
             </li>
             <li>
-              <a href="#retention">43–47. Retention</a>
+              <a href="#intelligence">23. Aggregate taste intelligence</a>
             </li>
             <li>
-              <a href="#loops">48–56. Loops, funnel &amp; pilots</a>
+              <a href="#media">24–35. Media, creators &amp; launch</a>
             </li>
             <li>
-              <a href="#limits">57–62. Limits, flywheel &amp; don’ts</a>
+              <a href="#retention">36–40. Retention</a>
             </li>
             <li>
-              <a href="#roadmap">63–67. Roadmap &amp; one-sentence plan</a>
+              <a href="#loops">41–49. Loops, funnel &amp; pilots</a>
+            </li>
+            <li>
+              <a href="#limits">50–55. Limits, flywheel &amp; don’ts</a>
+            </li>
+            <li>
+              <a href="#roadmap">56–60. Roadmap &amp; one-sentence plan</a>
             </li>
           </ol>
         </nav>

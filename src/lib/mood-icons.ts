@@ -1,5 +1,6 @@
 import type { LucideIcon } from "lucide-react";
 import {
+  ChefHat,
   Compass,
   Cookie,
   Dices,
@@ -36,6 +37,17 @@ export const QUIZ_OPTION_ICONS: Record<string, LucideIcon> = {
   safe: Shield,
   curious: Compass,
   surprise: Dices,
+};
+
+/** One mark per quiz question step. */
+export const QUIZ_STEP_ICONS: Record<
+  "flavor" | "texture" | "heaviness" | "adventure",
+  LucideIcon
+> = {
+  flavor: ChefHat,
+  texture: Layers,
+  heaviness: Scale,
+  adventure: Dices,
 };
 
 /** DNA dimension labels share the same marks as quiz picks. */

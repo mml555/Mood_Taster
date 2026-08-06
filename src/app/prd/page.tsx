@@ -5,7 +5,7 @@ import { SiteHeader } from "@/components/SiteHeader";
 export const metadata: Metadata = {
   title: "Product Requirements",
   description:
-    "Ship Night PRD for Mood Taster: craving quiz, dish match, Taste DNA, and demo success criteria.",
+    "Ship Night PRD for Mood Taster: craving quiz, dish match, Taste DNA, privacy promises, and demo success criteria.",
 };
 
 export default function PrdPage() {
@@ -89,10 +89,47 @@ export default function PrdPage() {
                 Recipes, lanes (Go Out / Make / Snack), or live menus
               </li>
               <li>Native iOS/Android apps</li>
-              <li>Paid/sponsored restaurant placements</li>
+              <li>
+                Commercial products for Ship Night: affiliate handoffs, verified
+                visit codes, restaurant SaaS, and aggregate taste intelligence
+                products (future model on{" "}
+                <a href="/strategy">Strategy</a>; never sell personal Taste DNA)
+              </li>
               <li>Social feed, streaks, calorie tracking</li>
               <li>
                 Voice input, couple/group matching, fridge/pantry scanning
+              </li>
+            </ul>
+          </section>
+
+          <section id="privacy" aria-labelledby="privacy-title">
+            <h2 id="privacy-title">Privacy and data</h2>
+            <ul>
+              <li>
+                Taste DNA exists to improve matching for the user. It is not a
+                sellable personal profile.
+              </li>
+              <li>
+                We never sell personal Taste DNA or individual taste profiles to
+                third parties.
+              </li>
+              <li>
+                Future commercial intelligence, if any, is aggregate only, with
+                cohort floors and no user-level export path for buyers.
+              </li>
+              <li>
+                Commercial analytics for aggregate products require explicit,
+                unbundled consent, separate from using the core mood → match →
+                act flow.
+              </li>
+              <li>
+                Guests keep Taste DNA locally. Optional accounts may sync Taste
+                DNA to the profile. Deletion must actually delete account-held
+                Taste DNA when requested.
+              </li>
+              <li>
+                Binding public detail: <a href="/privacy">Privacy</a>. Business
+                framing: <a href="/strategy">Strategy</a>.
               </li>
             </ul>
           </section>
@@ -112,7 +149,8 @@ export default function PrdPage() {
             <h2 id="stack-title">Tech stack</h2>
             <p>
               Next.js + TypeScript on Vercel, built in Cursor. Ranking is a pure
-              client-side function over a static catalog. No database.
+              client-side function over a static catalog. Optional accounts and
+              cloud Taste DNA sync use Supabase when configured.
             </p>
           </section>
         </article>

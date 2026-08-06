@@ -5,7 +5,7 @@ import { ArrowLeft } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { loadDnaForUser } from "@/lib/dna-sync";
 import { rank } from "@/lib/engine";
-import { QUIZ_OPTION_ICONS } from "@/lib/mood-icons";
+import { QUIZ_OPTION_ICONS, QUIZ_STEP_ICONS } from "@/lib/mood-icons";
 import { emptySession, writeSession } from "@/lib/session";
 import type { Answers } from "@/lib/taste-types";
 import {
@@ -161,15 +161,21 @@ export function TasteQuiz() {
   if (!current) return null;
 
   const selected = hydrated ? answers[current.key] : undefined;
+  const StepIcon = QUIZ_STEP_ICONS[current.key];
 
   return (
     <section className="quiz" aria-labelledby="quiz-question">
       <p className="step quiz-progress" aria-live="polite">
         {stepLabel} / 04
       </p>
-      <h1 id="quiz-question" className="quiz-question">
-        {current.question}
-      </h1>
+      <div className="quiz-question-block">
+        <span className="quiz-question-icon" aria-hidden>
+          <StepIcon size={28} strokeWidth={1.5} />
+        </span>
+        <h1 id="quiz-question" className="quiz-question">
+          {current.question}
+        </h1>
+      </div>
 
       <ul className="quiz-options" role="list">
         {current.options.map((opt) => {

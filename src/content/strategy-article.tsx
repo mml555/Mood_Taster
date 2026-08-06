@@ -6,9 +6,10 @@ export function StrategyArticle() {
         <p>
           This document defines how Mood Taster will enter the market, acquire
           its first users, create repeat usage, encourage referrals, develop
-          defensible taste data, introduce paid features, monetize restaurants
-          and food brands, protect user trust, and grow from a consumer tool
-          into a food-intent media platform.
+          defensible taste data, and build outcome revenue: affiliate handoffs,
+          verified visits, restaurant software, and aggregate taste
+          intelligence. Recommendation quality comes first. Monetization follows
+          trust.
         </p>
         <p>
           This strategy is built around Mood Taster as a{" "}
@@ -22,6 +23,7 @@ export function StrategyArticle() {
           <li>a review platform</li>
           <li>a restaurant management system</li>
           <li>a paid consumer subscription product</li>
+          <li>a company that sells personal Taste DNA</li>
         </ul>
         <p>
           The first job is simple: become the website people open when they are
@@ -47,7 +49,8 @@ export function StrategyArticle() {
         </p>
         <p>
           That gives Mood Taster access to something valuable:{" "}
-          <strong>structured craving intent</strong>.
+          <strong>structured craving intent</strong>, before the search query
+          exists.
         </p>
         <p>
           The user is not simply searching for “restaurants near me.” Mood
@@ -56,16 +59,16 @@ export function StrategyArticle() {
           versus exploration, historical preferences, and current context.
         </p>
         <p>
-          The long-term commercial value is not merely restaurant exposure. It
-          is the ability to connect businesses with people whose current craving
-          genuinely matches what they sell.
+          Google owns “pizza near me.” Yelp owns “best pizza.” Delivery apps own
+          the order. All of them operate after the decision has already formed.
+          We operate before it. Because we shape the decision rather than serve
+          it, we can charge for the outcome instead of the impression.
         </p>
         <p>
-          Existing platforms already show restaurants and food brands will pay
-          for placement near purchase intent: Yelp for local sponsored results,
-          Instacart for brand ads at the choosing moment. Mood Taster’s
-          opportunity is an earlier, more personal intent layer: the moment
-          someone is still discovering what they want.
+          The long-term commercial value is not banner inventory. It is the
+          ability to connect a verified craving to a handoff, a physical visit,
+          a restaurant planning habit, and anonymized demand trends nobody else
+          can see.
         </p>
       </section>
 
@@ -76,47 +79,66 @@ export function StrategyArticle() {
             <strong>Consumer:</strong> We’ll figure out what you’re craving.
           </li>
           <li>
-            <strong>Restaurant:</strong> Reach diners when your food is exactly
-            what they want.
+            <strong>Restaurant:</strong> Pay only when someone walks in for a
+            match we shaped, then grow into planning tools that tell you what
+            people near you wanted.
           </li>
           <li>
-            <strong>Food brand:</strong> Put your product in front of the right
-            craving.
+            <strong>Data buyer:</strong> Buy aggregated craving trends, never
+            personal Taste DNA.
           </li>
           <li>
-            <strong>Internal category:</strong> Craving-intent advertising
+            <strong>Internal category:</strong> Pre-intent food decision
             platform
           </li>
         </ul>
         <p>
           Consumer-facing language should remain Mood Taster, personal taste
-          engine, and “Taste your mood.” Advertising infrastructure stays
+          engine, and “Taste your mood.” Commercial infrastructure stays
           invisible until it is relevant.
         </p>
       </section>
 
       <section id="model" aria-labelledby="model-title">
-        <h2 id="model-title">4. The business model</h2>
-        <p>Four eventual revenue layers:</p>
+        <h2 id="model-title">4. Four revenue streams</h2>
+        <p>
+          Every stream is a different way of monetizing one position: the
+          instant before a person knows what they want to eat. None of them
+          work if the recommendation is not uncanny.
+        </p>
         <ol>
           <li>
-            <strong>Restaurant promotion</strong>: sponsored matches when
-            genuinely relevant to the craving.
+            <strong>Affiliate routing</strong>: paid handoffs to grocery,
+            delivery, and retail partners when a pick needs ingredients, an
+            order, or a purchase. Scaffolding for year one.
           </li>
           <li>
-            <strong>Food and CPG promotion</strong>: brands in snack,
-            ingredient, and at-home contexts.
+            <strong>Verified visits</strong>: single-use codes with a small
+            perk. Staff entry is the billing event. Restaurants pay only when
+            someone walks in.
           </li>
           <li>
-            <strong>Performance / transaction</strong>: revenue on reserve,
-            order, purchase, redeem, waitlist, or ingredient buy.
+            <strong>Restaurant software</strong>: free claimed dashboards that
+            show why people matched you, then paid tiers for craving promotion,
+            off-peak fill, and demand intelligence.
           </li>
           <li>
-            <strong>Taste intelligence</strong>: aggregated, privacy-safe
-            trends for restaurants and brands. Later-stage; never expose
-            individual Taste DNA.
+            <strong>Aggregate taste intelligence</strong>: anonymized craving
+            trends for producers, chains, delivery platforms, and retailers.
+            Highest margin. Never user records.
           </li>
         </ol>
+        <p>
+          How they stack: affiliate pays early bills → visits prove we drive
+          real customers → subscriptions turn that proof into recurring revenue
+          → data turns the exhaust into pure margin. The mix matters. Recurring
+          and data revenue are worth more than transaction volume alone.
+        </p>
+        <p>
+          We’re not monetizing food. We’re monetizing accuracy. If the pick
+          does not make someone think “how did it know,” every stream above
+          earns nothing.
+        </p>
       </section>
 
       <section id="order" aria-labelledby="order-title">
@@ -126,8 +148,11 @@ export function StrategyArticle() {
           <li>Prove repeat behavior: users return when hungry.</li>
           <li>Build Taste DNA: enough feedback to improve matches.</li>
           <li>Establish local density: one geographic market.</li>
-          <li>Test commercial placements manually: few restaurants/brands.</li>
-          <li>Productize advertising: self-serve or managed tools.</li>
+          <li>Turn on affiliate handoffs where a pick ends in buy or order.</li>
+          <li>Pilot verified visit codes with a small set of restaurants.</li>
+          <li>Offer free claimed profiles so owners see who wanted them and why.</li>
+          <li>Sell SaaS tiers once the dashboard habit exists.</li>
+          <li>Productize aggregate taste intelligence only with privacy floors.</li>
         </ol>
         <p>
           Trying to monetize before recommendation trust will damage the
@@ -149,10 +174,58 @@ export function StrategyArticle() {
         </p>
       </section>
 
-      <section id="market" aria-labelledby="market-title">
-        <h2 id="market-title">7–10. Market, beachhead &amp; launch promise</h2>
+      <section id="trust" aria-labelledby="trust-title">
+        <h2 id="trust-title">7. Trust &amp; data guardrails</h2>
+        <ol>
+          <li>
+            <strong>Organic primary pick</strong>: the food recommendation stays
+            independent of payment. Paid surfaces, if any, are labeled and
+            compete for a next action, not for the conclusion of what you crave.
+          </li>
+          <li>
+            <strong>Relevance first</strong>: a paid restaurant or handoff must
+            still satisfy hard dietary and contextual constraints.
+          </li>
+          <li>
+            <strong>Outcome billing over impressions</strong>: prefer verified
+            visits and handoffs over selling banner inventory.
+          </li>
+          <li>
+            <strong>Never sell personal Taste DNA</strong>: no names tied to
+            profiles, no individual food histories for buyers, no user-level
+            commercial export path in the product.
+          </li>
+          <li>
+            <strong>Aggregate only for commercial intelligence</strong>: trends
+            with a hard floor on how few users sit behind any reported cell.
+          </li>
+          <li>
+            <strong>Unbundled consent</strong>: commercial analytics opt-in is
+            separate from using the core mood → match → act flow.
+          </li>
+          <li>
+            <strong>Real deletion</strong>: when a user asks to delete, we
+            delete. Aggregation after retention is not a substitute for that
+            promise.
+          </li>
+          <li>
+            <strong>Never touch diner payment for visit perks</strong>: the
+            restaurant discounts its own customer. We invoice for confirmed
+            visits. We stay a software company, not a money transmitter.
+          </li>
+        </ol>
+        <p>
+          Preferred early trust model: primary food recommendation stays fully
+          organic. Partners compete in “Where to get it,” affiliate handoffs, or
+          labeled visit perks. See also{" "}
+          <a href="/privacy">Privacy</a>.
+        </p>
+      </section>
 
-        <h3>7. Initial market</h3>
+      <section id="market" aria-labelledby="market-title">
+        <h2 id="market-title">8–11. Market, beachhead &amp; launch promise</h2>
+
+        <h3>8. Initial market</h3>
         <p>
           Launch in one concentrated market: <strong>South Florida</strong>{" "}
           (Miami, Miami Beach, Aventura, Hallandale Beach, Hollywood, Fort
@@ -161,8 +234,12 @@ export function StrategyArticle() {
           relationships. Kosher dining can be a focused community wedge without
           limiting the full product to kosher users.
         </p>
+        <p>
+          Local density beats thin national coverage. Excellent Miami restaurant
+          coverage makes the visit and SaaS stories real.
+        </p>
 
-        <h3>8. Beachhead user</h3>
+        <h3>9. Beachhead user</h3>
         <p>
           <strong>The indecisive social eater</strong>: roughly 18–35, eats out
           or orders often, mobile-web heavy, shares food content, decides with
@@ -170,7 +247,7 @@ export function StrategyArticle() {
           quiz-style results, and wants faster decisions.
         </p>
 
-        <h3>9. Primary use cases</h3>
+        <h3>10. Primary use cases</h3>
         <ul>
           <li>
             <strong>The dinner problem</strong>: hungry, nothing sounds right.
@@ -189,10 +266,11 @@ export function StrategyArticle() {
         <p>
           Do not lead launch marketing with machine learning, Taste XP,
           databases, taxonomies, or gamification. Lead with the recognizable
-          problem.
+          problem. “I have no clue” mode is the hook that makes people say
+          “wait, how did it know.”
         </p>
 
-        <h3>10. Launch promise</h3>
+        <h3>11. Launch promise</h3>
         <p>
           <strong>Find out what you’re craving in 30 seconds.</strong>
         </p>
@@ -203,7 +281,7 @@ export function StrategyArticle() {
       </section>
 
       <section id="phases" aria-labelledby="phases-title">
-        <h2 id="phases-title">11. Go-to-market phases</h2>
+        <h2 id="phases-title">12. Go-to-market phases</h2>
         <h3>Phase 0: Closed testing</h3>
         <p>
           50–150 testers from friends, founder network, local young adults,
@@ -222,7 +300,8 @@ export function StrategyArticle() {
         <p>
           Shift from utility to identity: flavor profile, top tastes,
           underexplored tastes, food passport, profile completion, shareable
-          Taste Card.
+          Taste Card. Design the result card and DNA reveal for sharing from day
+          one. That is a product decision, not a marketing one.
         </p>
         <h3>Phase 3: Multi-city expansion</h3>
         <p>
@@ -230,22 +309,25 @@ export function StrategyArticle() {
           repeat behavior, and commercial demand, e.g. NYC, LA, Chicago,
           Austin, Atlanta. Do not expand just to claim coverage.
         </p>
-        <h3>Phase 4: Advertising network</h3>
+        <h3>Phase 4: Commercial readiness</h3>
         <p>
-          After trust and intent volume, launch structured restaurant and brand
-          advertising.
+          After trust and local density: affiliate handoffs live, verified visit
+          pilots with a small restaurant set, free claimed profiles in market,
+          then SaaS tiers and aggregate intelligence products only when privacy
+          floors and consent are in place.
         </p>
       </section>
 
       <section id="acquisition" aria-labelledby="acquisition-title">
-        <h2 id="acquisition-title">12–18. Acquisition &amp; free product</h2>
+        <h2 id="acquisition-title">13–19. Acquisition &amp; free product</h2>
 
-        <h3>12–14. Acquisition and the share loop</h3>
+        <h3>13–15. Acquisition and the share loop</h3>
         <p>
           Grow through product-led sharing, short-form content, creators,
           search, restaurant and physical distribution, partnerships, earned
-          media, and paid acquisition only after conversion is understood. The
-          product itself must be the primary growth engine.
+          media, and paid acquisition only after conversion is understood. Paid
+          acquisition cannot work at our revenue per user until recurring
+          streams mature. The product itself must be the primary growth engine.
         </p>
         <p>
           Every session should create a shareable artifact: recommendation card,
@@ -260,7 +342,7 @@ export function StrategyArticle() {
           receiving value.
         </p>
 
-        <h3>15. Referral program</h3>
+        <h3>16. Referral program</h3>
         <p>
           Introduce after organic share loop works. Reward unit: one new user
           who completes a Taste Session, not clicks, impressions, or empty
@@ -269,7 +351,7 @@ export function StrategyArticle() {
           gate core recommendation quality behind referrals.
         </p>
 
-        <h3>16. Locked and unlocked features</h3>
+        <h3>17. Locked and unlocked features</h3>
         <p>
           Progress unlocks, not payment gates. Available immediately: first
           recommendation, Go Out / Make Something / snack flows, basic feedback,
@@ -281,7 +363,7 @@ export function StrategyArticle() {
           exploration badges.
         </p>
 
-        <h3>17–18. Free product and optional Plus</h3>
+        <h3>18–19. Free product and optional Plus</h3>
         <p>
           The consumer product stays largely free: scale, usage, and taste
           feedback are the commercial asset. Generous Taste Sessions,
@@ -292,119 +374,194 @@ export function StrategyArticle() {
         <p>
           Optional future <strong>Mood Taster Plus</strong> ($3.99–$6.99/mo
           hypothesis): advanced DNA, contextual insights, family/couple
-          profiles, travel guides, no sponsored placements, deeper analytics.
-          Do not launch until users clearly want deeper personalization. Never
-          deliberately worsen free recommendations to sell a subscription.
+          profiles, travel guides, deeper personal analytics. Do not launch
+          until users clearly want deeper personalization. Never deliberately
+          worsen free recommendations to sell a subscription.
         </p>
       </section>
 
-      <section id="restaurants" aria-labelledby="restaurants-title">
-        <h2 id="restaurants-title">19–25. Restaurant monetization</h2>
-
-        <h3>19–20. Sponsored Taste Match</h3>
+      <section id="affiliate" aria-labelledby="affiliate-title">
+        <h2 id="affiliate-title">20. Affiliate routing (the bridge)</h2>
         <p>
-          Sell relevance, not generic banners:{" "}
-          <strong>Sponsored Taste Match</strong>. Money increases eligible
-          visibility; money must not convert an irrelevant restaurant into a
-          “good” match.
+          Every recommendation ends somewhere. A recipe needs ingredients. A
+          snack needs to be bought. Someone who wanted to go out sometimes stays
+          in. Each of those is a handoff we can be paid for.
         </p>
+        <p>
+          Plug into existing partner programs in grocery delivery, food
+          delivery, and retail. No sales team, no negotiation theater, no heavy
+          build. Revenue can exist from launch.
+        </p>
+        <p>
+          Example: Maya matches to gochujang noodles, taps “missing three
+          ingredients,” a grocery basket opens. The partner pays us for the
+          handoff.
+        </p>
+        <p>
+          Its job is to fund the first year while we build the real business. Do
+          not over-invest. We do not control the partners. Margins compress as
+          those programs mature. A company that looks like an affiliate site
+          raises money like one. Scaffolding, nothing more.
+        </p>
+      </section>
+
+      <section id="visits" aria-labelledby="visits-title">
+        <h2 id="visits-title">21. Verified visits</h2>
+        <p>
+          How it works. The user finishes the quiz, gets a specific dish, picks
+          a restaurant. The result screen issues a single-use code tied to that
+          session, that user, and that restaurant, expiring in about two days.
+          The code carries a small perk such as a free side or a free drink. The
+          diner shows it. Staff types it into a bookmarked web page. That entry
+          is our billing event.
+        </p>
+        <p>
+          Example: Jordan shows code MT-4471 at Coop’s, gets free fries, we bill
+          Coop’s a small amount per confirmed visit.
+        </p>
+        <p>
+          Why the perk works. Choose something that costs the restaurant almost
+          nothing in ingredients but reads as a real gift. That gap between
+          actual cost and perceived value is the mechanic. A trivial percentage
+          discount is easy to ignore. A free item feels like a win.
+        </p>
+        <p>
+          Why staff cooperate without training. The code is how the customer
+          gets their perk, so the customer enforces the process. Restaurant
+          marketing programs die on staff compliance. This routes around it.
+        </p>
+        <p>
+          Why restaurants say yes. Free to be listed. Free when people see you.
+          Pay only when someone walks in holding our code. If nobody comes, the
+          bill is zero. Independents have been burned by review-site ads with no
+          attribution and by daily deals that destroyed margins. A bill that
+          only arrives after a customer did is a different pitch.
+        </p>
+        <p>
+          Why we never touch the money. The restaurant discounts its own
+          customer out of its own register. We invoice monthly for confirmed
+          visits. The moment consumer money flows through our accounts we become
+          a regulated money transmitter. Avoiding that is worth more than
+          incremental margin.
+        </p>
+        <p>
+          How it evolves. Start with code redemption. Later add automatic
+          confirmation when a phone dwells at a restaurant long enough, priced
+          lower because the evidence is weaker but friction is zero. Eventually
+          integrate with point of sale, which unlocks pricing tied to ticket
+          size.
+        </p>
+      </section>
+
+      <section id="saas" aria-labelledby="saas-title">
+        <h2 id="saas-title">22. Restaurant software (the recurring core)</h2>
+        <p>Three stages. The sequence is not optional.</p>
+
+        <h3>Stage one: coverage without permission</h3>
+        <p>
+          Index restaurants whether they know it or not, tagging menus into our
+          taxonomy of flavor, texture, temperature, heaviness, and cuisine. This
+          is work we must do for the recommendation engine, so it costs nothing
+          extra commercially.
+        </p>
+        <p>
+          Thousands of restaurants can be live in a city with zero contracts.
+          That inverts the classic marketplace problem. Most local startups need
+          restaurants to sign up before the product works. Our supply side is
+          indexed first, so the product works before anyone has agreed to
+          anything.
+        </p>
+
+        <h3>Stage two: free claimed profile</h3>
+        <p>
+          Reach owners with a simple message: you appeared in this many
+          recommendations last month. Claim your free profile to see who wanted
+          you and why.
+        </p>
+        <p>
+          That message gets opened because it is information about their own
+          business they have never had. When they log in they see which dishes
+          people actually crave, what craving profile triggers each one, which
+          taste dimensions they over and under index on, and how many matches
+          they lost to competitors nearby.
+        </p>
+        <p>
+          The wedge is the “why,” not the traffic. Every other tool tells a
+          restaurant how many people looked. We tell them what people wanted
+          when they found them. Once an owner checks that dashboard every week,
+          we own their attention. Still free, still no contract.
+        </p>
+
+        <h3>Stage three: paid tiers</h3>
         <ul>
-          <li>Sponsored result (CPC, qualified visit, or monthly budget)</li>
-          <li>Featured dish against flavor/texture/occasion signals</li>
-          <li>Taste Quest sponsor (clearly labeled)</li>
-          <li>New-menu launch to matching Taste DNA</li>
-          <li>Limited-time craving campaigns (late-night, brunch, rain, etc.)</li>
-          <li>Offers with measurable conversion</li>
+          <li>
+            <strong>Craving promotion</strong>: not “show my restaurant more
+            often,” but “when someone nearby is matched to a crispy spicy
+            chicken craving, put my sandwich in front of them.” The restaurant
+            buys a craving, not a keyword.
+          </li>
+          <li>
+            <strong>Off-peak fill</strong>: surface a restaurant into matches
+            during dead hours, optionally with an incentive. Giving away an
+            appetizer at three in the afternoon costs almost nothing when the
+            alternative is an empty room.
+          </li>
+          <li>
+            <strong>Demand intelligence</strong>: alerts that say how many
+            people near them were matched to a dish nobody in the area serves
+            well. We move from “we send you customers” to “we tell you what to
+            cook.” Marketing channels get cut in a bad quarter. Planning
+            infrastructure does not.
+          </li>
         </ul>
-
-        <h3>21–23. Pricing and sales</h3>
-        <p>
-          Start manually. Pilot: free claim/profile review/tagging, small paid
-          pilot, monthly report. Hypotheses: Starter $199–$299/mo; Growth
-          $499–$999/mo; multi-location custom. Later: CPC, CPA, redemption, or
-          hybrid minimums. Founder-led sales first: prioritize visually strong
-          signature dishes, clear cravings, local popularity, capacity, social
-          presence, responsive owners. Avoid long-cycle chains at the start.
-        </p>
-        <p>
-          Message: Mood Taster helps hungry people figure out exactly what they
-          want. When their craving matches your food, we put your dish in front
-          of them, with reporting on who saw it, what they craved, which dish,
-          and what action they took.
-        </p>
-
-        <h3>24–25. Onboarding and claiming</h3>
-        <p>
-          Collect location, hours, menu, signature dishes, pricing, photos,
-          dietary support, cuisine, atmosphere, occasions, flavor/texture tags,
-          temperature, heaviness, dayparts, order/reserve links, promotions.
-          Suggest tags; restaurant confirms. Do not allow every dish to claim
-          every flavor. Free claim for corrections and basic analytics; paid for
-          sponsored matches, featured dishes, promotions, advanced analytics,
-          campaigns, and quest sponsorships.
-        </p>
       </section>
 
-      <section id="brands" aria-labelledby="brands-title">
-        <h2 id="brands-title">26–28. Brands &amp; commerce</h2>
+      <section id="intelligence" aria-labelledby="intelligence-title">
+        <h2 id="intelligence-title">23. Aggregate taste intelligence</h2>
         <p>
-          Packaged food and beverage brands match craving context (e.g. sour +
-          chewy snack → eligible sour candy). Promote because it fits, not merely
-          because it paid. Products: sponsored snack match, sponsored
-          ingredient, Taste Quest, sample/coupon campaigns, new-product testing,
-          sponsored Quick Bite (must still enrich Taste DNA, never disguised
-          ads).
+          Sell anonymized, aggregated craving trends. Never user records, ever.
+        </p>
+        <p>Buyers:</p>
+        <ul>
+          <li>
+            Food producers who need flavor and texture combinations gaining
+            demand before retail sales show it
+          </li>
+          <li>
+            Restaurant chains doing menu development and site selection
+          </li>
+          <li>
+            Delivery platforms predicting demand and spotting supply gaps
+          </li>
+          <li>Grocery retailers planning assortment by region</li>
+        </ul>
+        <p>
+          The moat, stated plainly. Transaction data records what people bought
+          from whatever happened to be available. We record what people wanted,
+          including every time nothing satisfied them. Unmet craving cannot be
+          reconstructed from purchase data. The measurement industry is
+          structurally blind to it because it starts at the register.
         </p>
         <p>
-          Commerce/affiliate: reservations, orders, grocery, snacks,
-          ingredients, meal kits, coupon redemptions. Prefer direct actions
-          (Find it near me, Reserve, Order, Get ingredients, Buy this snack)
-          into trusted partners. Do not become a complicated checkout product
-          initially.
+          This is also the highest margin revenue we will ever have, because the
+          data is a byproduct of a product we were building anyway.
         </p>
-      </section>
-
-      <section id="trust" aria-labelledby="trust-title">
-        <h2 id="trust-title">29–30. Advertising trust &amp; result architecture</h2>
-        <ol>
-          <li>
-            <strong>Sponsored means labeled</strong>: Sponsored match, Promoted
-            dish, Sponsored Taste Quest. Never hide paid placement.
-          </li>
-          <li>
-            <strong>Relevance first</strong>: sponsors must satisfy hard dietary
-            and contextual constraints.
-          </li>
-          <li>
-            <strong>Organic options remain</strong>: never show only sponsors.
-          </li>
-          <li>
-            <strong>Payment does not change Taste DNA</strong>.
-          </li>
-          <li>
-            <strong>Feedback stays honest</strong>: users can Nope sponsored
-            recs.
-          </li>
-          <li>
-            <strong>No personal identities to advertisers</strong>: aggregated
-            reporting unless the user completes an identifiable transaction.
-          </li>
-          <li>
-            <strong>Protect recommendation trust</strong>: if a sponsor is
-            materially weaker than organic, it is not the primary
-            recommendation.
-          </li>
-        </ol>
         <p>
-          Preferred early trust model: primary food recommendation stays fully
-          organic; paid restaurants compete only in{" "}
-          <strong>“Where to get it.”</strong> Alternative layout to test: craving
-          → best organic match → clearly labeled sponsored match → wildcard.
+          Guardrails must be architected from the first line of code. Aggregate
+          only. A hard floor on how few users sit behind any reported statistic.
+          Explicit, unbundled consent for commercial analytics. Real deletion
+          that actually deletes. No user-level export path anywhere in the
+          codebase: not as a policy alone, but as an absence of code.
+        </p>
+        <p>
+          A company selling anonymized market intelligence is boring and legal.
+          A company selling personal taste profiles is a headline, a fine, and a
+          dead valuation. We only get one chance to choose which one we are.
         </p>
       </section>
 
       <section id="media" aria-labelledby="media-title">
-        <h2 id="media-title">31–42. Media, creators &amp; launch</h2>
+        <h2 id="media-title">24–35. Media, creators &amp; launch</h2>
         <p>
           Mood Taster can behave like a media company without becoming a blog.
           The media asset is <strong>interactive food intent</strong>: active
@@ -420,7 +577,9 @@ export function StrategyArticle() {
           Short-form (TikTok, Reels, Shorts): demonstration over explanation:
           craving reveal, couple indecision, creator Taste DNA, mood test,
           restaurant challenge. Local micro-creators first; measure completed
-          Taste Sessions, not only views.
+          Taste Sessions, not only views. Organic and TikTok are primary
+          channels because the result screen and Taste DNA reveal are
+          screenshot-bait by design.
         </p>
         <p>
           Restaurant distribution loop: table cards, QR, receipts, counter
@@ -434,12 +593,15 @@ export function StrategyArticle() {
           repeat, referral, and successful-session rates are understood.
           Guerrilla and launch event concepts (“Taste Your Mood: Miami”) support
           density. Earned media angle: personal Taste DNA metaphor, not “another
-          AI restaurant app.” Do not claim scientific DNA analysis.
+          AI restaurant app.” Do not claim scientific DNA analysis. The “making
+          food better” narrative works when matching is the product: less wasted
+          meals, better discovery for independents, expanded palates. It
+          collapses if we sell personal profiles.
         </p>
       </section>
 
       <section id="retention" aria-labelledby="retention-title">
-        <h2 id="retention-title">43–47. Retention</h2>
+        <h2 id="retention-title">36–40. Retention</h2>
         <p>
           Rely on natural hunger frequency. Drivers: better recommendations, Taste
           DNA growth, history, passport stamps, quests, flavor development, Taste
@@ -450,23 +612,24 @@ export function StrategyArticle() {
         <p>
           Email continues the product (DNA update, weekly recap, quest, passport,
           re-engagement), one clear action, limited frequency. Monthly/seasonal
-          Taste Recap as Spotify Wrapped-style share moment. Habit target:{" "}
+          Taste Recap as a share moment. Habit target:{" "}
           <em>Hungry and indecisive = Mood Taster.</em>
         </p>
       </section>
 
       <section id="loops" aria-labelledby="loops-title">
-        <h2 id="loops-title">48–56. Loops, funnel, metrics &amp; pilots</h2>
+        <h2 id="loops-title">41–49. Loops, funnel, metrics &amp; pilots</h2>
         <p>
           Growth loops: recommendation sharing; Taste DNA sharing; restaurant
           QR; creator demo; Food Passport; better-data loop (the primary moat).
-          Supply-side flywheel: claim → menu data → better matches → traffic →
-          sponsored matches → revenue → acquisition → more restaurants.
+          Supply-side flywheel: index coverage → free claim → dashboard habit →
+          visit pilots → SaaS tiers → more restaurant data → better matches.
         </p>
         <p>
           Funnel: Awareness → Activation → Value moment (“that actually sounds
           good”) → Conversion (save Taste DNA) → Engagement → Retention →
-          Referral → Monetization (relevant sponsored action).
+          Referral → Monetization (affiliate handoff, verified visit, or
+          restaurant SaaS).
         </p>
         <p>
           Track awareness, activation, satisfaction (Nailed it / Kinda / Nope),
@@ -479,81 +642,86 @@ export function StrategyArticle() {
         <p>
           Commercial readiness: meaningful local MAU, restaurant coverage,
           reliable craving classification, stable satisfaction, measurable
-          actions, transparent sponsorship, enough demand for delivery. Small
-          pilots can start earlier; scalable sales cannot.
+          actions, enough density for visit pilots and claimed dashboards.
+          Small pilots can start earlier; scalable sales cannot.
         </p>
         <p>
           First restaurant pilot: ~5–10 restaurants, one signature dish, one
-          target craving/occasion, optional offer. Report matching sessions,
-          eligibility, views, clicks, directions, redemptions, feedback, CPA,
-          never individual Taste DNA. Brand reporting similarly privacy-safe.
+          target craving/occasion, optional visit-code perk. Report matching
+          sessions, eligibility, clicks, directions, redemptions, feedback, CPA,
+          never individual Taste DNA.
+        </p>
+        <p>
+          Three things that decide whether this works: Does the shareable taste
+          profile actually spread? Does code redemption convert? Do restaurants
+          convert on their own from the free dashboard without a salesperson on
+          every close?
         </p>
       </section>
 
       <section id="limits" aria-labelledby="limits-title">
-        <h2 id="limits-title">57–62. Limits, flywheel &amp; what not to do</h2>
+        <h2 id="limits-title">50–55. Limits, flywheel &amp; what not to do</h2>
         <p>
           Never sell names tied to taste profiles, email lists, individual food
           histories, dietary restrictions, exact personal location histories, or
-          identifiable Taste DNA without clear permission. Future products use
-          aggregated trends, thresholds, anonymization, and category-level
-          insights.
+          identifiable Taste DNA. Commercial products use aggregated trends,
+          cohort floors, anonymization, and category-level insights only.
         </p>
         <p>
-          Later B2B: Mood Taster for Restaurants, for Brands, Trends, and API,
-          not initial priorities. Defensibility: taste history, Taste DNA,
-          craving taxonomy, feedback data, local dish data, brand, distribution,
-          not AI alone.
+          Later B2B: Mood Taster for Restaurants (SaaS), aggregate Trends, and
+          API. Not initial priorities ahead of accuracy and local density.
+          Defensibility: taste history, Taste DNA, craving taxonomy, feedback
+          data, local dish data, brand, distribution, not AI alone.
         </p>
         <p>
           Monetization flywheel: more users → more sessions → better DNA/matching
-          → better recs → trust → advertiser value → revenue → acquisition → more
-          users. Advertising should strengthen the consumer product, not
-          interrupt it.
+          → better recs → trust → outcome value (visits, handoffs, SaaS, data) →
+          revenue → acquisition → more users. Commercial surfaces should
+          strengthen the consumer product, not interrupt it.
         </p>
         <p>Revenue sequence:</p>
         <ol>
-          <li>Affiliate and reservation links</li>
-          <li>Manually managed restaurant sponsored matches</li>
-          <li>Sponsored dishes and offers</li>
-          <li>Food brand campaigns</li>
-          <li>Self-service restaurant platform</li>
-          <li>Aggregated trends and API</li>
+          <li>Affiliate and commerce handoffs</li>
+          <li>Verified visit pilots</li>
+          <li>Free claimed restaurant profiles</li>
+          <li>Restaurant SaaS tiers</li>
+          <li>Aggregated taste intelligence</li>
         </ol>
         <p>
           Do not: cover the site in banners; show irrelevant paid restaurants;
           require payment for a useful rec; lock Taste DNA fully behind
           subscription; over-gamify; force streaks; build a social feed for fake
           engagement; expand cities before density; promise scientific certainty
-          to advertisers; call paid results organic; sell personal Taste DNA;
-          make restaurants manage complex campaigns early; optimize for time
-          spent instead of decisions made.
+          to buyers; call paid results organic; sell personal Taste DNA; build a
+          user-level export path “just in case”; make restaurants manage complex
+          campaigns early; optimize for time spent instead of decisions made;
+          become a money transmitter by routing diner payments.
         </p>
       </section>
 
       <section id="roadmap" aria-labelledby="roadmap-title">
-        <h2 id="roadmap-title">63–67. Roadmap &amp; one-sentence plan</h2>
+        <h2 id="roadmap-title">56–60. Roadmap &amp; one-sentence plan</h2>
 
-        <h3>63. First 90 days</h3>
+        <h3>56. First 90 days</h3>
         <ul>
           <li>
             <strong>Days 1–30:</strong> Go Out, result quality, feedback,
             anonymous Taste DNA, sharing card, analytics; 50–150 testers; five
-            creators; five restaurant partners.
+            creators; five restaurant relationships for coverage.
           </li>
           <li>
             <strong>Days 31–60:</strong> Miami coverage, landing pages, visuals,
             share/save flows, passport/badge, content kit, QR cards, waitlist,
-            media story, private ad pilot.
+            media story, affiliate handoff tests where a pick ends in buy.
           </li>
           <li>
             <strong>Days 61–90:</strong> Miami launch: creators, QR, paid social
-            tests, referrals, Taste DNA cards, event/tasting, media; commercial
-            pilot with 5–10 restaurants.
+            tests, referrals, Taste DNA cards, event/tasting, media; first
+            verified visit pilot with 5–10 restaurants.
           </li>
         </ul>
 
-        <h3>64. 12-month roadmap</h3>
+        <h3>57. 12-month roadmap</h3>
         <ul>
           <li>
             <strong>Q1:</strong> usefulness, local demand, accuracy, sharing, DNA
@@ -561,51 +729,53 @@ export function StrategyArticle() {
           </li>
           <li>
             <strong>Q2:</strong> Miami density, passport/quests/recaps, restaurant
-            onboarding, sponsored match tests, search
+            indexing and claim outreach, visit-code pilots, search
           </li>
           <li>
-            <strong>Q3:</strong> advertiser reporting, sponsored dishes,
-            creators, CPG tests, evaluate second city
+            <strong>Q3:</strong> free dashboard habit, first SaaS tier tests,
+            creators, evaluate second city
           </li>
           <li>
             <strong>Q4:</strong> 1–2 new markets, restaurant self-serve, broader
-            brand campaigns, premium insights test, aggregated trends package
+            craving promotion and off-peak fill, first aggregate trends package
+            under privacy floors
           </li>
         </ul>
 
-        <h3>65. Team</h3>
+        <h3>58. Team</h3>
         <p>
           Early ownership across founder/product, growth, restaurant
           partnerships, product/design, and engineering/data. Several roles may
           be founders initially.
         </p>
 
-        <h3>66. One-sentence plan</h3>
+        <h3>59. One-sentence plan</h3>
         <p>
           Build the fastest and most fun way to discover what you are craving,
           grow through shareable Taste DNA and local food culture, then monetize
-          the moment of intent by showing clearly labeled restaurants and
-          products that genuinely match the craving.
+          accuracy through affiliate handoffs, verified visits, restaurant
+          software, and aggregate taste intelligence, never personal Taste DNA.
         </p>
 
-        <h3>67. Strategic north star</h3>
+        <h3>60. Strategic north star</h3>
         <p>
           Mood Taster should not become a website with food ads. It should
           become <strong>the place where food decisions begin</strong>.
         </p>
         <p>
           When consumers trust Mood Taster to understand their cravings,
-          restaurants and brands will pay to participate in those decisions.
+          restaurants and data buyers will pay for outcomes and planning signal
+          those decisions create.
         </p>
         <p>
           <strong>Trust first. Intent second. Monetization third.</strong>
         </p>
         <p>
-          The most important monetization choice: keep the actual food
-          recommendation independent, and initially place paid restaurants under
-          “Where to get it.” That lets Mood Taster say “You’re craving hot honey
-          chicken” without payment influencing the conclusion, while restaurants
-          compete for the relevant next action.
+          The single point of failure: a user thinking “how did it know.”
+          Affiliate revenue, verified visits, restaurant software, and data
+          licensing are all downstream of recommendation quality.
+          Recommendation quality is not a feature of the business model. It is
+          the business model.
         </p>
       </section>
     </article>

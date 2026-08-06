@@ -804,6 +804,12 @@ button {
   color: var(--paper-muted);
 }
 
+/* Token names and env vars are single unbreakable words on a 320px screen. */
+.doc-body code,
+.brand-guide code {
+  overflow-wrap: anywhere;
+}
+
 .brand-demos {
   display: grid;
   gap: var(--space-6);
@@ -964,6 +970,24 @@ button {
   color: var(--paper-muted);
   font-size: 0.85rem;
   font-weight: 500;
+}
+
+.quiz-question-block {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-3);
+}
+
+.quiz-question-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 3.25rem;
+  height: 3.25rem;
+  border-radius: var(--radius-btn);
+  background: var(--ink-raised);
+  color: var(--ink);
 }
 
 .quiz-question {
@@ -1450,9 +1474,10 @@ button {
 
 .dna-list li {
   display: flex;
+  flex-wrap: wrap;
   justify-content: space-between;
   align-items: center;
-  gap: var(--space-4);
+  gap: var(--space-1) var(--space-4);
   font-size: 1rem;
 }
 
@@ -1470,8 +1495,10 @@ button {
 }
 
 .dna-meta {
+  flex-shrink: 0;
   color: var(--paper-quiet);
   font-size: 0.9rem;
+  font-variant-numeric: tabular-nums;
 }
 
 /* Auth + account */
@@ -1532,6 +1559,7 @@ button {
 .auth-error code {
   font-size: 0.9em;
   color: var(--accent);
+  overflow-wrap: anywhere;
 }
 
 .auth-switch {
@@ -1558,6 +1586,8 @@ button {
   margin: var(--space-2) 0 0;
   font-family: var(--font-display);
   font-size: 1.35rem;
+  /* Emails are long and unbreakable at the word level. */
+  overflow-wrap: anywhere;
 }
 
 .profile-nudge {
@@ -1693,14 +1723,19 @@ button {
   display: flex;
   align-items: baseline;
   justify-content: space-between;
-  gap: var(--space-3);
+  gap: var(--space-2) var(--space-3);
+  /* A long venue name wraps to its own line rather than crushing the
+     distance readout, which must stay one glanceable token. */
+  flex-wrap: wrap;
 }
 
 .nearby-head a,
 .nearby-name {
+  min-width: 0;
   color: var(--ink);
   font-size: 1.05rem;
   font-weight: 500;
+  overflow-wrap: anywhere;
 }
 
 .nearby-meta {
@@ -1906,6 +1941,11 @@ button {
 
   .quiz-question {
     font-size: clamp(1.65rem, 8vw, 2.2rem);
+  }
+
+  .quiz-question-icon {
+    width: 3.5rem;
+    height: 3.5rem;
   }
 
   .quiz-option {
