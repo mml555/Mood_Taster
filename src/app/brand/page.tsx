@@ -273,25 +273,30 @@ export default function BrandPage() {
 
           <section id="type" aria-labelledby="type-title">
             <h2 id="type-title">5. Type</h2>
+            <p>
+              One face: <strong>Comfortaa</strong>. Regular (400) is the default
+              for body and UI. Heavier weights carry display hierarchy. Both{" "}
+              <code>--font-display</code> and <code>--font-body</code> point at
+              the same family.
+            </p>
             <dl className="user-list">
               <div>
-                <dt className="type-sample-display">Fraunces</dt>
+                <dt className="type-sample-display">Comfortaa Bold</dt>
                 <dd>
-                  Display. Brand name, section titles, lane names. Variable{" "}
-                  <code>--font-display</code>.
+                  Display. Brand name and section titles. Size and weight do the
+                  work.
                 </dd>
               </div>
               <div>
-                <dt className="type-sample-body">Sora</dt>
+                <dt className="type-sample-body">Comfortaa Regular</dt>
                 <dd>
-                  Body and UI. Support lines, lists, nav. Variable{" "}
-                  <code>--font-body</code>.
+                  Body and UI. Support lines, lists, nav. Default weight 400.
                 </dd>
               </div>
             </dl>
             <p>
-              Hierarchy comes from size, weight, and family. Do not lean on
-              underlines or rules to invent structure.
+              Hierarchy comes from size and weight within Comfortaa. Do not lean
+              on underlines or rules to invent structure.
             </p>
           </section>
 

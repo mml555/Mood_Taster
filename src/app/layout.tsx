@@ -1,17 +1,12 @@
 import type { Metadata } from "next";
-import { Fraunces, Sora } from "next/font/google";
+import { Comfortaa } from "next/font/google";
 import { Grain } from "@/components/Grain";
 import "./globals.css";
 
-const fraunces = Fraunces({
+const comfortaa = Comfortaa({
   subsets: ["latin"],
-  variable: "--font-fraunces",
-  display: "swap",
-});
-
-const sora = Sora({
-  subsets: ["latin"],
-  variable: "--font-sora",
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-comfortaa",
   display: "swap",
 });
 
@@ -30,7 +25,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${fraunces.variable} ${sora.variable}`}>
+    <html lang="en" className={comfortaa.variable}>
       <body>
         <Grain />
         {children}

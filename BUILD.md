@@ -112,7 +112,9 @@ export type Food = {
   temperature: 'hot' | 'cold' | 'room'
   adventurousness: 1 | 2 | 3 | 4 | 5
   dietaryTags: string[]         // 'vegetarian' | 'vegan' | 'gluten-free' | 'contains-pork' ...
-  image: string                 // see section 8
+  image: string                 // '/food/<id>.jpg', committed locally. See section 8
+  imageAlt: string              // required, describes the dish in the photo
+  imageCredit?: string          // 'Photographer Name / Unsplash', for the README credits list
   reasonTemplate: string        // "{flavor} and {texture}, and it eats {heaviness}."
 }
 
@@ -270,6 +272,8 @@ between them, extend the `current` union in `src/components/SiteHeader.tsx`, and
 Vercel deploy from `main` while the screens are still empty. Deploying before feature work is
 the entire point of this ticket.
 
+Install `lucide-react`, the only new runtime dependency. Icon rules are in section 8.
+
 - [ ] App loads from a public URL with no authentication
 - [ ] Mobile layout works at roughly 375px
 - [ ] Desktop layout stays centered and usable
@@ -294,11 +298,18 @@ values. A path with two candidates produces an obviously wrong recommendation on
 Spread `adventurousness` across the full 1 to 5 range, or "Surprise me" returns the same dish
 as "Safe favorite".
 
+**Images are part of this ticket, not Ticket 5.** Source, resize, and commit 30 photos to
+`public/food/` per section 8, and write `imageAlt` for each. This is the slowest part of the
+ticket, so start it before the attribute tagging rather than after.
+
 - [ ] Every food has complete structured attributes
 - [ ] Foods cover all available quiz answers
 - [ ] Names are specific dishes, never broad cuisines
 - [ ] At least five foods reasonably match each major preference direction
 - [ ] Catalog imports with no API and no database
+- [ ] Every food has a committed local photo that visibly shows that dish
+- [ ] Every food has non-empty `imageAlt`
+- [ ] Photo sources are Unsplash or Pexels only, credits captured for the README
 
 ---
 
@@ -420,7 +431,9 @@ keyboard and focus states, a `.cursorrules` file at the repo root (the repo curr
 repo, README, final Vercel deploy, submission links.
 
 README covers what was built, how recommendations work, the tech stack, what is out of scope,
-and what comes next.
+and what comes next. Add a photo credits list from the `imageCredit` fields. Neither Unsplash
+nor Pexels requires attribution, but crediting 30 photographers costs nothing and reads well to
+a judge.
 
 - [ ] Full demo performs in under three minutes
 - [ ] Public URL works in incognito
@@ -495,13 +508,67 @@ against `--paper-quiet`), never a ring or a box. The progress indicator reuses t
 **Feedback buttons are type, not colored chips.** There is no success green or failure red in
 this palette. Nailed it and Nope are distinguished by placement and weight.
 
+### Icons
+
+`lucide-react` is the icon set and the only new runtime dependency in the build. No emoji
+anywhere in the product.
+
+- Icons inherit `currentColor` and sit in ink or paper. Never saffron, which is reserved for
+  small type marks.
+- One stroke width across the app (`strokeWidth={1.5}`), sizes from a short set (16, 20, 24).
+- Icons are functional, never decorative. If an icon sits next to a label that already says the
+  same thing, drop the icon.
+- Every icon-only control needs an `aria-label`. Icons inside a labelled button get
+  `aria-hidden`.
+
+Working map, adjust in the ticket:
+
+| Surface | Icon |
+|---|---|
+| Quiz back control | `ArrowLeft` |
+| Not feeling it | `RefreshCw` |
+| Why this? (expand) | `ChevronDown` |
+| Nailed it / Kinda / Nope | `Check` / `Minus` / `X` |
+| Taste DNA link and dashboard | `Sparkles` |
+| Reset profile | `RotateCcw` |
+
+The rating trio is the place to be careful. `Check` and `X` read as green and red in most
+products, and this palette has neither. They stay ink on paper, distinguished by placement and
+weight, exactly like the labels beside them.
+
 ### Food images
 
-`Food.image` holds a single emoji glyph, rendered large. Offline safe, zero dependency, and it
-does not fight a flat two tone system the way food photography would. Swapping to real photos
-later is a one field change plus `remotePatterns` in `next.config.ts`.
+Real photography, roughly 30 shots, one per food.
 
-This is the one visible element chosen rather than specified. Flag it now if you disagree.
+**Source:** Unsplash first, Pexels as the fallback. Both are free for commercial use with no
+attribution required. Do not pull from Google Images or a recipe blog, the licensing is not
+there.
+
+**Store them locally.** Download, resize to 800px wide, JPEG at quality 80, target under 120KB
+each, and commit to `public/food/<id>.jpg`. `Food.image` is then `/food/<id>.jpg`.
+
+Local files rather than hotlinking, because a venue network on demo night is the wrong place to
+discover a CDN timeout, and it avoids `remotePatterns` config, rate limits, and any chance of a
+photo being taken down between now and judging. Total payload lands around 3MB, which is fine
+in `public/`.
+
+**Rendering, and this is where the design system bites:**
+
+- Use `next/image` with explicit `width` and `height`, `sizes` set for a 390px viewport, and
+  `priority` on the result screen hero so it is not the thing the judge waits for.
+- Square corners. No border, no shadow, no rounded mask, no gradient scrim over the photo. A
+  photo is content, so it is allowed to be the one rich element on the screen, but it does not
+  get decoration layered on it.
+- Full bleed to the page inset, with the dish name below it and not overlaid. Text over
+  photography needs a scrim to stay legible, and scrims are banned.
+- `imageAlt` is required on every food. Empty alt is not acceptable here, the photo carries
+  real information.
+- **Ship a fallback.** If an image 404s or is still being sourced, render a flat `--paper-quiet`
+  block at the same aspect ratio with the dish name in it. A broken image icon on stage is
+  worse than no image.
+
+**Verify every photo actually shows the dish.** Thirty images sourced quickly is thirty chances
+to put a burger under "poke bowl". This needs a human pass, not a search-and-paste.
 
 ---
 
@@ -515,7 +582,9 @@ This is the one visible element chosen rather than specified. Flag it now if you
 | 4 | **DNA learning rate.** A flat delta lets one rating swing a dimension and fails Ticket 7 | Decaying rate, section 5 |
 | 5 | **AI latency on stage** | Render first, swap after, hard timeout, two fallbacks |
 | 6 | **Direct navigation to `/result/[id]` with no session** | Explicit no session fallback, Ticket 5 |
-| 7 | **Scope creep at hour six** | Section 11 |
+| 7 | **A photo that does not match its dish.** Thirty images sourced fast is thirty chances to put a burger under "poke bowl" | Human review pass over the whole catalog, Ticket 2 |
+| 8 | **Image payload.** Unoptimized downloads can push a page into multiple MB on venue wifi | 800px, quality 80, under 120KB each, `next/image` with `priority` only on the result hero |
+| 9 | **Scope creep at hour six** | Section 11 |
 
 ---
 
@@ -534,6 +603,11 @@ This is the one visible element chosen rather than specified. Flag it now if you
 - [ ] With `GEMINI_API_KEY` unset, the result page renders instantly with the template line and
       no console error
 - [ ] Public URL loads in incognito with no login
+- [ ] Every one of the 30 photos loads, and each one shows the dish it is labelled with
+- [ ] Rename one image file locally and confirm the fallback block renders instead of a broken
+      image icon
+- [ ] No emoji anywhere in the product surface
+- [ ] Result screen on throttled 3G still shows the dish name and reason before the photo lands
 
 ---
 
@@ -567,7 +641,10 @@ rejection sinking, and the bound on a single rating's effect. It is the safest t
 
 ## 13. Open items for review
 
-1. Food images as emoji glyphs (section 8). Object now if you want photos.
+1. Photography is the largest unbounded task in the build. Thirty sourced, resized, verified,
+   and credited images is plausibly two hours of one person's night, and it blocks nothing else
+   if it starts first. Assign it to a dedicated owner on Ticket 2 rather than folding it into
+   the attribute tagging.
 2. `PRD.md` stays stale by choice. It currently lists Taste DNA as out of scope and describes a
    three lane flow that we are not building. `/prd` is publicly linked.
 3. Git commits, making the repository public, and the Vercel deploy need an explicit go ahead.

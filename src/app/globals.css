@@ -26,8 +26,9 @@
   --space-8: clamp(4rem, 12vh, 7rem);
   --page-inset: clamp(1.25rem, 4vw, 3rem);
 
-  --font-display: var(--font-fraunces), "Times New Roman", serif;
-  --font-body: var(--font-sora), system-ui, sans-serif;
+  /* Comfortaa Regular (400) is the brand face; heavier weights for hierarchy */
+  --font-display: var(--font-comfortaa), "Comfortaa", system-ui, sans-serif;
+  --font-body: var(--font-comfortaa), "Comfortaa", system-ui, sans-serif;
   --ease: cubic-bezier(0.22, 1, 0.36, 1);
 }
 
@@ -644,7 +645,7 @@ a {
 .type-sample-body {
   font-family: var(--font-body);
   font-size: 1.15rem;
-  font-weight: 500;
+  font-weight: 400;
   letter-spacing: 0;
 }
 
