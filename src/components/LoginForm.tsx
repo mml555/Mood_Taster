@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { FormEvent, useState } from "react";
 import { loginSchema } from "@/lib/auth-schema";
-import { createClient, isSupabaseConfigured } from "@/lib/supabase/client";
+import { isSupabaseConfigured } from "@/lib/supabase/client";
 import { loadDnaForUser } from "@/lib/dna-sync";
 
 export function LoginForm() {
@@ -40,30 +40,22 @@ export function LoginForm() {
     }
 
     try {
-      const resolveRes = await fetch("/api/auth/resolve", {
+      // Sign-in happens server side. The response carries the session cookies;
+      // the browser never sees the account's email address.
+      const res = await fetch("/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ identifier: parsed.data.identifier }),
-      });
-      const resolveBody = (await resolveRes.json()) as {
-        email?: string;
-        error?: string;
-      };
-
-      if (!resolveRes.ok || !resolveBody.email) {
-        setError(resolveBody.error ?? "Could not find that account");
-        setPending(false);
-        return;
-      }
-
-      const supabase = createClient();
-      const { error: signError } = await supabase.auth.signInWithPassword({
-        email: resolveBody.email,
-        password: parsed.data.password,
+        body: JSON.stringify({
+          identifier: parsed.data.identifier,
+          password: parsed.data.password,
+        }),
       });
 
-      if (signError) {
-        setError(signError.message);
+      if (!res.ok) {
+        const body = (await res.json().catch(() => ({}))) as {
+          error?: string;
+        };
+        setError(body.error ?? "Could not sign in");
         setPending(false);
         return;
       }

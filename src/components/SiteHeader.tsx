@@ -1,6 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
-import { Home, Sparkles } from "lucide-react";
+import { Sparkles } from "lucide-react";
 import { AuthNav } from "@/components/AuthNav";
 
 type SiteHeaderProps = {
@@ -40,16 +40,12 @@ export function SiteHeader({ current = "home" }: SiteHeaderProps) {
             </a>
             <Link className="nav-primary nav-with-icon" href="/dna">
               <Sparkles size={16} strokeWidth={1.5} aria-hidden />
-              DNA
+              <span className="nav-dna-label">DNA</span>
             </Link>
             <AuthNav current={current} />
           </>
         ) : (
           <>
-            <Link className="nav-primary nav-with-icon" href="/">
-              <Home size={16} strokeWidth={1.5} aria-hidden />
-              <span className="nav-label">Home</span>
-            </Link>
             <Link
               className="nav-primary"
               href="/taste"
@@ -63,7 +59,7 @@ export function SiteHeader({ current = "home" }: SiteHeaderProps) {
               aria-current={current === "dna" ? "page" : undefined}
             >
               <Sparkles size={16} strokeWidth={1.5} aria-hidden />
-              DNA
+              <span className="nav-dna-label">DNA</span>
             </Link>
             <AuthNav current={current} />
           </>

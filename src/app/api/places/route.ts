@@ -1,3 +1,4 @@
+import { createHash } from "node:crypto";
 import { request as httpsRequest } from "node:https";
 import { NextResponse } from "next/server";
 import { CATALOG } from "@/lib/catalog";
@@ -167,12 +168,14 @@ export async function GET(request: Request) {
     );
 
     if (status !== 200) {
-      // 403 here is almost always the key, not the request. Log the head of it
-      // so a shell-exported key shadowing .env is visible rather than silent.
+      // 403 here is almost always the key, not the request. A fingerprint tells
+      // which key is loaded, so a shell-exported key shadowing .env is still
+      // visible, without writing key material into the log.
       console.warn(
-        "[places] responded %d using key %s...",
+        "[places] responded %d using key fingerprint %s (length %d)",
         status,
-        apiKey.slice(0, 10),
+        keyFingerprint(apiKey),
+        apiKey.length,
       );
       return NextResponse.json({ places: [] });
     }

@@ -537,7 +537,7 @@ export function ResultView({ food }: ResultViewProps) {
                 <span className="reaction-icon" aria-hidden>
                   ×
                 </span>
-                <span className="reaction-label">Not for me</span>
+                <span className="reaction-label">Nope</span>
               </button>
               <button
                 type="button"
@@ -549,7 +549,7 @@ export function ResultView({ food }: ResultViewProps) {
                 <span className="reaction-icon" aria-hidden>
                   ↻
                 </span>
-                <span className="reaction-label">Try again</span>
+                <span className="reaction-label">Again</span>
               </button>
               <button
                 type="button"
@@ -561,7 +561,7 @@ export function ResultView({ food }: ResultViewProps) {
                 <span className="reaction-icon" aria-hidden>
                   ♡
                 </span>
-                <span className="reaction-label">I like it</span>
+                <span className="reaction-label">Like</span>
               </button>
             </div>
 

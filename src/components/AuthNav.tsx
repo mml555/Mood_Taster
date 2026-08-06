@@ -102,6 +102,7 @@ export function AuthNav({ current }: { current?: string }) {
       <Link
         className="nav-primary nav-with-icon"
         href="/login"
+        aria-label="Sign in"
         aria-current={current === "account" ? "page" : undefined}
       >
         <LogIn size={16} strokeWidth={1.5} aria-hidden />

@@ -14,10 +14,10 @@ const PEEK_DISHES = [
     alt: "Crispy fried chicken sandwich with honey drizzle",
   },
   {
-    id: "matcha-latte",
-    name: "Matcha latte",
-    image: "/food/matcha-latte.jpg",
-    alt: "Frothy green matcha latte in a cup",
+    id: "mango-with-tajin",
+    name: "Mango with Tajin",
+    image: "/food/mango-with-tajin.jpg",
+    alt: "Fresh mango slices dusted with Tajin",
   },
   {
     id: "birria-tacos",
