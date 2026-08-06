@@ -79,6 +79,10 @@ export function LoginForm() {
         name="identifier"
         className="auth-input"
         autoComplete="username"
+        autoCapitalize="none"
+        autoCorrect="off"
+        spellCheck={false}
+        enterKeyHint="next"
         required
         disabled={pending}
       />
@@ -92,6 +96,7 @@ export function LoginForm() {
         type="password"
         className="auth-input"
         autoComplete="current-password"
+        enterKeyHint="go"
         required
         minLength={8}
         disabled={pending}

@@ -12,10 +12,19 @@ import {
   ADVENTURE,
   FLAVORS,
   HEAVINESS,
+  INTENTS,
   TEXTURES,
 } from "@/lib/taste-types";
 
 const STEPS = [
+  {
+    key: "intent" as const,
+    question: "Eat out or cook?",
+    options: [
+      { value: "restaurant", label: "Eat out" },
+      { value: "recipe", label: "Cook" },
+    ],
+  },
   {
     key: "flavor" as const,
     question: "What flavor?",
@@ -60,6 +69,7 @@ const STEPS = [
 type PartialAnswers = Partial<Answers>;
 
 const DRAFT_KEY = "mood-taster-quiz-draft";
+const TOTAL_STEPS = STEPS.length;
 
 function readDraft(): PartialAnswers {
   if (typeof window === "undefined") return {};
@@ -83,15 +93,17 @@ function clearDraft() {
 function parseStep(raw: string | null): number {
   const n = Number(raw ?? "1");
   if (!Number.isFinite(n) || n < 1) return 1;
-  return Math.min(4, Math.floor(n));
+  return Math.min(TOTAL_STEPS, Math.floor(n));
 }
 
 function isComplete(answers: PartialAnswers): answers is Answers {
   return Boolean(
-    answers.flavor &&
+    answers.intent &&
+      answers.flavor &&
       answers.texture &&
       answers.heaviness &&
       answers.adventure &&
+      INTENTS.includes(answers.intent) &&
       FLAVORS.includes(answers.flavor) &&
       TEXTURES.includes(answers.texture) &&
       (HEAVINESS.includes(answers.heaviness as (typeof HEAVINESS)[number]) ||
@@ -116,6 +128,7 @@ export function TasteQuiz() {
 
   const current = STEPS[step - 1];
   const stepLabel = String(step).padStart(2, "0");
+  const totalLabel = String(TOTAL_STEPS).padStart(2, "0");
 
   const goStep = useCallback(
     (next: number) => {
@@ -146,7 +159,7 @@ export function TasteQuiz() {
       setAnswers(next);
       writeDraft(next);
 
-      if (step < 4) {
+      if (step < TOTAL_STEPS) {
         goStep(step + 1);
         return;
       }
@@ -166,11 +179,11 @@ export function TasteQuiz() {
   return (
     <section className="quiz" aria-labelledby="quiz-question">
       <p className="step quiz-progress" aria-live="polite">
-        {stepLabel} / 04
+        {stepLabel} / {totalLabel}
       </p>
       <div className="quiz-question-block">
         <span className="quiz-question-icon" aria-hidden>
-          <StepIcon size={28} strokeWidth={1.5} />
+          <StepIcon size={22} strokeWidth={1.5} />
         </span>
         <h1 id="quiz-question" className="quiz-question">
           {current.question}
@@ -192,7 +205,7 @@ export function TasteQuiz() {
               >
                 {Icon ? (
                   <span className="quiz-option-icon" aria-hidden>
-                    <Icon size={24} strokeWidth={1.5} />
+                    <Icon size={20} strokeWidth={1.5} />
                   </span>
                 ) : null}
                 <span className="quiz-option-label">{opt.label}</span>

@@ -6,7 +6,7 @@ import { SiteHeader } from "@/components/SiteHeader";
 export const metadata: Metadata = {
   title: "Privacy",
   description:
-    "How Mood Taster handles information: Taste DNA, aggregate-only commercial use, consent, and what we never sell.",
+    "How Mood Taster handles information: Taste DNA, aggregate-only commercial use, consent, partners, and what we never sell.",
 };
 
 export default function PrivacyPage() {
@@ -24,6 +24,48 @@ export default function PrivacyPage() {
           <p className="doc-meta">Last updated: August 6, 2026</p>
         </header>
 
+        <nav className="toc" aria-label="On this page">
+          <p className="toc-label">On this page</p>
+          <ol>
+            <li>
+              <a href="#overview">Overview</a>
+            </li>
+            <li>
+              <a href="#collect">What we collect</a>
+            </li>
+            <li>
+              <a href="#use">How we use it</a>
+            </li>
+            <li>
+              <a href="#partners">Partners and handoffs</a>
+            </li>
+            <li>
+              <a href="#commercial-data">Commercial aggregate data</a>
+            </li>
+            <li>
+              <a href="#not-do">What we do not do</a>
+            </li>
+            <li>
+              <a href="#consent">Consent</a>
+            </li>
+            <li>
+              <a href="#cookies">Cookies and analytics</a>
+            </li>
+            <li>
+              <a href="#retention">Retention and deletion</a>
+            </li>
+            <li>
+              <a href="#children">Children</a>
+            </li>
+            <li>
+              <a href="#changes">Changes</a>
+            </li>
+            <li>
+              <a href="#contact">Contact</a>
+            </li>
+          </ol>
+        </nav>
+
         <article className="doc-body">
           <section id="overview" aria-labelledby="overview-title">
             <h2 id="overview-title">Overview</h2>
@@ -32,7 +74,8 @@ export default function PrivacyPage() {
               you use the site, how we use it, and what we do not do with it. It
               applies to{" "}
               <a href="https://mood-taster.vercel.app/">mood-taster.vercel.app</a>{" "}
-              and related Mood Taster experiences we operate.
+              and related Mood Taster experiences we operate. Read it with the{" "}
+              <Link href="/terms">Terms of use</Link>.
             </p>
           </section>
 
@@ -63,6 +106,13 @@ export default function PrivacyPage() {
                 and abuse prevention)
               </li>
               <li>
+                Session and action signals needed to run a handoff or visit perk
+                when those features exist (for example that a partner link was
+                opened, or that a single-use visit code was issued or redeemed).
+                These are for operating and billing outcomes, not for selling
+                your identity
+              </li>
+              <li>
                 Messages you send us through the{" "}
                 <Link href="/contact">contact</Link> path
               </li>
@@ -81,8 +131,28 @@ export default function PrivacyPage() {
               <li>To understand whether picks feel right and fix weak ones</li>
               <li>To keep the service working, secure, and measurable</li>
               <li>To sync Taste DNA when you choose an account</li>
+              <li>
+                To operate partner handoffs and visit-code redemptions when those
+                features exist
+              </li>
               <li>To respond when you contact us</li>
             </ul>
+          </section>
+
+          <section id="partners" aria-labelledby="partners-title">
+            <h2 id="partners-title">Partners and handoffs</h2>
+            <p>
+              A pick may send you to a third-party partner (grocery, delivery,
+              retail, or a restaurant tools page for redeeming a code). Those
+              partners process data under their own policies once you leave our
+              site. We share only what is needed to complete the handoff or
+              confirm a redemption, not a sellable personal Taste DNA file.
+            </p>
+            <p>
+              Restaurant dashboards, when offered, show restaurant-scoped or
+              aggregated match stats (what people wanted when they found that
+              place). They do not sell named diner profiles to the public.
+            </p>
           </section>
 
           <section id="commercial-data" aria-labelledby="commercial-data-title">
@@ -102,14 +172,11 @@ export default function PrivacyPage() {
               reported statistic so small groups cannot be re-identified.
             </p>
             <p>
-              Restaurant dashboards, when offered, show restaurant-scoped or
-              aggregated match stats (what people wanted when they found that
-              place). They do not sell named diner profiles.
-            </p>
-            <p>
               See the public <Link href="/strategy">Strategy</Link> for how
               aggregate taste intelligence fits the business. The promise here
-              is the binding one: never sell personal Taste DNA.
+              is the binding one: never sell personal Taste DNA. The{" "}
+              <Link href="/terms">Terms of use</Link> describe the same line for
+              product use.
             </p>
           </section>
 
@@ -131,6 +198,10 @@ export default function PrivacyPage() {
               <li>
                 We do not bury paid placements. When a paid match or promotion
                 appears, it is labeled
+              </li>
+              <li>
+                We do not take your meal payment through Mood Taster for visit
+                perks. The restaurant handles that itself
               </li>
             </ul>
           </section>
@@ -162,12 +233,15 @@ export default function PrivacyPage() {
               We keep operational and analytics data only as long as it is useful
               for the purposes above, then delete it or convert it into
               aggregate form that cannot identify you. Contact messages are kept
-              long enough to resolve your request.
+              long enough to resolve your request. Visit-code and handoff logs,
+              when they exist, are kept only as long as needed to operate,
+              prevent abuse, and bill partners.
             </p>
             <p>
               If you ask us to delete your account or personal Taste DNA we
               hold, we delete it. Aggregation after retention is not a
-              substitute for that deletion request.
+              substitute for that deletion request. Use{" "}
+              <Link href="/contact">Contact</Link> for privacy requests.
             </p>
           </section>
 

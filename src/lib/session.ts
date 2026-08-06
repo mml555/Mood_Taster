@@ -17,6 +17,7 @@ export function readSession(): SessionState | null {
     if (!raw) return null;
     const parsed = JSON.parse(raw) as SessionState;
     if (
+      !parsed?.answers?.intent ||
       !parsed?.answers?.flavor ||
       !parsed?.answers?.texture ||
       !Array.isArray(parsed.rejectedIds) ||

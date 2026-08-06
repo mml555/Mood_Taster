@@ -501,7 +501,7 @@ export function ResultView({ food }: ResultViewProps) {
               width={800}
               height={800}
               priority
-              sizes="(max-width: 390px) 100vw, 640px"
+              sizes="(max-width: 720px) 100vw, 640px"
               className="result-image"
               onError={() => setImgFailed(true)}
               draggable={false}
@@ -596,6 +596,7 @@ export function ResultView({ food }: ResultViewProps) {
                 className="reject-input"
                 type="text"
                 autoComplete="off"
+                enterKeyHint="go"
                 maxLength={120}
                 placeholder="too heavy, something colder"
                 value={rejectNoteText}

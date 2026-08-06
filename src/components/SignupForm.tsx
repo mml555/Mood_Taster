@@ -95,6 +95,10 @@ export function SignupForm() {
         name="username"
         className="auth-input"
         autoComplete="username"
+        autoCapitalize="none"
+        autoCorrect="off"
+        spellCheck={false}
+        enterKeyHint="next"
         required
         minLength={3}
         maxLength={32}
@@ -112,6 +116,11 @@ export function SignupForm() {
         type="email"
         className="auth-input"
         autoComplete="email"
+        inputMode="email"
+        autoCapitalize="none"
+        autoCorrect="off"
+        spellCheck={false}
+        enterKeyHint="next"
         required
         disabled={pending}
       />
@@ -125,6 +134,7 @@ export function SignupForm() {
         type="password"
         className="auth-input"
         autoComplete="new-password"
+        enterKeyHint="go"
         required
         minLength={8}
         disabled={pending}

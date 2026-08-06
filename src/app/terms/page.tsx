@@ -6,7 +6,7 @@ import { SiteHeader } from "@/components/SiteHeader";
 export const metadata: Metadata = {
   title: "Terms",
   description:
-    "Terms of use for Mood Taster: what the product is, what it is not, and the rules for using it.",
+    "Terms of use for Mood Taster: the product, Taste DNA, accounts, partners, and the rules for using it.",
 };
 
 export default function TermsPage() {
@@ -39,7 +39,8 @@ export default function TermsPage() {
               Mood Taster is a tasting companion. You describe how you feel (or
               pick short craving cues), and we suggest a dish, place path, or
               snack direction with a brief reason it fits. It is not a therapist,
-              doctor, dietitian, delivery service, or calorie counter.
+              doctor, dietitian, delivery service, payments company, or calorie
+              counter.
             </p>
           </section>
 
@@ -50,6 +51,64 @@ export default function TermsPage() {
               medical, nutritional, allergen, or legal advice. Always use your
               own judgment for allergies, dietary needs, and safety. Verify
               restaurant hours, menus, and ingredients yourself before you act.
+            </p>
+          </section>
+
+          <section id="taste-dna" aria-labelledby="taste-dna-title">
+            <h2 id="taste-dna-title">Taste DNA</h2>
+            <p>
+              Taste DNA is a preference profile built from your sessions and
+              feedback so later picks can fit you better. As a guest it stays on
+              your device. If you create an optional account, it may sync to your
+              profile.
+            </p>
+            <p>
+              Taste DNA exists to improve matching for you. We do not sell
+              personal Taste DNA or individual taste profiles. Details live in{" "}
+              <Link href="/privacy">Privacy</Link>.
+            </p>
+          </section>
+
+          <section id="accounts" aria-labelledby="accounts-title">
+            <h2 id="accounts-title">Accounts</h2>
+            <p>
+              An account is optional. You can use the core mood → match → act
+              flow as a guest. If you create an account, you are responsible for
+              keeping your credentials safe and for activity under that account.
+              You may ask us to delete an account you created. See{" "}
+              <Link href="/privacy">Privacy</Link> for how deletion works.
+            </p>
+          </section>
+
+          <section id="partners" aria-labelledby="partners-title">
+            <h2 id="partners-title">Partners, handoffs, and paid surfaces</h2>
+            <p>
+              A recommendation may end in a next step such as finding a place,
+              ordering, buying ingredients, or redeeming a visit perk. Those
+              steps may use third-party partners (for example grocery or delivery
+              programs). Their sites and apps have their own terms and privacy
+              rules. We do not control them.
+            </p>
+            <p>
+              When a paid match, promotion, or partner placement appears in our
+              product, it is labeled. Payment does not rewrite your Taste DNA.
+              The primary food pick is meant to stay independent of who paid.
+            </p>
+            <p>
+              If we offer visit codes or similar perks, the restaurant provides
+              any discount from its own register. We are not a money transmitter
+              for your meal payment.
+            </p>
+          </section>
+
+          <section id="commercial-data" aria-labelledby="commercial-data-title">
+            <h2 id="commercial-data-title">Commercial aggregate data</h2>
+            <p>
+              We may later offer anonymized, aggregated craving trends to
+              businesses. That is not a sale of your personal Taste DNA. Any
+              commercial analytics of that kind requires explicit, unbundled
+              consent as described in <Link href="/privacy">Privacy</Link>. Using
+              the core product alone does not enroll you.
             </p>
           </section>
 
@@ -64,6 +123,11 @@ export default function TermsPage() {
               <li>
                 Do not submit content that is illegal, harassing, or intended to
                 compromise the service
+              </li>
+              <li>
+                Do not abuse visit codes, referral flows, or partner offers
+                (including sharing single-use codes as if they were public
+                coupons)
               </li>
             </ul>
           </section>
@@ -105,7 +169,7 @@ export default function TermsPage() {
               operators are not liable for indirect, incidental, special, or
               consequential damages arising from your use of the service,
               including decisions about food, travel, or purchases you make
-              after a recommendation.
+              after a recommendation, or issues on third-party partner sites.
             </p>
           </section>
 

@@ -11,6 +11,7 @@ import {
   Infinity as InfinityIcon,
   Layers,
   Leaf,
+  MapPin,
   Milk,
   Scale,
   Search,
@@ -22,6 +23,8 @@ import {
 
 /** Lucide icons that teach each quiz pick. Use strokeWidth={1.5} at call site. */
 export const QUIZ_OPTION_ICONS: Record<string, LucideIcon> = {
+  restaurant: MapPin,
+  recipe: ChefHat,
   savory: Utensils,
   spicy: Flame,
   sweet: Cookie,
@@ -41,9 +44,10 @@ export const QUIZ_OPTION_ICONS: Record<string, LucideIcon> = {
 
 /** One mark per quiz question step. */
 export const QUIZ_STEP_ICONS: Record<
-  "flavor" | "texture" | "heaviness" | "adventure",
+  "intent" | "flavor" | "texture" | "heaviness" | "adventure",
   LucideIcon
 > = {
+  intent: Utensils,
   flavor: ChefHat,
   texture: Layers,
   heaviness: Scale,

@@ -1,12 +1,21 @@
+export const INTENTS = ["restaurant", "recipe"] as const;
 export const FLAVORS = ["savory", "spicy", "sweet", "fresh"] as const;
 export const TEXTURES = ["crunchy", "creamy", "juicy", "soft"] as const;
 export const HEAVINESS = ["light", "medium", "filling"] as const;
 export const ADVENTURE = ["safe", "curious", "surprise"] as const;
 
+export type Intent = (typeof INTENTS)[number];
 export type Flavor = (typeof FLAVORS)[number];
 export type Texture = (typeof TEXTURES)[number];
 export type Heaviness = (typeof HEAVINESS)[number];
 export type Adventure = (typeof ADVENTURE)[number];
+
+export type Recipe = {
+  servings: number;
+  timeMinutes: number;
+  ingredients: string[];
+  steps: string[];
+};
 
 export type Food = {
   id: string;
@@ -22,9 +31,12 @@ export type Food = {
   imageAlt: string;
   imageCredit?: string;
   reasonTemplate: string;
+  /** Present when this dish can be cooked at home. */
+  recipe?: Recipe;
 };
 
 export type Answers = {
+  intent: Intent;
   flavor: Flavor;
   texture: Texture;
   heaviness: Heaviness | "any";

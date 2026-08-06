@@ -2,8 +2,10 @@ import {
   ADVENTURE,
   FLAVORS,
   HEAVINESS,
+  INTENTS,
   TEXTURES,
   type Answers,
+  type Intent,
 } from "./taste-types";
 import { CATALOG } from "./catalog";
 import { createNeutralDna } from "./dna";
@@ -17,8 +19,9 @@ import { emptySession } from "./session";
 const THRESHOLD = 0.55;
 const MIN_MATCHES = 5;
 
-function baseAnswers(): Answers {
+function baseAnswers(intent: Intent): Answers {
   return {
+    intent,
     flavor: "savory",
     texture: "soft",
     heaviness: "any",
@@ -34,36 +37,44 @@ function countStrong(answers: Answers): number {
   return all.filter((s) => s.score >= THRESHOLD).length;
 }
 
-function main() {
-  const cases: { label: string; answers: Answers }[] = [
+function casesForIntent(intent: Intent): { label: string; answers: Answers }[] {
+  const base = baseAnswers(intent);
+  return [
     ...FLAVORS.map((flavor) => ({
-      label: `flavor=${flavor}`,
-      answers: { ...baseAnswers(), flavor },
+      label: `${intent} flavor=${flavor}`,
+      answers: { ...base, flavor },
     })),
     ...TEXTURES.map((texture) => ({
-      label: `texture=${texture}`,
-      answers: { ...baseAnswers(), texture },
+      label: `${intent} texture=${texture}`,
+      answers: { ...base, texture },
     })),
     ...HEAVINESS.map((heaviness) => ({
-      label: `heaviness=${heaviness}`,
-      answers: { ...baseAnswers(), heaviness },
+      label: `${intent} heaviness=${heaviness}`,
+      answers: { ...base, heaviness },
     })),
     ...ADVENTURE.map((adventure) => ({
-      label: `adventure=${adventure}`,
-      answers: { ...baseAnswers(), adventure },
+      label: `${intent} adventure=${adventure}`,
+      answers: { ...base, adventure },
     })),
   ];
+}
 
-  console.log(`Catalog size: ${CATALOG.length}`);
+function main() {
+  const withRecipe = CATALOG.filter((f) => f.recipe != null).length;
+  console.log(`Catalog size: ${CATALOG.length} (${withRecipe} with recipes)`);
+
   let failed = false;
-  for (const c of cases) {
-    const count = countStrong(c.answers);
-    const ok = count >= MIN_MATCHES;
-    console.log(
-      `${ok ? "OK" : "FAIL"} ${c.label}: ${count} foods ≥ ${THRESHOLD}`,
-    );
-    if (!ok) failed = true;
+  for (const intent of INTENTS) {
+    for (const c of casesForIntent(intent)) {
+      const count = countStrong(c.answers);
+      const ok = count >= MIN_MATCHES;
+      console.log(
+        `${ok ? "OK" : "FAIL"} ${c.label}: ${count} foods ≥ ${THRESHOLD}`,
+      );
+      if (!ok) failed = true;
+    }
   }
+
   if (failed) process.exit(1);
   console.log("Coverage OK");
 }

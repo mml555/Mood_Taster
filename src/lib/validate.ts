@@ -2,11 +2,13 @@ import {
   ADVENTURE,
   FLAVORS,
   HEAVINESS,
+  INTENTS,
   TEXTURES,
   type Adventure,
   type Answers,
   type Flavor,
   type Heaviness,
+  type Intent,
   type Texture,
 } from "./taste-types";
 
@@ -29,6 +31,7 @@ export function parseAnswers(raw: unknown): Answers | null {
   if (typeof raw !== "object" || raw === null) return null;
   const src = raw as Record<string, unknown>;
 
+  const intent = oneOf<Intent>(INTENTS, src.intent);
   const flavor = oneOf<Flavor>(FLAVORS, src.flavor);
   const texture = oneOf<Texture>(TEXTURES, src.texture);
   const adventure = oneOf<Adventure>(ADVENTURE, src.adventure);
@@ -38,9 +41,9 @@ export function parseAnswers(raw: unknown): Answers | null {
       ? ("any" as const)
       : oneOf<Heaviness>(HEAVINESS, src.heaviness);
 
-  if (!flavor || !texture || !adventure || !heaviness) return null;
+  if (!intent || !flavor || !texture || !adventure || !heaviness) return null;
 
-  return { flavor, texture, heaviness, adventure };
+  return { intent, flavor, texture, heaviness, adventure };
 }
 
 /**

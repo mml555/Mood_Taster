@@ -73,8 +73,9 @@ export async function POST(request: Request) {
   }
 
   // Re-validate against the same guards used for user input. The model is not
-  // more trusted than the browser.
-  const nextAnswers = parseAnswers(parsed);
+  // more trusted than the browser. Force original intent so adjust cannot flip
+  // Eat out ↔ Cook.
+  const nextAnswers = parseAnswers({ ...parsed, intent: answers.intent });
   if (!nextAnswers) {
     return NextResponse.json({ answers: null, note: null });
   }
