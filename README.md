@@ -3,7 +3,7 @@
 Match how you feel to what you should taste.
 
 **Site:** [mood-taster.vercel.app](https://mood-taster.vercel.app/)  
-**PRD:** [Product requirements](https://mood-taster.vercel.app/prd/)  
+**PRD:** [Product requirements](https://mood-taster.vercel.app/prd)  
 **Repo:** [github.com/mml555/Mood_Taster](https://github.com/mml555/Mood_Taster)
 
 ## Stack
