@@ -8,10 +8,10 @@ import {
   createNeutralDna,
   discoveryPercent,
   labelDimension,
-  readDna,
-  resetDna,
   strongestDimensions,
 } from "@/lib/dna";
+import { loadDnaForUser, resetDnaEverywhere } from "@/lib/dna-sync";
+import { isSupabaseConfigured } from "@/lib/supabase/client";
 import type { DnaDimension, DnaProfile } from "@/lib/taste-types";
 
 const FLAVOR_DIMS: DnaDimension[] = ["savory", "spicy", "sweet", "fresh"];
@@ -19,16 +19,26 @@ const TEXTURE_DIMS: DnaDimension[] = ["crunchy", "creamy", "juicy", "soft"];
 
 export function DnaDashboard() {
   const [dna, setDna] = useState<DnaProfile | null>(null);
+  const [cloudHint, setCloudHint] = useState<string | null>(null);
 
   useEffect(() => {
-    queueMicrotask(() => {
-      setDna(readDna());
+    queueMicrotask(async () => {
+      const loaded = await loadDnaForUser();
+      setDna(loaded);
+      if (isSupabaseConfigured()) {
+        setCloudHint(
+          "Signed-in profiles sync Taste DNA to your account. Guests stay on this device only.",
+        );
+      } else {
+        setCloudHint("Built from ratings on this device. No account required.");
+      }
     });
   }, []);
 
   const onReset = useCallback(() => {
-    resetDna();
-    setDna(createNeutralDna());
+    void resetDnaEverywhere().then(() => {
+      setDna(createNeutralDna());
+    });
   }, []);
 
   if (!dna) {
@@ -54,11 +64,22 @@ export function DnaDashboard() {
         <h1 className="dna-title">Nothing learned yet</h1>
         <p className="dna-lede">
           Finish a session and rate a dish. Your Taste DNA builds from those
-          ratings, locally on this device.
+          ratings
+          {isSupabaseConfigured()
+            ? ", and syncs to your account when you are signed in"
+            : ", locally on this device"}
+          .
         </p>
-        <Link className="cta" href="/taste">
-          Start a session
-        </Link>
+        <div className="result-actions">
+          <Link className="cta" href="/taste">
+            Start a session
+          </Link>
+          {isSupabaseConfigured() ? (
+            <Link className="text-link" href="/signup">
+              Create an account
+            </Link>
+          ) : null}
+        </div>
       </section>
     );
   }
@@ -72,10 +93,7 @@ export function DnaDashboard() {
       <p className="dna-discovery">
         <span className="dna-discovery-value">{discovery}%</span> discovered
       </p>
-      <p className="dna-lede">
-        Built from ratings on this device. No account. Reset anytime for a clean
-        demo run.
-      </p>
+      <p className="dna-lede">{cloudHint}</p>
 
       {flavors.length > 0 ? (
         <div className="dna-block">

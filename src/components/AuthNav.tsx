@@ -1,0 +1,103 @@
+"use client";
+
+import Link from "next/link";
+import { useEffect, useState } from "react";
+import { createClient, isSupabaseConfigured } from "@/lib/supabase/client";
+
+type AuthNavState =
+  | { status: "loading" }
+  | { status: "guest" }
+  | { status: "user"; username: string | null };
+
+export function AuthNav({ current }: { current?: string }) {
+  const [state, setState] = useState<AuthNavState>({ status: "loading" });
+
+  useEffect(() => {
+    let cancelled = false;
+    let unsubscribe: (() => void) | undefined;
+
+    queueMicrotask(() => {
+      if (!isSupabaseConfigured()) {
+        if (!cancelled) setState({ status: "guest" });
+        return;
+      }
+
+      const supabase = createClient();
+
+      void (async () => {
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
+        if (cancelled) return;
+
+        if (!user) {
+          setState({ status: "guest" });
+          return;
+        }
+
+        const { data } = await supabase
+          .from("profiles")
+          .select("username")
+          .eq("id", user.id)
+          .maybeSingle();
+
+        if (!cancelled) {
+          setState({ status: "user", username: data?.username ?? null });
+        }
+      })();
+
+      const {
+        data: { subscription },
+      } = supabase.auth.onAuthStateChange((_event, session) => {
+        if (!session?.user) {
+          setState({ status: "guest" });
+          return;
+        }
+        void supabase
+          .from("profiles")
+          .select("username")
+          .eq("id", session.user.id)
+          .maybeSingle()
+          .then(({ data }) => {
+            if (!cancelled) {
+              setState({ status: "user", username: data?.username ?? null });
+            }
+          });
+      });
+
+      unsubscribe = () => subscription.unsubscribe();
+    });
+
+    return () => {
+      cancelled = true;
+      unsubscribe?.();
+    };
+  }, []);
+
+  if (state.status === "loading") {
+    return null;
+  }
+
+  if (state.status === "user") {
+    return (
+      <Link
+        href="/account"
+        aria-current={current === "account" ? "page" : undefined}
+      >
+        {state.username ? `@${state.username}` : "Account"}
+      </Link>
+    );
+  }
+
+  return (
+    <>
+      <Link
+        href="/login"
+        aria-current={current === "account" ? "page" : undefined}
+      >
+        Sign in
+      </Link>
+      <Link href="/signup">Join</Link>
+    </>
+  );
+}

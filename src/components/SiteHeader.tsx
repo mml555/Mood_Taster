@@ -1,4 +1,6 @@
 import Link from "next/link";
+import Image from "next/image";
+import { AuthNav } from "@/components/AuthNav";
 
 type SiteHeaderProps = {
   current?:
@@ -6,6 +8,7 @@ type SiteHeaderProps = {
     | "taste"
     | "result"
     | "dna"
+    | "account"
     | "prd"
     | "strategy"
     | "brand"
@@ -36,7 +39,14 @@ export function SiteHeader({ current = "home" }: SiteHeaderProps) {
   return (
     <header className="top">
       <Link className="mark" href="/">
-        Mood Taster
+        <Image
+          className="mark-lockup"
+          src="/brand/lockup-yellow-sm.png"
+          alt="Mood Taster"
+          width={200}
+          height={26}
+          priority
+        />
       </Link>
       <nav aria-label="Primary">
         {current === "home" ? (
@@ -44,6 +54,7 @@ export function SiteHeader({ current = "home" }: SiteHeaderProps) {
             <Link href="/taste">Start</Link>
             <a href="#how">How it works</a>
             <Link href="/dna">Taste DNA</Link>
+            <AuthNav current={current} />
             {docs}
           </>
         ) : (
@@ -61,6 +72,7 @@ export function SiteHeader({ current = "home" }: SiteHeaderProps) {
             >
               Taste DNA
             </Link>
+            <AuthNav current={current} />
             {docs}
           </>
         )}

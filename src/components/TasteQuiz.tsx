@@ -3,7 +3,7 @@
 import { useRouter, useSearchParams } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
-import { readDna } from "@/lib/dna";
+import { loadDnaForUser } from "@/lib/dna-sync";
 import { rank } from "@/lib/engine";
 import { emptySession, writeSession } from "@/lib/session";
 import type { Answers } from "@/lib/taste-types";
@@ -124,10 +124,10 @@ export function TasteQuiz() {
   );
 
   const finish = useCallback(
-    (finalAnswers: Answers) => {
+    async (finalAnswers: Answers) => {
       clearDraft();
       const session = emptySession(finalAnswers);
-      const dna = readDna();
+      const dna = await loadDnaForUser();
       const rec = rank(finalAnswers, dna, session);
       writeSession({
         ...session,

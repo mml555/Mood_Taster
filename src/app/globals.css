@@ -10,6 +10,10 @@
   --paper: #f2ebe0;
   --accent: #e4a01a;
 
+  /* Logo system (mark / lockup / wordmark). Not UI fills yet. */
+  --grape: #580098;
+  --zest: #fcdc6c;
+
   /* Neutrals are mixes of the two tones, never a new hue */
   --paper-muted: color-mix(in srgb, var(--paper) 72%, var(--ink));
   --paper-quiet: color-mix(in srgb, var(--paper) 45%, var(--ink));
@@ -88,11 +92,15 @@ a {
 }
 
 .mark {
-  font-family: var(--font-display);
-  font-size: 1.15rem;
-  font-weight: 700;
-  letter-spacing: 0.01em;
+  display: inline-flex;
+  align-items: center;
   text-decoration: none;
+  line-height: 0;
+}
+
+.mark-lockup {
+  width: auto;
+  height: 1.35rem;
 }
 
 .top nav {
@@ -283,8 +291,16 @@ a {
 
 .foot-brand {
   margin: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
   font-family: var(--font-display);
   font-weight: 700;
+}
+
+.foot-mark {
+  width: 1.35rem;
+  height: auto;
 }
 
 .foot-meta {
@@ -546,6 +562,58 @@ a {
 
 .brand-guide .swatch-paper-quiet {
   background: var(--paper-quiet);
+}
+
+.brand-guide .swatch-grape {
+  background: var(--grape);
+}
+
+.brand-guide .swatch-zest {
+  background: var(--zest);
+}
+
+.brand-guide .logo-grid {
+  list-style: none;
+  margin: 0 0 var(--space-6);
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(14rem, 1fr));
+  gap: var(--space-5);
+}
+
+.brand-guide .logo-grid li {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.brand-guide .logo-tile {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 7.5rem;
+  padding: var(--space-5);
+  border-radius: 0;
+}
+
+.brand-guide .logo-tile img {
+  width: auto;
+  max-width: 100%;
+  height: auto;
+  max-height: 4.5rem;
+}
+
+.brand-guide .logo-tile-wide img {
+  max-height: 2rem;
+}
+
+.brand-guide .logo-tile-ink {
+  background: var(--ink-raised);
+}
+
+.brand-guide .logo-tile-paper {
+  background: var(--paper);
 }
 
 .brand-guide .swatch-name {
@@ -1005,6 +1073,91 @@ a {
 .dna-meta {
   color: var(--paper-quiet);
   font-size: 0.9rem;
+}
+
+/* Auth + account */
+
+.auth-form {
+  margin-top: var(--space-6);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  max-width: 24rem;
+}
+
+.auth-label {
+  margin-top: var(--space-2);
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--paper-muted);
+}
+
+.auth-input {
+  width: 100%;
+  padding: var(--space-3) 0;
+  background: transparent;
+  color: var(--paper);
+  font: inherit;
+  font-size: 1.1rem;
+  border: 0;
+  border-radius: 0;
+  box-shadow: inset 0 -1px 0 var(--paper-quiet);
+}
+
+.auth-input:focus {
+  outline: none;
+  box-shadow: inset 0 -2px 0 var(--accent);
+}
+
+.auth-input:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
+.auth-submit {
+  margin-top: var(--space-5);
+  align-self: flex-start;
+}
+
+.auth-submit:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.auth-error {
+  margin: var(--space-3) 0 0;
+  color: var(--paper);
+  font-weight: 500;
+}
+
+.auth-error code {
+  font-size: 0.9em;
+  color: var(--accent);
+}
+
+.auth-switch {
+  margin: var(--space-4) 0 0;
+  color: var(--paper-muted);
+  font-size: 0.95rem;
+}
+
+.account-facts {
+  margin: var(--space-6) 0 0;
+  display: grid;
+  gap: var(--space-5);
+}
+
+.account-facts dt {
+  font-size: 0.8rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.account-facts dd {
+  margin: var(--space-2) 0 0;
+  font-family: var(--font-display);
+  font-size: 1.35rem;
 }
 
 @media (prefers-reduced-motion: reduce) {

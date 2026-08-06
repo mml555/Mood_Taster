@@ -10,14 +10,25 @@ Match how you feel to what you should taste.
 
 ## What was built
 
-A client-only Ship Night product:
+A mood → match product with optional accounts:
 
 1. **Home** (`/`) asks "Hungry?" and starts the quiz
 2. **Quiz** (`/taste`) asks four one-tap questions (flavor, texture, heaviness, adventure)
 3. **Result** (`/result/[id]`) shows one specific dish, why it fits, feedback, and "Not feeling it"
-4. **Taste DNA** (`/dna`) shows a local preference profile that updates from ratings
+4. **Taste DNA** (`/dna`) shows a preference profile that updates from ratings
+5. **Accounts** (`/signup`, `/login`, `/account`) via Supabase: username + email + password, cloud-synced Taste DNA
 
-No accounts, no database, no restaurant or delivery APIs.
+Guests still work with no account (localStorage only). Accounts need Supabase env vars.
+
+## Accounts (Supabase)
+
+1. Create a project at [supabase.com](https://supabase.com)
+2. Copy URL, anon key, and service role key into `.env` (see `.env.example`)
+3. Run [`supabase/schema.sql`](supabase/schema.sql) in the SQL editor
+4. Auth → Email: enable. For local demos, turn off "Confirm email"
+5. Restart `npm run dev`
+
+Sign up with username, email, and password. Sign in with email or username + password.
 
 ## How recommendations work
 
@@ -31,22 +42,23 @@ score = 0.75 * quizMatch
       - recentPenalty
 ```
 
-Quiz answers live in `sessionStorage`. Taste DNA lives in `localStorage`. Identical inputs produce identical rankings (stable id tie-break).
+Quiz answers live in `sessionStorage`. Taste DNA lives in `localStorage`, and syncs to Supabase when signed in.
 
 ## Tech stack
 
 - Next.js App Router + TypeScript + React 19
 - Hosted on Vercel
+- Supabase Auth + Postgres (optional)
 - `lucide-react` for icons
 - Static food catalog (~30 dishes) with local photos in `public/food/`
 
 ## Out of scope (for now)
 
-Authentication, maps/Places, recipes, lanes, live menus, PostHog, native apps, social features.
+Maps/Places UX, recipes, lanes, native apps, social features.
 
 ## What comes next
 
-Optional AI polish for the explanation line (`/api/explain`), restaurant act paths, and cloud-synced Taste DNA when accounts exist.
+Restaurant act paths, richer profile prefs, and optional AI polish for explanations.
 
 ## Getting started
 

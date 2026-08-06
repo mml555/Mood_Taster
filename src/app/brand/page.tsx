@@ -47,25 +47,28 @@ export default function BrandPage() {
               <a href="#voice">2. Voice</a>
             </li>
             <li>
-              <a href="#palette">3. Palette</a>
+              <a href="#logo">3. Logo</a>
             </li>
             <li>
-              <a href="#never">4. Never / Instead</a>
+              <a href="#palette">4. Palette</a>
             </li>
             <li>
-              <a href="#type">5. Type</a>
+              <a href="#never">5. Never / Instead</a>
             </li>
             <li>
-              <a href="#spacing">6. Spacing</a>
+              <a href="#type">6. Type</a>
             </li>
             <li>
-              <a href="#motion">7. Motion</a>
+              <a href="#spacing">7. Spacing</a>
             </li>
             <li>
-              <a href="#sponsored">8. Sponsored placements</a>
+              <a href="#motion">8. Motion</a>
             </li>
             <li>
-              <a href="#checklist">9. Ship checklist</a>
+              <a href="#sponsored">9. Sponsored placements</a>
+            </li>
+            <li>
+              <a href="#checklist">10. Ship checklist</a>
             </li>
           </ol>
         </nav>
@@ -108,8 +111,129 @@ export default function BrandPage() {
             </ul>
           </section>
 
+          <section id="logo" aria-labelledby="logo-title">
+            <h2 id="logo-title">3. Logo</h2>
+            <p>
+              The mark is a stylized tongue. Use yellow on ink surfaces, purple
+              on paper or light fields. Never stretch, rotate, or add a stroke.
+              Clear space around the mark should be at least the height of the
+              cleft.
+            </p>
+
+            <ul className="logo-grid" aria-label="Logo variants">
+              <li>
+                <div className="logo-tile logo-tile-ink">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src="/brand/mark-yellow.png"
+                    alt=""
+                    width={128}
+                    height={105}
+                  />
+                </div>
+                <span className="swatch-name">Mark · yellow</span>
+                <span className="swatch-meta">
+                  Default on ink. Favicon and compact UI.
+                </span>
+              </li>
+              <li>
+                <div className="logo-tile logo-tile-paper">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src="/brand/mark-purple.png"
+                    alt=""
+                    width={128}
+                    height={105}
+                  />
+                </div>
+                <span className="swatch-name">Mark · purple</span>
+                <span className="swatch-meta">
+                  On paper or light surfaces.
+                </span>
+              </li>
+              <li>
+                <div className="logo-tile logo-tile-ink logo-tile-wide">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src="/brand/lockup-yellow-sm.png"
+                    alt=""
+                    width={280}
+                    height={36}
+                  />
+                </div>
+                <span className="swatch-name">Lockup · yellow</span>
+                <span className="swatch-meta">
+                  Icon + wordmark. Site header default.
+                </span>
+              </li>
+              <li>
+                <div className="logo-tile logo-tile-paper logo-tile-wide">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src="/brand/lockup-purple-sm.png"
+                    alt=""
+                    width={280}
+                    height={36}
+                  />
+                </div>
+                <span className="swatch-name">Lockup · purple</span>
+                <span className="swatch-meta">
+                  Icon + wordmark on light fields.
+                </span>
+              </li>
+              <li>
+                <div className="logo-tile logo-tile-ink logo-tile-wide">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src="/brand/wordmark-yellow-sm.png"
+                    alt=""
+                    width={280}
+                    height={35}
+                  />
+                </div>
+                <span className="swatch-name">Wordmark · yellow</span>
+                <span className="swatch-meta">Type only. Comfortaa, lowercase.</span>
+              </li>
+              <li>
+                <div className="logo-tile logo-tile-paper logo-tile-wide">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src="/brand/wordmark-purple-sm.png"
+                    alt=""
+                    width={280}
+                    height={35}
+                  />
+                </div>
+                <span className="swatch-name">Wordmark · purple</span>
+                <span className="swatch-meta">Type only on light fields.</span>
+              </li>
+            </ul>
+
+            <h3>Logo colors</h3>
+            <ul className="swatch-grid" aria-label="Logo color tokens">
+              <li>
+                <span className="swatch swatch-grape" aria-hidden="true" />
+                <span className="swatch-name">Grape</span>
+                <span className="swatch-meta">
+                  <code>--grape</code> · #580098 · Logo purple
+                </span>
+              </li>
+              <li>
+                <span className="swatch swatch-zest" aria-hidden="true" />
+                <span className="swatch-name">Zest</span>
+                <span className="swatch-meta">
+                  <code>--zest</code> · #fcdc6c · Logo yellow
+                </span>
+              </li>
+            </ul>
+            <p>
+              Grape and zest live in the logo system. The product UI still uses
+              ink, paper, and saffron until a full palette merge is decided.
+            </p>
+          </section>
+
           <section id="palette" aria-labelledby="palette-title">
-            <h2 id="palette-title">3. Palette</h2>
+            <h2 id="palette-title">4. Palette</h2>
             <p>
               Two tones and one accent. Every neutral is a mix of the two tones,
               never a new hue.
@@ -198,7 +322,7 @@ export default function BrandPage() {
           </section>
 
           <section id="never" aria-labelledby="never-title">
-            <h2 id="never-title">4. Never / Instead</h2>
+            <h2 id="never-title">5. Never / Instead</h2>
 
             <h3>Never</h3>
             <ul>
@@ -272,7 +396,7 @@ export default function BrandPage() {
           </section>
 
           <section id="type" aria-labelledby="type-title">
-            <h2 id="type-title">5. Type</h2>
+            <h2 id="type-title">6. Type</h2>
             <p>
               One face: <strong>Comfortaa</strong>. Regular (400) is the default
               for body and UI. Heavier weights carry display hierarchy. Both{" "}
@@ -301,7 +425,7 @@ export default function BrandPage() {
           </section>
 
           <section id="spacing" aria-labelledby="spacing-title">
-            <h2 id="spacing-title">6. Spacing</h2>
+            <h2 id="spacing-title">7. Spacing</h2>
             <p>
               Use the ramp. Do not invent one-off values. Related items sit{" "}
               <code>--space-4</code> apart; unrelated groups sit{" "}
@@ -345,7 +469,7 @@ export default function BrandPage() {
           </section>
 
           <section id="motion" aria-labelledby="motion-title">
-            <h2 id="motion-title">7. Motion</h2>
+            <h2 id="motion-title">8. Motion</h2>
             <p>
               Entrance <code>rise</code> only, and one shared{" "}
               <code>--ease</code>. No spinning, pulsing, or looping ambient
@@ -354,7 +478,7 @@ export default function BrandPage() {
           </section>
 
           <section id="sponsored" aria-labelledby="sponsored-title">
-            <h2 id="sponsored-title">8. Sponsored placements</h2>
+            <h2 id="sponsored-title">9. Sponsored placements</h2>
             <p>
               Paid placements must be unmistakably labeled. The label is type,
               not a badge box.
@@ -383,7 +507,7 @@ export default function BrandPage() {
           </section>
 
           <section id="checklist" aria-labelledby="checklist-title">
-            <h2 id="checklist-title">9. Ship checklist</h2>
+            <h2 id="checklist-title">10. Ship checklist</h2>
             <ul className="brand-checklist">
               <li>No gradient, border, or shadow added</li>
               <li>

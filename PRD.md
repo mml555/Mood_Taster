@@ -17,11 +17,12 @@ Mood Taster is a mobile-first web app. You answer four short questions about fla
 - Nailed it / Kinda / Nope feedback on the result
 - Local Taste DNA that persists on device and affects later rankings
 - Taste DNA dashboard with discovery percentage and reset for demos
+- Optional accounts (Supabase): username + email + password, cloud-synced Taste DNA
+- Guest mode still works with local Taste DNA and no account
 
 ## Out of scope
 
-- User accounts and cloud-synced profiles
-- Restaurant maps, Google Places, delivery, or reservations
+- Restaurant maps, Google Places UX, delivery, or reservations
 - Recipes, lanes (Go Out / Make / Snack), or live menus
 - Native iOS/Android apps
 - Paid/sponsored restaurant placements

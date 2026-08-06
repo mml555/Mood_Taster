@@ -16,9 +16,9 @@ import {
   applyRating,
   labelDimension,
   readDna,
-  writeDna,
   type DnaDelta,
 } from "@/lib/dna";
+import { persistDna } from "@/lib/dna-sync";
 import { nextAfterReject, rank } from "@/lib/engine";
 import {
   markRejected,
@@ -110,7 +110,7 @@ export function ResultView({ food }: ResultViewProps) {
         food,
         rating,
       );
-      writeDna(next);
+      void persistDna(next);
       setDeltas(changes.filter((d) => d.direction !== "flat"));
       setRated(true);
     },

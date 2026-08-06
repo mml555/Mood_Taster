@@ -70,8 +70,11 @@ export default function PrdPage() {
                 rankings
               </li>
               <li>
-                Taste DNA dashboard with discovery percentage and reset for
-                demos
+                Optional accounts (Supabase): username + email + password, with
+                Taste DNA synced to your profile
+              </li>
+              <li>
+                Guest mode still works with local Taste DNA and no account
               </li>
             </ul>
           </section>
@@ -79,9 +82,8 @@ export default function PrdPage() {
           <section id="out-of-scope" aria-labelledby="oos-title">
             <h2 id="oos-title">Out of scope</h2>
             <ul>
-              <li>User accounts and cloud-synced profiles</li>
               <li>
-                Restaurant maps, Google Places, delivery, or reservations
+                Restaurant maps, Google Places UX, delivery, or reservations
               </li>
               <li>
                 Recipes, lanes (Go Out / Make / Snack), or live menus

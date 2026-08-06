@@ -526,6 +526,39 @@ engine -> dish + precomputed explanation   (instant, from JSON, always correct)
 The floor here is an AI-written sentence that a human already approved, not a template. If
 Azure never responds, the demo is still showing generated copy.
 
+**We are on the Foundry v1 Responses API**, not the classic Azure OpenAI surface. Getting this
+wrong costs an hour, so it is spelled out:
+
+| | Classic (do not use) | v1 GA (ours) |
+|---|---|---|
+| Path | `/openai/deployments/<name>/chat/completions` | `/openai/v1/responses` |
+| `api-version` | Required, requests fail without it | **Not required. There is no such variable** |
+| Deployment | In the URL path | In the body as `model` |
+| Body | `messages` | `input`, plus optional `instructions` |
+| Client | `AzureOpenAI()` | Plain `OpenAI()` with `baseURL`, or raw `fetch` |
+
+Minimal call, which is the whole integration:
+
+```
+POST https://<resource>.services.ai.azure.com/openai/v1/responses
+api-key: $AZURE_OPENAI_API_KEY
+Content-Type: application/json
+
+{ "model": "gpt-5.6-terra",
+  "instructions": "<the one sentence rule>",
+  "input": "<dish name, matched attributes, current line>",
+  "max_output_tokens": 60 }
+```
+
+Read the text off `output_text`. Use raw `fetch` rather than adding the `openai` package. It is
+a single POST, and `coding-standards.mdc` says to avoid abstraction until a second use appears.
+
+**Smoke test the model before wiring it into the UI.** `gpt-5.6-terra` (version 2026-07-09) is
+newer than anything this document's author can vouch for. Confirm with one curl which optional
+parameters it accepts, since reasoning-tier models commonly reject `temperature` and may return
+an empty `output_text` while spending tokens on internal reasoning. Find that out with curl, not
+on stage.
+
 Rules:
 
 - Keys stay server side in `/api/explain`. Never `NEXT_PUBLIC_`. There is no legitimate
@@ -541,13 +574,15 @@ Rules:
   | `GEMINI_API_KEY` | build | Local only. Never in Vercel |
   | `GEMINI_MODEL` | build | Must be a Flash Lite variant. The 20 RPD models cannot finish a run |
   | `GEMINI_BATCH_SIZE` | build | Default 10. Lower values risk exceeding the daily ceiling |
-  | `AZURE_OPENAI_ENDPOINT` | runtime | No trailing slash |
-  | `AZURE_OPENAI_API_KEY` | runtime | |
-  | `AZURE_OPENAI_DEPLOYMENT` | runtime | The **deployment** name, not the model name. Most common Azure misconfiguration |
-  | `AZURE_OPENAI_API_VERSION` | runtime | Sent as `?api-version=`. Azure requests fail without it |
+  | `AZURE_OPENAI_ENDPOINT` | runtime | Includes the `/openai/v1/` suffix, **with** trailing slash |
+  | `AZURE_OPENAI_API_KEY` | runtime | Sent as the `api-key` header |
+  | `AZURE_OPENAI_DEPLOYMENT` | runtime | Deployment name, sent in the body as `model`. Currently `gpt-5.6-terra` |
 
-  The four Azure variables are all-or-nothing. Three of four means "Azure not configured" and
+  The three Azure variables are all-or-nothing. Two of three means "Azure not configured" and
   the call is skipped, not attempted and failed.
+
+  There is deliberately **no `AZURE_OPENAI_API_VERSION`**. The v1 GA endpoint does not take one.
+  If someone adds it back, they are building against the classic path by mistake.
 - **Model output is untrusted input**, at build time and at runtime both. Strip markup and
   control characters, collapse whitespace, enforce one sentence and a length cap, and reject any
   em dash, which this repo bans everywhere. A violation at build time fails the entry loudly so
