@@ -14,6 +14,7 @@ export function SiteHeader({ current = "home" }: SiteHeaderProps) {
         {current === "home" ? (
           <>
             <a href="#how">How it works</a>
+            <a href="#lanes">Lanes</a>
             <Link href="/prd">PRD</Link>
           </>
         ) : (

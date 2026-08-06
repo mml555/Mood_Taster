@@ -21,7 +21,7 @@ export const metadata: Metadata = {
     template: "%s — Mood Taster",
   },
   description:
-    "Match how you feel to what you should taste. Mood first — food, drink, and recipes that fit the moment.",
+    "Figure out what you actually want to eat in under 30 seconds. A few questions about your mood, then one specific pick — not another endless menu.",
 };
 
 export default function RootLayout({

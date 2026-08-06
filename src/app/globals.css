@@ -202,6 +202,7 @@ a {
 }
 
 .how,
+.lanes,
 .about {
   position: relative;
   z-index: 1;
@@ -211,6 +212,7 @@ a {
 }
 
 .how h2,
+.lanes h2,
 .about h2 {
   margin: 0;
   font-family: var(--font-display);
@@ -263,6 +265,30 @@ a {
 
 .flow p {
   margin: 0.5rem 0 0;
+  color: var(--smoke);
+  font-size: 0.95rem;
+}
+
+.lane-list {
+  margin: 2.5rem 0 0;
+  display: grid;
+  gap: 1.5rem;
+  max-width: 40rem;
+}
+
+.lane-list div {
+  padding-top: 1rem;
+  border-top: 1px solid color-mix(in srgb, var(--paper) 14%, transparent);
+}
+
+.lane-list dt {
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  font-weight: 500;
+}
+
+.lane-list dd {
+  margin: 0.4rem 0 0;
   color: var(--smoke);
   font-size: 0.95rem;
 }
