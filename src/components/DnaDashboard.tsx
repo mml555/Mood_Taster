@@ -21,8 +21,9 @@ export function DnaDashboard() {
   const [dna, setDna] = useState<DnaProfile | null>(null);
 
   useEffect(() => {
-    setDna(readDna());
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- browser storage bootstrap
+    queueMicrotask(() => {
+      setDna(readDna());
+    });
   }, []);
 
   const onReset = useCallback(() => {

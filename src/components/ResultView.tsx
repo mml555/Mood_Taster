@@ -26,17 +26,10 @@ import {
   readSession,
   writeSession,
 } from "@/lib/session";
-import type { Food, Rating, SessionState } from "@/lib/taste-types";
-import type { DnaProfile } from "@/lib/taste-types";
+import type { DnaProfile, Food, Rating, SessionState } from "@/lib/taste-types";
 
 type ResultViewProps = {
   food: Food;
-};
-
-type ViewModel = {
-  hasSession: boolean;
-  explanation: string;
-  attrs: string[];
 };
 
 export function ResultView({ food }: ResultViewProps) {
@@ -44,12 +37,16 @@ export function ResultView({ food }: ResultViewProps) {
   const searchParams = useSearchParams();
   const rejectNote = searchParams.get("alt") === "1";
 
-  const [ready, setReady] = useState(false);
-  const [view, setView] = useState<ViewModel>({
-    hasSession: false,
-    explanation: food.description,
-    attrs: [],
-  });
+  // Neutral first paint: dish from server props only. Session UI mounts after.
+  const [hasSession, setHasSession] = useState(false);
+  const [explanation, setExplanation] = useState(food.description);
+  const [attrs, setAttrs] = useState<string[]>(() =>
+    [...food.flavorTags.map(capitalize), capitalize(food.heaviness)].slice(
+      0,
+      3,
+    ),
+  );
+  const [sessionReady, setSessionReady] = useState(false);
   const [whyOpen, setWhyOpen] = useState(false);
   const [imgFailed, setImgFailed] = useState(false);
   const [deltas, setDeltas] = useState<DnaDelta[] | null>(null);
@@ -57,37 +54,38 @@ export function ResultView({ food }: ResultViewProps) {
   const [emptyAlts, setEmptyAlts] = useState(false);
 
   useEffect(() => {
-    setWhyOpen(false);
-    setImgFailed(false);
-    setDeltas(null);
-    setRated(false);
-    setEmptyAlts(false);
+    queueMicrotask(() => {
+      setImgFailed(false);
+      setWhyOpen(false);
+      setDeltas(null);
+      setRated(false);
+      setEmptyAlts(false);
+      setExplanation(food.description);
+      setAttrs(
+        [...food.flavorTags.map(capitalize), capitalize(food.heaviness)].slice(
+          0,
+          3,
+        ),
+      );
 
-    const session = readSession();
-    const dna = readDna();
+      const session = readSession();
+      const dna = readDna();
 
-    if (!session) {
-      setView({
-        hasSession: false,
-        explanation: food.description,
-        attrs: [
-          ...food.flavorTags.map(capitalize),
-          capitalize(food.heaviness),
-        ].slice(0, 3),
-      });
-      setReady(true);
-      return;
-    }
+      if (!session) {
+        setHasSession(false);
+        setSessionReady(true);
+        return;
+      }
 
-    if (!session.servedIds.includes(food.id)) {
-      writeSession(markServed(session, food.id));
-    }
+      if (!session.servedIds.includes(food.id)) {
+        writeSession(markServed(session, food.id));
+      }
 
-    const active = readSession() ?? session;
-    setView(buildView(food, active, dna));
-    setReady(true);
-    // Storage must be read after mount to avoid hydration mismatch (BUILD risk 1).
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- browser storage bootstrap
+      const active = readSession() ?? session;
+      applySessionView(food, active, dna, setExplanation, setAttrs);
+      setHasSession(true);
+      setSessionReady(true);
+    });
   }, [food]);
 
   const onReject = useCallback(() => {
@@ -118,15 +116,6 @@ export function ResultView({ food }: ResultViewProps) {
     },
     [food],
   );
-
-  if (!ready) {
-    return (
-      <section className="result" aria-busy="true">
-        <p className="eyebrow">Finding it</p>
-        <h1 className="result-title">One moment…</h1>
-      </section>
-    );
-  }
 
   if (emptyAlts) {
     return (
@@ -178,15 +167,15 @@ export function ResultView({ food }: ResultViewProps) {
       <h1 className="result-title">{food.name}</h1>
       <p className="result-desc">{food.description}</p>
 
-      {view.attrs.length > 0 ? (
+      {attrs.length > 0 ? (
         <ul className="result-attrs" aria-label="Matched attributes">
-          {view.attrs.map((a) => (
+          {attrs.map((a) => (
             <li key={a}>{a}</li>
           ))}
         </ul>
       ) : null}
 
-      {view.hasSession ? (
+      {!sessionReady ? null : hasSession ? (
         <>
           <button
             type="button"
@@ -202,9 +191,7 @@ export function ResultView({ food }: ResultViewProps) {
               className={whyOpen ? "is-open" : undefined}
             />
           </button>
-          {whyOpen ? (
-            <p className="result-why">{view.explanation}</p>
-          ) : null}
+          {whyOpen ? <p className="result-why">{explanation}</p> : null}
 
           <div className="result-actions" role="group" aria-label="Feedback">
             <button
@@ -280,11 +267,13 @@ export function ResultView({ food }: ResultViewProps) {
   );
 }
 
-function buildView(
+function applySessionView(
   food: Food,
   session: SessionState,
   dna: DnaProfile,
-): ViewModel {
+  setExplanation: (s: string) => void,
+  setAttrs: (a: string[]) => void,
+) {
   const rec = rank(session.answers, dna, session);
   const match =
     rec.primary.food.id === food.id
@@ -292,18 +281,13 @@ function buildView(
       : rec.alternates.find((s) => s.food.id === food.id);
 
   if (match) {
-    return {
-      hasSession: true,
-      explanation: match.explanation,
-      attrs: match.matchedAttributes,
-    };
+    setExplanation(match.explanation);
+    setAttrs(match.matchedAttributes);
+    return;
   }
 
-  return {
-    hasSession: true,
-    explanation: food.description,
-    attrs: food.flavorTags.map(capitalize).slice(0, 3),
-  };
+  setExplanation(food.description);
+  setAttrs(food.flavorTags.map(capitalize).slice(0, 3));
 }
 
 function capitalize(s: string): string {

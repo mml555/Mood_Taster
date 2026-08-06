@@ -107,9 +107,10 @@ export function TasteQuiz() {
   const [hydrated, setHydrated] = useState(false);
 
   useEffect(() => {
-    setAnswers(readDraft());
-    setHydrated(true);
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- browser storage bootstrap
+    queueMicrotask(() => {
+      setAnswers(readDraft());
+      setHydrated(true);
+    });
   }, []);
 
   const current = STEPS[step - 1];
