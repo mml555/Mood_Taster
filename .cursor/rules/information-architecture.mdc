@@ -19,6 +19,7 @@ Keep this sequence intact. Do not bury mood capture behind long onboarding.
 | Area | Purpose | Notes |
 |------|---------|--------|
 | Home / landing | Brand + one CTA into mood flow | One composition; brand is the hero |
+| PRD (`docs/prd.html`) | Public product requirements | Linked from nav/footer; keep in sync with product |
 | Mood entry | Select or describe mood | Fast; one job |
 | Results | Short list with “why it fits” | No endless scroll walls |
 | Detail | Single pick: recipe, place, or tasting note | One primary action |
@@ -34,7 +35,7 @@ Keep this sequence intact. Do not bury mood capture behind long onboarding.
 ## Navigation rules
 
 - Primary nav: Mood → Results path only until product expands
-- Footer: About, Privacy, GitHub
+- Footer: PRD, About, Privacy, GitHub
 - Avoid mega-menus, pill clusters, and competing CTAs on the same surface
 
 ## Naming

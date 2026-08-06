@@ -3,6 +3,7 @@
 Match how you feel to what you should taste.
 
 **Site:** [GitHub Pages](https://mml555.github.io/Mood_Taster/)  
+**PRD:** [Product requirements](https://mml555.github.io/Mood_Taster/prd.html)  
 **Repo:** [github.com/mml555/Mood_Taster](https://github.com/mml555/Mood_Taster)
 
 ## What’s here
@@ -10,6 +11,7 @@ Match how you feel to what you should taste.
 | Path | Purpose |
 |------|---------|
 | `docs/` | Public marketing site (GitHub Pages) |
+| `docs/prd.html` | Public product requirements document |
 | `.cursor/rules/` | Cursor agent rules (IA, coding standards, overview) |
 | `CLAUDE.md` | Claude project instructions |
 | `AGENTS.md` | Shared agent orientation |

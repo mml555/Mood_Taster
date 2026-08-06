@@ -328,6 +328,161 @@ a {
   }
 }
 
+/* —— Document / PRD pages —— */
+
+.doc-page .doc {
+  position: relative;
+  z-index: 1;
+  max-width: 44rem;
+  margin: 0 auto;
+  padding: 0 clamp(1.25rem, 4vw, 3rem) clamp(3rem, 8vh, 5rem);
+}
+
+.doc-hero {
+  padding: clamp(2rem, 6vh, 3.5rem) 0 1.5rem;
+  animation: rise 0.9s var(--ease) both;
+}
+
+.doc-hero h1 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(2.4rem, 7vw, 3.75rem);
+  font-weight: 700;
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+}
+
+.doc-hero .lede {
+  margin-top: 1rem;
+  max-width: 36rem;
+}
+
+.doc-meta {
+  margin: 1.25rem 0 0;
+  font-size: 0.85rem;
+  color: var(--smoke);
+}
+
+.toc {
+  margin: 0 0 2.5rem;
+  padding: 1.25rem 0 0;
+  border-top: 1px solid color-mix(in srgb, var(--paper) 12%, transparent);
+  animation: rise 1s var(--ease) 0.12s both;
+}
+
+.toc-label {
+  margin: 0 0 0.75rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--zest);
+}
+
+.toc ol {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 0.45rem;
+  font-size: 0.95rem;
+}
+
+.toc a {
+  text-decoration: none;
+  color: var(--smoke);
+  transition: color 0.2s ease;
+}
+
+.toc a:hover,
+.toc a:focus-visible {
+  color: var(--paper);
+  text-decoration: underline;
+}
+
+.doc-body section {
+  padding: 2rem 0 0.5rem;
+  border-top: 1px solid color-mix(in srgb, var(--paper) 10%, transparent);
+  scroll-margin-top: 1.25rem;
+}
+
+.doc-body h2 {
+  margin: 0 0 0.85rem;
+  font-family: var(--font-display);
+  font-size: clamp(1.45rem, 3.5vw, 1.85rem);
+  font-weight: 500;
+  line-height: 1.2;
+}
+
+.doc-body h3 {
+  margin: 1.5rem 0 0.65rem;
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  font-weight: 500;
+  color: var(--saffron);
+}
+
+.doc-body p,
+.doc-body li,
+.doc-body dd {
+  color: var(--smoke);
+}
+
+.doc-body p {
+  margin: 0 0 1rem;
+}
+
+.doc-body ul,
+.doc-body ol:not(.req-flow) {
+  margin: 0 0 1rem;
+  padding-left: 1.2rem;
+}
+
+.doc-body li {
+  margin-bottom: 0.45rem;
+}
+
+.doc-body strong {
+  color: var(--paper);
+  font-weight: 600;
+}
+
+.user-list {
+  margin: 0;
+  display: grid;
+  gap: 1.25rem;
+}
+
+.user-list div {
+  padding-top: 0.85rem;
+  border-top: 1px solid color-mix(in srgb, var(--paper) 10%, transparent);
+}
+
+.user-list dt {
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  font-weight: 500;
+  color: var(--paper);
+}
+
+.user-list dd {
+  margin: 0.4rem 0 0;
+}
+
+.req-flow {
+  margin: 0 0 1rem;
+  padding-left: 1.2rem;
+}
+
+.req-flow li {
+  margin-bottom: 0.75rem;
+}
+
+.top nav a[aria-current="page"] {
+  opacity: 1;
+  color: var(--saffron);
+}
+
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
