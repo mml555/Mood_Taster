@@ -21,4 +21,4 @@ Mood Taster matches how you feel to what you should taste — food, drink, or re
 - Do not commit or push unless explicitly asked
 - Keep secrets out of the repo; use env examples only
 - Update docs when APIs, schema, or IA change materially
-- Regenerate GitHub Pages with `npm run build:pages` after site changes
+- Site deploys via GitHub Actions on push to `main`

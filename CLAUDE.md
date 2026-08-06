@@ -14,9 +14,9 @@ Mood Taster recommends what to eat or drink based on how you feel. Mood first, m
 
 ## Stack
 
-- Next.js App Router (TypeScript) in `src/`
-- Static export for GitHub Pages (`output: 'export'`, `basePath: '/Mood_Taster'`)
-- Shared styles in `src/app/globals.css`
+- Next.js App Router + TypeScript in `src/`
+- GitHub Pages deploys from Actions (`.github/workflows/deploy-pages.yml`)
+- Do not commit generated `out/` or `docs/` — CI builds the static export
 
 ## Safety
 

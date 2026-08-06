@@ -8,7 +8,7 @@ Follow `CLAUDE.md` at the repo root and the Cursor rules in `.cursor/rules/`.
 - Prefer small, reviewable diffs
 - Validate inputs; log errors with context; never swallow exceptions
 - Keep secrets out of commits
-- Edit `src/` for the site; run `npm run build:pages` to refresh `docs/`
+- Edit `src/` for the site; Pages deploys automatically from Actions on `main`
 
 ## Never
 

@@ -11,7 +11,7 @@ This file orients coding agents (Cursor, Claude, Codex, etc.).
 | Information architecture | `.cursor/rules/information-architecture.mdc` |
 | Claude-specific notes | `CLAUDE.md` |
 | App source | `src/` (Next.js App Router) |
-| Deployed static site | `docs/` (GitHub Pages build output) |
+| Deploy | GitHub Actions → GitHub Pages (`out/`) |
 
 ## Non-negotiables
 
@@ -24,7 +24,7 @@ This file orients coding agents (Cursor, Claude, Codex, etc.).
 ## Stack bootstrap
 
 - Next.js + TypeScript + App Router
-- Public GitHub Pages from `/docs` on `main` (static export via `npm run build`)
+- Public GitHub Pages via Actions workflow (not branch `/docs`)
 - Local: `npm run dev` → http://localhost:3000
 
 <!-- BEGIN:nextjs-agent-rules -->

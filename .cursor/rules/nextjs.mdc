@@ -9,5 +9,6 @@ alwaysApply: false
 - App Router under `src/app/`; shared UI in `src/components/`
 - Use `next/link` for internal routes (respects `basePath`)
 - Static export only: no server actions, no default `next/image` optimizer
-- Production Pages build: `npm run build:pages` → writes `docs/`
+- Production Pages build: GitHub Actions sets `GITHUB_PAGES=true` and deploys `out/`
 - Prefer server components by default; add `"use client"` only when needed
+- Do not hand-edit generated `docs/` or `out/`
