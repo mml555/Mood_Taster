@@ -27,7 +27,7 @@ alwaysApply: true
 - Mobile-responsive by default
 - Prefer CSS variables for brand color/type tokens
 - Follow `design-system.mdc`: two tones plus one accent, no gradients, no
-  borders, no shadows — separate with spacing and type, not lines
+  borders, no shadows. Separate with spacing and type, not lines
 
 ## APIs & data
 

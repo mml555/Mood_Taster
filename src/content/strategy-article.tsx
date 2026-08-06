@@ -62,7 +62,7 @@ export function StrategyArticle() {
         </p>
         <p>
           Existing platforms already show restaurants and food brands will pay
-          for placement near purchase intent — Yelp for local sponsored results,
+          for placement near purchase intent: Yelp for local sponsored results,
           Instacart for brand ads at the choosing moment. Mood Taster’s
           opportunity is an earlier, more personal intent layer: the moment
           someone is still discovering what they want.
@@ -100,19 +100,19 @@ export function StrategyArticle() {
         <p>Four eventual revenue layers:</p>
         <ol>
           <li>
-            <strong>Restaurant promotion</strong> — sponsored matches when
+            <strong>Restaurant promotion</strong>: sponsored matches when
             genuinely relevant to the craving.
           </li>
           <li>
-            <strong>Food and CPG promotion</strong> — brands in snack,
+            <strong>Food and CPG promotion</strong>: brands in snack,
             ingredient, and at-home contexts.
           </li>
           <li>
-            <strong>Performance / transaction</strong> — revenue on reserve,
+            <strong>Performance / transaction</strong>: revenue on reserve,
             order, purchase, redeem, waitlist, or ingredient buy.
           </li>
           <li>
-            <strong>Taste intelligence</strong> — aggregated, privacy-safe
+            <strong>Taste intelligence</strong>: aggregated, privacy-safe
             trends for restaurants and brands. Later-stage; never expose
             individual Taste DNA.
           </li>
@@ -122,12 +122,12 @@ export function StrategyArticle() {
       <section id="order" aria-labelledby="order-title">
         <h2 id="order-title">5. The order of operations</h2>
         <ol>
-          <li>Make the tool useful — recommendations people want.</li>
-          <li>Prove repeat behavior — users return when hungry.</li>
-          <li>Build Taste DNA — enough feedback to improve matches.</li>
-          <li>Establish local density — one geographic market.</li>
-          <li>Test commercial placements manually — few restaurants/brands.</li>
-          <li>Productize advertising — self-serve or managed tools.</li>
+          <li>Make the tool useful: recommendations people want.</li>
+          <li>Prove repeat behavior: users return when hungry.</li>
+          <li>Build Taste DNA: enough feedback to improve matches.</li>
+          <li>Establish local density: one geographic market.</li>
+          <li>Test commercial placements manually: few restaurants/brands.</li>
+          <li>Productize advertising: self-serve or managed tools.</li>
         </ol>
         <p>
           Trying to monetize before recommendation trust will damage the
@@ -138,7 +138,7 @@ export function StrategyArticle() {
       <section id="north-star" aria-labelledby="north-star-title">
         <h2 id="north-star-title">6. North star</h2>
         <p>
-          Primary consumer metric: <strong>Successful Taste Sessions</strong> —
+          Primary consumer metric: <strong>Successful Taste Sessions</strong>:
           when a user accepts a recommendation, clicks through to obtain it,
           saves it, or later marks it as Nailed it.
         </p>
@@ -154,9 +154,9 @@ export function StrategyArticle() {
 
         <h3>7. Initial market</h3>
         <p>
-          Launch in one concentrated market — <strong>South Florida</strong>{" "}
+          Launch in one concentrated market: <strong>South Florida</strong>{" "}
           (Miami, Miami Beach, Aventura, Hallandale Beach, Hollywood, Fort
-          Lauderdale) — for restaurant density, food culture, cuisine mix,
+          Lauderdale), for restaurant density, food culture, cuisine mix,
           nightlife, creators, founder proximity, and direct restaurant
           relationships. Kosher dining can be a focused community wedge without
           limiting the full product to kosher users.
@@ -164,7 +164,7 @@ export function StrategyArticle() {
 
         <h3>8. Beachhead user</h3>
         <p>
-          <strong>The indecisive social eater</strong> — roughly 18–35, eats out
+          <strong>The indecisive social eater</strong>: roughly 18–35, eats out
           or orders often, mobile-web heavy, shares food content, decides with
           friends or a partner, says “I don’t know what I want,” likes
           quiz-style results, and wants faster decisions.
@@ -173,16 +173,16 @@ export function StrategyArticle() {
         <h3>9. Primary use cases</h3>
         <ul>
           <li>
-            <strong>The dinner problem</strong> — hungry, nothing sounds right.
+            <strong>The dinner problem</strong>: hungry, nothing sounds right.
           </li>
           <li>
-            <strong>The couple problem</strong> — neither knows where to eat.
+            <strong>The couple problem</strong>: neither knows where to eat.
           </li>
           <li>
-            <strong>The boredom problem</strong> — same things on repeat.
+            <strong>The boredom problem</strong>: same things on repeat.
           </li>
           <li>
-            <strong>The snack problem</strong> — want something, don’t know
+            <strong>The snack problem</strong>: want something, don’t know
             what.
           </li>
         </ul>
@@ -227,7 +227,7 @@ export function StrategyArticle() {
         <h3>Phase 3: Multi-city expansion</h3>
         <p>
           Expand on organic traffic, waitlist density, data quality, creators,
-          repeat behavior, and commercial demand — e.g. NYC, LA, Chicago,
+          repeat behavior, and commercial demand, e.g. NYC, LA, Chicago,
           Austin, Atlanta. Do not expand just to claim coverage.
         </p>
         <h3>Phase 4: Advertising network</h3>
@@ -249,7 +249,7 @@ export function StrategyArticle() {
         </p>
         <p>
           Every session should create a shareable artifact: recommendation card,
-          Taste DNA card, passport card, or badge card — strong visual
+          Taste DNA card, passport card, or badge card: strong visual
           hierarchy, Mood Taster mark, short URL, clear CTA, no need to
           understand the full platform.
         </p>
@@ -263,7 +263,7 @@ export function StrategyArticle() {
         <h3>15. Referral program</h3>
         <p>
           Introduce after organic share loop works. Reward unit: one new user
-          who completes a Taste Session — not clicks, impressions, or empty
+          who completes a Taste Session, not clicks, impressions, or empty
           accounts. Unlock interpretation, identity, and cosmetic features
           (extra DNA reveal, badges, deeper insights, Founding Taster). Never
           gate core recommendation quality behind referrals.
@@ -283,7 +283,7 @@ export function StrategyArticle() {
 
         <h3>17–18. Free product and optional Plus</h3>
         <p>
-          The consumer product stays largely free — scale, usage, and taste
+          The consumer product stays largely free: scale, usage, and taste
           feedback are the commercial asset. Generous Taste Sessions,
           restaurants, recipes, snacks, basic DNA, feedback, history, XP,
           passport, quests, badges, share cards. Do not throttle the core
@@ -322,14 +322,14 @@ export function StrategyArticle() {
           Start manually. Pilot: free claim/profile review/tagging, small paid
           pilot, monthly report. Hypotheses: Starter $199–$299/mo; Growth
           $499–$999/mo; multi-location custom. Later: CPC, CPA, redemption, or
-          hybrid minimums. Founder-led sales first — prioritize visually strong
+          hybrid minimums. Founder-led sales first: prioritize visually strong
           signature dishes, clear cravings, local popularity, capacity, social
           presence, responsive owners. Avoid long-cycle chains at the start.
         </p>
         <p>
           Message: Mood Taster helps hungry people figure out exactly what they
           want. When their craving matches your food, we put your dish in front
-          of them — with reporting on who saw it, what they craved, which dish,
+          of them, with reporting on who saw it, what they craved, which dish,
           and what action they took.
         </p>
 
@@ -352,13 +352,13 @@ export function StrategyArticle() {
           chewy snack → eligible sour candy). Promote because it fits, not merely
           because it paid. Products: sponsored snack match, sponsored
           ingredient, Taste Quest, sample/coupon campaigns, new-product testing,
-          sponsored Quick Bite (must still enrich Taste DNA — never disguised
+          sponsored Quick Bite (must still enrich Taste DNA, never disguised
           ads).
         </p>
         <p>
           Commerce/affiliate: reservations, orders, grocery, snacks,
-          ingredients, meal kits, coupon redemptions. Prefer direct actions —
-          Find it near me, Reserve, Order, Get ingredients, Buy this snack —
+          ingredients, meal kits, coupon redemptions. Prefer direct actions
+          (Find it near me, Reserve, Order, Get ingredients, Buy this snack)
           into trusted partners. Do not become a complicated checkout product
           initially.
         </p>
@@ -368,29 +368,29 @@ export function StrategyArticle() {
         <h2 id="trust-title">29–30. Advertising trust &amp; result architecture</h2>
         <ol>
           <li>
-            <strong>Sponsored means labeled</strong> — Sponsored match, Promoted
+            <strong>Sponsored means labeled</strong>: Sponsored match, Promoted
             dish, Sponsored Taste Quest. Never hide paid placement.
           </li>
           <li>
-            <strong>Relevance first</strong> — sponsors must satisfy hard dietary
+            <strong>Relevance first</strong>: sponsors must satisfy hard dietary
             and contextual constraints.
           </li>
           <li>
-            <strong>Organic options remain</strong> — never show only sponsors.
+            <strong>Organic options remain</strong>: never show only sponsors.
           </li>
           <li>
             <strong>Payment does not change Taste DNA</strong>.
           </li>
           <li>
-            <strong>Feedback stays honest</strong> — users can Nope sponsored
+            <strong>Feedback stays honest</strong>: users can Nope sponsored
             recs.
           </li>
           <li>
-            <strong>No personal identities to advertisers</strong> — aggregated
+            <strong>No personal identities to advertisers</strong>: aggregated
             reporting unless the user completes an identifiable transaction.
           </li>
           <li>
-            <strong>Protect recommendation trust</strong> — if a sponsor is
+            <strong>Protect recommendation trust</strong>: if a sponsor is
             materially weaker than organic, it is not the primary
             recommendation.
           </li>
@@ -407,9 +407,9 @@ export function StrategyArticle() {
         <h2 id="media-title">31–42. Media, creators &amp; launch</h2>
         <p>
           Mood Taster can behave like a media company without becoming a blog.
-          The media asset is <strong>interactive food intent</strong> — active
+          The media asset is <strong>interactive food intent</strong>: active
           craving, location, taste compatibility, occasion, decision readiness,
-          measured action — not hours of scroll.
+          measured action, not hours of scroll.
         </p>
         <p>
           Owned content drives users into the product: “what should I eat”
@@ -417,7 +417,7 @@ export function StrategyArticle() {
           aggregated data stories once volume exists.
         </p>
         <p>
-          Short-form (TikTok, Reels, Shorts): demonstration over explanation —
+          Short-form (TikTok, Reels, Shorts): demonstration over explanation:
           craving reveal, couple indecision, creator Taste DNA, mood test,
           restaurant challenge. Local micro-creators first; measure completed
           Taste Sessions, not only views.
@@ -427,13 +427,13 @@ export function StrategyArticle() {
           signs, menu stickers, social templates. Physical QR with context
           (“What should you eat here?” / “What should you order?”). SEO landing
           pages for high-intent queries; programmatic local pages only with real
-          unique value — no thin spam.
+          unique value, no thin spam.
         </p>
         <p>
           Paid UA only after completion, satisfaction, account conversion,
           repeat, referral, and successful-session rates are understood.
           Guerrilla and launch event concepts (“Taste Your Mood: Miami”) support
-          density. Earned media angle: personal Taste DNA metaphor — not “another
+          density. Earned media angle: personal Taste DNA metaphor, not “another
           AI restaurant app.” Do not claim scientific DNA analysis.
         </p>
       </section>
@@ -449,7 +449,7 @@ export function StrategyArticle() {
         </p>
         <p>
           Email continues the product (DNA update, weekly recap, quest, passport,
-          re-engagement) — one clear action, limited frequency. Monthly/seasonal
+          re-engagement), one clear action, limited frequency. Monthly/seasonal
           Taste Recap as Spotify Wrapped-style share moment. Habit target:{" "}
           <em>Hungry and indecisive = Mood Taster.</em>
         </p>
@@ -473,7 +473,7 @@ export function StrategyArticle() {
           conversion, engagement, retention, referral, and revenue metrics.
           Directional first-market targets: 70%+ quiz completion; result within
           45s; 50%+ positive reaction; 10–20% save-account; 30%+ feedback; 20%+
-          30-day return among registered; 10%+ share interaction. Hypotheses —
+          30-day return among registered; 10%+ share interaction. Hypotheses:
           adjust with real behavior.
         </p>
         <p>
@@ -485,7 +485,7 @@ export function StrategyArticle() {
         <p>
           First restaurant pilot: ~5–10 restaurants, one signature dish, one
           target craving/occasion, optional offer. Report matching sessions,
-          eligibility, views, clicks, directions, redemptions, feedback, CPA —
+          eligibility, views, clicks, directions, redemptions, feedback, CPA,
           never individual Taste DNA. Brand reporting similarly privacy-safe.
         </p>
       </section>
@@ -500,9 +500,9 @@ export function StrategyArticle() {
           insights.
         </p>
         <p>
-          Later B2B: Mood Taster for Restaurants, for Brands, Trends, and API —
+          Later B2B: Mood Taster for Restaurants, for Brands, Trends, and API,
           not initial priorities. Defensibility: taste history, Taste DNA,
-          craving taxonomy, feedback data, local dish data, brand, distribution —
+          craving taxonomy, feedback data, local dish data, brand, distribution,
           not AI alone.
         </p>
         <p>
@@ -547,7 +547,7 @@ export function StrategyArticle() {
             media story, private ad pilot.
           </li>
           <li>
-            <strong>Days 61–90:</strong> Miami launch — creators, QR, paid social
+            <strong>Days 61–90:</strong> Miami launch: creators, QR, paid social
             tests, referrals, Taste DNA cards, event/tasting, media; commercial
             pilot with 5–10 restaurants.
           </li>
@@ -576,7 +576,7 @@ export function StrategyArticle() {
         <h3>65. Team</h3>
         <p>
           Early ownership across founder/product, growth, restaurant
-          partnerships, product/design, and engineering/data — several roles may
+          partnerships, product/design, and engineering/data. Several roles may
           be founders initially.
         </p>
 
@@ -604,7 +604,7 @@ export function StrategyArticle() {
           The most important monetization choice: keep the actual food
           recommendation independent, and initially place paid restaurants under
           “Where to get it.” That lets Mood Taster say “You’re craving hot honey
-          chicken” without payment influencing the conclusion — while restaurants
+          chicken” without payment influencing the conclusion, while restaurants
           compete for the relevant next action.
         </p>
       </section>

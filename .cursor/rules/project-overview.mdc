@@ -5,7 +5,7 @@ alwaysApply: true
 
 # Mood Taster
 
-Mood Taster matches how you feel to what you should taste — food, drink, or recipes — without diet dogma or endless menus.
+Mood Taster matches how you feel to what you should taste (food, drink, or recipes) without diet dogma or endless menus.
 
 ## Product stance
 
@@ -16,7 +16,7 @@ Mood Taster matches how you feel to what you should taste — food, drink, or re
 
 ## Visual stance
 
-- Two tones (ink + paper) and one saffron accent — nothing else
+- Two tones (ink + paper) and one saffron accent, nothing else
 - Flat and spacing-led: no gradients, borders, or shadows
 - Full system in `design-system.mdc`
 

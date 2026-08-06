@@ -8,6 +8,6 @@ alwaysApply: false
 
 - App Router under `src/app/`; shared UI in `src/components/`
 - Use `next/link` for internal routes
-- Hosted on Vercel — no `basePath`, no static-export requirement
+- Hosted on Vercel: no `basePath`, no static-export requirement
 - Prefer server components by default; add `"use client"` only when needed
 - Do not reintroduce GitHub Pages `output: 'export'` / `basePath` unless asked

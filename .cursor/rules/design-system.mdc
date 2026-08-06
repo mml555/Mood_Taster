@@ -1,5 +1,5 @@
 ---
-description: Visual design system for Mood Taster — two-tone, flat, spacing-led
+description: Visual design system for Mood Taster. Two-tone, flat, spacing-led
 alwaysApply: true
 ---
 
@@ -9,7 +9,7 @@ Mood Taster looks like a well-set page, not a dashboard. Two tones, flat fills,
 and generous space do all the work. If a change needs a line or a gradient to
 read clearly, the spacing or the type is wrong.
 
-## Palette — two tones and one accent
+## Palette: two tones and one accent
 
 | Token | Value | Role |
 |-------|-------|------|
@@ -28,7 +28,7 @@ Every neutral in the UI is a **mix of the two tones**, never a new hue:
 Accent rules:
 
 - Saffron is for **small marks**: eyebrows, step numbers, one emphasis per section
-- It must never fill a surface, a button, or any large area — roughly 1% of a
+- It must never fill a surface, a button, or any large area. Roughly 1% of a
   viewport's painted area is the ceiling
 - Never introduce a fourth hue. No zest, no status greens, no semantic reds.
   Failure and success read through copy, weight, and placement
@@ -43,7 +43,7 @@ Accent rules:
 - **No card grids** built out of boxes. Group with space and alignment
 - **No `border-radius` above `2px`.** Prefer `0`
 
-## Instead — separate with space and tone
+## Instead: separate with space and tone
 
 Reach for these, in order:
 
@@ -52,7 +52,7 @@ Reach for these, in order:
 3. **Tone.** Step a surface to `--ink-raised`, or invert to paper-on-ink, when a
    region genuinely needs to detach
 
-Primary actions **invert the tones** — paper background, ink text. That is the
+Primary actions **invert the tones**: paper background, ink text. That is the
 only "filled" element in the system.
 
 ## Spacing scale
@@ -75,11 +75,11 @@ a divider.
 
 These are accessibility features, not decoration, and must survive:
 
-- `:focus-visible` outlines — keep a visible 2px focus ring on every interactive
+- `:focus-visible` outlines: keep a visible 2px focus ring on every interactive
   element. Never set `outline: none` without an equivalent replacement
 - `box-sizing: border-box`
 - Underlines on inline text links
-- The `.grain` overlay — monochrome noise, no hue and no gradient. It is brand
+- The `.grain` overlay: monochrome noise, no hue and no gradient. It is brand
   texture, not a substitute for structure. Do not add a second texture
 
 ## Sponsored placements
@@ -87,7 +87,7 @@ These are accessibility features, not decoration, and must survive:
 The Strategy doc (`/strategy`) requires paid placements to be unmistakably
 labeled. Under this system, that label is **type, not a badge box**:
 
-- Use an accent eyebrow — `Sponsored match` — in the same style as `.eyebrow`
+- Use an accent eyebrow, `Sponsored match`, in the same style as `.eyebrow`
 - Never build a bordered pill, tinted chip, or shadowed card to carry it
 - Never make the sponsored label quieter than the organic one it sits beside
 

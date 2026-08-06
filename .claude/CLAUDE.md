@@ -1,4 +1,4 @@
-# Mood Taster — Claude Code rules
+# Mood Taster: Claude Code rules
 
 Follow `CLAUDE.md` at the repo root and the Cursor rules in `.cursor/rules/`.
 
@@ -16,5 +16,6 @@ Follow `CLAUDE.md` at the repo root and the Cursor rules in `.cursor/rules/`.
 - Invent diet/wellness scoring as a primary UX
 - Add competing CTAs or card grids to marketing heroes
 - Add gradients, borders, or box shadows (see `.cursor/rules/design-system.mdc`)
+- Use em dashes in copy, metadata, docs, or comments
 - Commit without an explicit user request
 - Reintroduce GitHub Pages as the primary host unless asked

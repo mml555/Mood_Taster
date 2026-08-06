@@ -7,10 +7,10 @@ alwaysApply: true
 
 ## Core user flow
 
-1. **Mood** — capture how the user feels (quick pick, text, or voice later)
-2. **Match** — show a short ranked set of tastes/places/recipes
-3. **Act** — save, cook, or go (directions / details)
-4. **Remember** — optional history and preferences that improve future matches
+1. **Mood**: capture how the user feels (quick pick, text, or voice later)
+2. **Match**: show a short ranked set of tastes/places/recipes
+3. **Act**: save, cook, or go (directions / details)
+4. **Remember**: optional history and preferences that improve future matches
 
 Keep this sequence intact. Do not bury mood capture behind long onboarding.
 
@@ -45,3 +45,10 @@ Keep this sequence intact. Do not bury mood capture behind long onboarding.
 
 - User-facing: mood, taste, match, pick
 - Avoid: “algorithm,” “optimization,” “wellness score” in UI copy
+
+## Punctuation in copy
+
+- **No em dashes** anywhere: UI copy, metadata, docs, rules, or code comments.
+  Use a period, comma, or colon; parentheses for a true aside
+- En dashes are fine for numeric ranges only (18-35, 50-150)
+- One idea per sentence beats one sentence with a hinge in the middle

@@ -18,7 +18,7 @@ Match how you feel to what you should taste.
 |-----|-----|------|
 | PRD | `/prd` | What we’re building |
 | Strategy | `/strategy` | How we grow and monetize (trust first) |
-| Brand Guide | — | Planned companion |
+| Brand Guide | TBD | Planned companion |
 
 ## Getting started
 

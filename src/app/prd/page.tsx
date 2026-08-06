@@ -17,7 +17,7 @@ export default function PrdPage() {
           <p className="eyebrow">Ship Night PRD · one page</p>
           <h1>Mood Taster</h1>
           <p className="lede">
-            Figure out what you’re craving in under 30 seconds — one specific
+            Figure out what you’re craving in under 30 seconds: one specific
             dish, not another endless menu.
           </p>
           <p className="doc-meta">
@@ -48,8 +48,8 @@ export default function PrdPage() {
               Mood Taster is a mobile-first web app. You pick a lane (Go Out,
               Make Something, or Grab a snack), answer a few short craving
               questions, and get one dish-level recommendation with a
-              plain-English “why this fits.” You can act on it immediately —
-              directions, cook steps, or a snack path — and mark whether it
+              plain-English “why this fits.” You can act on it immediately:
+              directions, cook steps, or a snack path, and mark whether it
               nailed it.
             </p>
           </section>
@@ -92,7 +92,7 @@ export default function PrdPage() {
             <p>
               A judge on their phone completes Go Out → craving quiz → receives
               one specific dish recommendation with a why line and a place path,
-              then rates it Nailed it / Kinda / Nope — all live, under 45
+              then rates it Nailed it / Kinda / Nope. All live, under 45
               seconds, no account.
             </p>
           </section>

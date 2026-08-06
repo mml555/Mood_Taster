@@ -1,4 +1,4 @@
-# Agent instructions — Mood Taster
+# Agent instructions for Mood Taster
 
 This file orients coding agents (Cursor, Claude, Codex, etc.).
 
@@ -12,10 +12,10 @@ This file orients coding agents (Cursor, Claude, Codex, etc.).
 | Design system | `.cursor/rules/design-system.mdc` |
 | Claude-specific notes | `CLAUDE.md` |
 | App source | `src/` (Next.js App Router) |
-| Deploy | Vercel — https://mood-taster.vercel.app/ |
+| Deploy | Vercel: https://mood-taster.vercel.app/ |
 | Public PRD | `/prd` |
 | Public GTM strategy | `/strategy` |
-| Brand Guide | Planned — third companion doc with PRD + Strategy |
+| Brand Guide | Planned: third companion doc with PRD + Strategy |
 
 ## Non-negotiables
 
@@ -23,7 +23,7 @@ This file orients coding agents (Cursor, Claude, Codex, etc.).
 2. Validate inputs; no silent error swallowing
 3. No secrets in git
 4. Marketing surfaces: brand-first, one job per section
-5. Two-tone flat visuals — no gradients, borders, or shadows anywhere
+5. Two-tone flat visuals: no gradients, borders, or shadows anywhere
 6. Do not commit/push unless the user asks
 
 ## Stack bootstrap
