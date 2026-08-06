@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { LogIn, Sparkles } from "lucide-react";
 import { useEffect, useState } from "react";
 import { createClient, isSupabaseConfigured } from "@/lib/supabase/client";
 
@@ -57,9 +58,11 @@ export function ProfileNudge({ context = "dna" }: ProfileNudgeProps) {
       <p className="profile-nudge-copy">{copy}</p>
       <div className="profile-nudge-actions">
         <Link className="cta" href="/signup">
+          <Sparkles size={20} strokeWidth={1.5} aria-hidden />
           Save my taste
         </Link>
         <Link className="text-link" href="/login">
+          <LogIn size={16} strokeWidth={1.5} aria-hidden />
           Sign in
         </Link>
         <span className="profile-nudge-aside">Optional.</span>

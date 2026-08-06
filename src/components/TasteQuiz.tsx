@@ -5,6 +5,7 @@ import { ArrowLeft } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { loadDnaForUser } from "@/lib/dna-sync";
 import { rank } from "@/lib/engine";
+import { QUIZ_OPTION_ICONS } from "@/lib/mood-icons";
 import { emptySession, writeSession } from "@/lib/session";
 import type { Answers } from "@/lib/taste-types";
 import {
@@ -173,6 +174,7 @@ export function TasteQuiz() {
       <ul className="quiz-options" role="list">
         {current.options.map((opt) => {
           const isSelected = selected === opt.value;
+          const Icon = QUIZ_OPTION_ICONS[opt.value];
           return (
             <li key={opt.value}>
               <button
@@ -182,7 +184,12 @@ export function TasteQuiz() {
                 }
                 onClick={() => onChoose(opt.value)}
               >
-                {opt.label}
+                {Icon ? (
+                  <span className="quiz-option-icon" aria-hidden>
+                    <Icon size={24} strokeWidth={1.5} />
+                  </span>
+                ) : null}
+                <span className="quiz-option-label">{opt.label}</span>
               </button>
             </li>
           );

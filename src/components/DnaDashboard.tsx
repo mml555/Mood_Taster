@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { RotateCcw, Sparkles } from "lucide-react";
+import { RotateCcw, Search, Sparkles } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import {
   DNA_DIMENSIONS,
@@ -12,6 +12,7 @@ import {
 } from "@/lib/dna";
 import { loadDnaForUser, resetDnaEverywhere } from "@/lib/dna-sync";
 import { ProfileNudge } from "@/components/ProfileNudge";
+import { DNA_DIMENSION_ICONS } from "@/lib/mood-icons";
 import { createClient, isSupabaseConfigured } from "@/lib/supabase/client";
 import type { DnaDimension, DnaProfile } from "@/lib/taste-types";
 
@@ -82,6 +83,7 @@ export function DnaDashboard() {
         <div className="result-actions">
           <Link className="cta" href="/taste">
             Show me
+            <Search size={20} strokeWidth={1.5} aria-hidden />
           </Link>
         </div>
         <ProfileNudge context="dna" />
@@ -104,14 +106,24 @@ export function DnaDashboard() {
         <div className="dna-block">
           <h2 className="dna-heading">Strongest flavors</h2>
           <ul className="dna-list">
-            {flavors.map(({ dimension, entry }) => (
+            {flavors.map(({ dimension, entry }) => {
+              const Icon = DNA_DIMENSION_ICONS[dimension];
+              return (
               <li key={dimension}>
-                <span>{labelDimension(dimension)}</span>
+                <span className="dna-dim">
+                  {Icon ? (
+                    <span className="dna-dim-icon" aria-hidden>
+                      <Icon size={20} strokeWidth={1.5} />
+                    </span>
+                  ) : null}
+                  {labelDimension(dimension)}
+                </span>
                 <span className="dna-meta">
                   {Math.round(entry.score * 100)} · {entry.samples} samples
                 </span>
               </li>
-            ))}
+              );
+            })}
           </ul>
         </div>
       ) : null}
@@ -120,14 +132,24 @@ export function DnaDashboard() {
         <div className="dna-block">
           <h2 className="dna-heading">Strongest textures</h2>
           <ul className="dna-list">
-            {textures.map(({ dimension, entry }) => (
+            {textures.map(({ dimension, entry }) => {
+              const Icon = DNA_DIMENSION_ICONS[dimension];
+              return (
               <li key={dimension}>
-                <span>{labelDimension(dimension)}</span>
+                <span className="dna-dim">
+                  {Icon ? (
+                    <span className="dna-dim-icon" aria-hidden>
+                      <Icon size={20} strokeWidth={1.5} />
+                    </span>
+                  ) : null}
+                  {labelDimension(dimension)}
+                </span>
                 <span className="dna-meta">
                   {Math.round(entry.score * 100)} · {entry.samples} samples
                 </span>
               </li>
-            ))}
+              );
+            })}
           </ul>
         </div>
       ) : null}
@@ -137,9 +159,17 @@ export function DnaDashboard() {
         <ul className="dna-list">
           {evidenced.map((dimension) => {
             const entry = dna[dimension];
+            const Icon = DNA_DIMENSION_ICONS[dimension];
             return (
               <li key={dimension}>
-                <span>{labelDimension(dimension)}</span>
+                <span className="dna-dim">
+                  {Icon ? (
+                    <span className="dna-dim-icon" aria-hidden>
+                      <Icon size={20} strokeWidth={1.5} />
+                    </span>
+                  ) : null}
+                  {labelDimension(dimension)}
+                </span>
                 <span className="dna-meta">
                   {Math.round(entry.score * 100)} · conf{" "}
                   {Math.round(entry.confidence * 100)}%
@@ -155,6 +185,7 @@ export function DnaDashboard() {
       <div className="result-actions">
         <Link className="cta" href="/taste">
           Try again
+          <Search size={20} strokeWidth={1.5} aria-hidden />
         </Link>
         <button type="button" className="reject-btn" onClick={onReset}>
           <RotateCcw size={20} strokeWidth={1.5} aria-hidden />

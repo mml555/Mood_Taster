@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { LogIn, UserRound } from "lucide-react";
 import { useEffect, useState } from "react";
 import { createClient, isSupabaseConfigured } from "@/lib/supabase/client";
 
@@ -81,22 +82,30 @@ export function AuthNav({ current }: { current?: string }) {
   if (state.status === "user") {
     return (
       <Link
+        className="nav-primary nav-with-icon"
         href="/account"
         aria-current={current === "account" ? "page" : undefined}
       >
-        {state.username ? `@${state.username}` : "Account"}
+        <UserRound size={16} strokeWidth={1.5} aria-hidden />
+        <span className="nav-label">
+          {state.username ? `@${state.username}` : "Account"}
+        </span>
       </Link>
     );
   }
 
   return (
     <>
-      <Link href="/signup">Save taste</Link>
+      <Link className="nav-save" href="/signup">
+        Save
+      </Link>
       <Link
+        className="nav-primary nav-with-icon"
         href="/login"
         aria-current={current === "account" ? "page" : undefined}
       >
-        Sign in
+        <LogIn size={16} strokeWidth={1.5} aria-hidden />
+        <span className="nav-label">Sign in</span>
       </Link>
     </>
   );

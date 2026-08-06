@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { ChevronDown, MapPin, Sparkles } from "lucide-react";
+import { ChevronDown, MapPin, Search, Sparkles } from "lucide-react";
 import {
   useCallback,
   useEffect,
@@ -448,6 +448,7 @@ export function ResultView({ food }: ResultViewProps) {
             Start over
           </Link>
           <Link className="text-link" href="/dna">
+            <Sparkles size={16} strokeWidth={1.5} aria-hidden />
             See Taste DNA
           </Link>
         </div>
@@ -477,10 +478,10 @@ export function ResultView({ food }: ResultViewProps) {
         }
       >
         <span className="result-card-hint result-card-hint-like" aria-hidden>
-          Like
+          <span className="result-card-hint-mark">♡</span> Like
         </span>
         <span className="result-card-hint result-card-hint-nope" aria-hidden>
-          Nope
+          <span className="result-card-hint-mark">×</span> Nope
         </span>
 
         <div className="result-media">
@@ -522,83 +523,67 @@ export function ResultView({ food }: ResultViewProps) {
 
       {riff ? <p className="result-riff">{riff}</p> : null}
 
-      <NearbySection food={food} places={places} state={placesState} />
-
       {!sessionReady ? null : hasSession ? (
         <>
-          <button
-            type="button"
-            className="why-toggle"
-            aria-expanded={whyOpen}
-            onClick={() => setWhyOpen((v) => !v)}
-          >
-            Why this?
-            <ChevronDown
-              size={20}
-              strokeWidth={1.5}
-              aria-hidden
-              className={whyOpen ? "is-open" : undefined}
-            />
-          </button>
-          {whyOpen ? <p className="result-why">{explanation}</p> : null}
+          <div className="reaction-dock">
+            <div className="reaction-bar" role="group" aria-label="Reactions">
+              <button
+                type="button"
+                className="reaction-btn reaction-btn-nope"
+                onClick={onNope}
+                disabled={rated || adjusting}
+                aria-label="Not for me"
+              >
+                <span className="reaction-icon" aria-hidden>
+                  ×
+                </span>
+                <span className="reaction-label">Not for me</span>
+              </button>
+              <button
+                type="button"
+                className="reaction-btn"
+                onClick={onTryAgain}
+                disabled={adjusting}
+                aria-label="Try again"
+              >
+                <span className="reaction-icon" aria-hidden>
+                  ↻
+                </span>
+                <span className="reaction-label">Try again</span>
+              </button>
+              <button
+                type="button"
+                className="reaction-btn reaction-btn-like"
+                onClick={onLike}
+                disabled={rated || adjusting}
+                aria-label="I like it"
+              >
+                <span className="reaction-icon" aria-hidden>
+                  ♡
+                </span>
+                <span className="reaction-label">I like it</span>
+              </button>
+            </div>
 
-          <div className="reaction-bar" role="group" aria-label="Reactions">
-            <button
-              type="button"
-              className="reaction-btn reaction-btn-nope"
-              onClick={onNope}
-              disabled={rated || adjusting}
-              aria-label="Not for me"
-            >
-              <span className="reaction-icon" aria-hidden>
-                ×
-              </span>
-              Not for me
-            </button>
-            <button
-              type="button"
-              className="reaction-btn"
-              onClick={onTryAgain}
-              disabled={adjusting}
-              aria-label="Try again"
-            >
-              <span className="reaction-icon" aria-hidden>
-                ↻
-              </span>
-              Try again
-            </button>
-            <button
-              type="button"
-              className="reaction-btn reaction-btn-like"
-              onClick={onLike}
-              disabled={rated || adjusting}
-              aria-label="I like it"
-            >
-              <span className="reaction-icon" aria-hidden>
-                ♡
-              </span>
-              I like it
-            </button>
-          </div>
-
-          <div className="reaction-quiet">
-            <button
-              type="button"
-              className="text-link"
-              onClick={() => onRate("kinda")}
-              disabled={rated || adjusting}
-            >
-              Kinda
-            </button>
-            <button
-              type="button"
-              className="text-link"
-              onClick={() => setWhyPanelOpen((v) => !v)}
-              aria-expanded={whyPanelOpen}
-              disabled={adjusting}
-            >
-              Why?
-            </button>
+            <div className="reaction-quiet">
+              <button
+                type="button"
+                className="text-link"
+                onClick={() => onRate("kinda")}
+                disabled={rated || adjusting}
+              >
+                Kinda
+              </button>
+              <button
+                type="button"
+                className="text-link"
+                onClick={() => setWhyPanelOpen((v) => !v)}
+                aria-expanded={whyPanelOpen}
+                disabled={adjusting}
+              >
+                Why?
+              </button>
+            </div>
           </div>
 
           {whyPanelOpen ? (
@@ -642,6 +627,24 @@ export function ResultView({ food }: ResultViewProps) {
             </div>
           ) : null}
 
+          <button
+            type="button"
+            className="why-toggle"
+            aria-expanded={whyOpen}
+            onClick={() => setWhyOpen((v) => !v)}
+          >
+            Why this?
+            <ChevronDown
+              size={20}
+              strokeWidth={1.5}
+              aria-hidden
+              className={whyOpen ? "is-open" : undefined}
+            />
+          </button>
+          {whyOpen ? <p className="result-why">{explanation}</p> : null}
+
+          <NearbySection food={food} places={places} state={placesState} />
+
           {deltas && deltas.length > 0 ? (
             <p className="dna-toast" role="status">
               Taste DNA updated.{" "}
@@ -675,6 +678,7 @@ export function ResultView({ food }: ResultViewProps) {
           </p>
           <Link className="cta" href="/taste">
             Show me
+            <Search size={20} strokeWidth={1.5} aria-hidden />
           </Link>
         </div>
       )}
@@ -694,7 +698,10 @@ function NearbySection({
   if (state === "locating" || state === "loading") {
     return (
       <div className="nearby">
-        <p className="nearby-label">Nearby</p>
+        <p className="nearby-label">
+          <MapPin size={16} strokeWidth={1.5} aria-hidden />
+          Nearby
+        </p>
         <p className="nearby-status" role="status">
           {state === "locating" ? "Finding you" : "Looking nearby"}
         </p>
@@ -707,7 +714,10 @@ function NearbySection({
   if (state !== "ready" || places.length === 0) {
     return (
       <div className="nearby">
-        <p className="nearby-label">Nearby</p>
+        <p className="nearby-label">
+          <MapPin size={16} strokeWidth={1.5} aria-hidden />
+          Nearby
+        </p>
         <a
           className="nearby-link"
           href={mapsSearchUrl(food)}
@@ -723,28 +733,59 @@ function NearbySection({
 
   return (
     <div className="nearby">
-      <p className="nearby-label">Nearby</p>
+      <p className="nearby-label">
+        <MapPin size={16} strokeWidth={1.5} aria-hidden />
+        Nearby
+      </p>
       <ul className="nearby-list">
         {places.map((p) => (
           <li key={`${p.name}-${p.address}`}>
-            <span className="nearby-head">
-              {p.mapsUri ? (
-                <a href={p.mapsUri} target="_blank" rel="noopener noreferrer">
-                  {p.name}
-                </a>
-              ) : (
-                <span className="nearby-name">{p.name}</span>
-              )}
-              <span className="nearby-meta">
-                {[
-                  p.miles !== null ? `${p.miles.toFixed(1)} mi` : null,
-                  p.rating !== null ? p.rating.toFixed(1) : null,
-                ]
-                  .filter(Boolean)
-                  .join(" / ")}
+            {p.mapsUri ? (
+              <a
+                className="nearby-place"
+                href={p.mapsUri}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <span className="nearby-place-icon" aria-hidden>
+                  <MapPin size={20} strokeWidth={1.5} />
+                </span>
+                <span className="nearby-place-body">
+                  <span className="nearby-head">
+                    <span className="nearby-name">{p.name}</span>
+                    <span className="nearby-meta">
+                      {[
+                        p.miles !== null ? `${p.miles.toFixed(1)} mi` : null,
+                        p.rating !== null ? p.rating.toFixed(1) : null,
+                      ]
+                        .filter(Boolean)
+                        .join(" / ")}
+                    </span>
+                  </span>
+                  <span className="nearby-address">{p.address}</span>
+                </span>
+              </a>
+            ) : (
+              <span className="nearby-place is-static">
+                <span className="nearby-place-icon" aria-hidden>
+                  <MapPin size={20} strokeWidth={1.5} />
+                </span>
+                <span className="nearby-place-body">
+                  <span className="nearby-head">
+                    <span className="nearby-name">{p.name}</span>
+                    <span className="nearby-meta">
+                      {[
+                        p.miles !== null ? `${p.miles.toFixed(1)} mi` : null,
+                        p.rating !== null ? p.rating.toFixed(1) : null,
+                      ]
+                        .filter(Boolean)
+                        .join(" / ")}
+                    </span>
+                  </span>
+                  <span className="nearby-address">{p.address}</span>
+                </span>
               </span>
-            </span>
-            <span className="nearby-address">{p.address}</span>
+            )}
           </li>
         ))}
       </ul>

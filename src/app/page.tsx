@@ -1,7 +1,37 @@
+import Image from "next/image";
 import Link from "next/link";
+import { ArrowRight } from "lucide-react";
 import { SiteFooter } from "@/components/SiteFooter";
 import { SiteHeader } from "@/components/SiteHeader";
 import { ProfileNudge } from "@/components/ProfileNudge";
+import { FLOW_ICONS } from "@/lib/mood-icons";
+
+const PEEK_DISHES = [
+  {
+    id: "crispy-hot-honey-chicken-sandwich",
+    name: "Hot honey chicken",
+    image: "/food/crispy-hot-honey-chicken-sandwich.jpg",
+    alt: "Crispy fried chicken sandwich with honey drizzle",
+  },
+  {
+    id: "matcha-latte",
+    name: "Matcha latte",
+    image: "/food/matcha-latte.jpg",
+    alt: "Frothy green matcha latte in a cup",
+  },
+  {
+    id: "birria-tacos",
+    name: "Birria tacos",
+    image: "/food/birria-tacos.jpg",
+    alt: "Crispy birria tacos with consomme",
+  },
+  {
+    id: "avocado-toast",
+    name: "Avocado toast",
+    image: "/food/avocado-toast.jpg",
+    alt: "Avocado toast on rustic bread",
+  },
+] as const;
 
 export default function HomePage() {
   return (
@@ -18,17 +48,35 @@ export default function HomePage() {
           <div className="cta-row">
             <Link className="cta" href="/taste">
               Show me
+              <ArrowRight size={20} strokeWidth={1.5} aria-hidden />
             </Link>
           </div>
+
+          <ul className="hero-peek" aria-label="Dishes you might get">
+            {PEEK_DISHES.map((dish) => (
+              <li key={dish.id}>
+                <Image
+                  src={dish.image}
+                  alt={dish.alt}
+                  width={240}
+                  height={240}
+                  sizes="(max-width: 720px) 28vw, 140px"
+                  className="hero-peek-image"
+                />
+                <span className="hero-peek-name">{dish.name}</span>
+              </li>
+            ))}
+          </ul>
         </section>
 
         <section className="how" id="how" aria-labelledby="how-title">
           <h2 id="how-title">See. React. Taste.</h2>
-          <p className="section-lede">
-            Three steps. One job each.
-          </p>
+          <p className="section-lede">Three steps. One job each.</p>
           <ol className="flow">
             <li>
+              <span className="flow-icon" aria-hidden>
+                <FLOW_ICONS.feel size={24} strokeWidth={1.5} />
+              </span>
               <span className="step">01</span>
               <h3>Feel</h3>
               <p>
@@ -37,13 +85,17 @@ export default function HomePage() {
               </p>
             </li>
             <li>
+              <span className="flow-icon" aria-hidden>
+                <FLOW_ICONS.match size={24} strokeWidth={1.5} />
+              </span>
               <span className="step">02</span>
               <h3>Match</h3>
-              <p>
-                Get one dish and a short why. Not a long menu.
-              </p>
+              <p>Get one dish and a short why. Not a long menu.</p>
             </li>
             <li>
+              <span className="flow-icon" aria-hidden>
+                <FLOW_ICONS.react size={24} strokeWidth={1.5} />
+              </span>
               <span className="step">03</span>
               <h3>React</h3>
               <p>
@@ -63,6 +115,7 @@ export default function HomePage() {
           <div className="cta-row">
             <Link className="cta" href="/taste">
               Show me
+              <ArrowRight size={20} strokeWidth={1.5} aria-hidden />
             </Link>
           </div>
           <ProfileNudge context="home" />
