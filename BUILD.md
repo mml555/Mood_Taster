@@ -1,0 +1,573 @@
+# Mood Taster: Ship Night build document
+
+Status: ready for team review
+Scope: one night, nine tickets, four routes, no backend
+
+---
+
+## 1. What we are shipping
+
+Mood Taster asks four one-tap questions about what you are craving and returns one specific
+dish, not a category and not a menu. You can reject it and get another without redoing the
+quiz. Rating the result updates a local Taste DNA profile that visibly changes the next
+recommendation.
+
+Everything runs in the browser. No accounts, no database, no restaurant or delivery
+integration.
+
+### The judged demo (three minute budget)
+
+This walk is the spec. If a change does not serve one of these ten steps, it is not tonight.
+
+1. Open the public URL in incognito. No login.
+2. Tap start.
+3. Answer four questions.
+4. Receive a specific dish with a reason.
+5. Tap "Not feeling it".
+6. Receive a different dish that still matches the craving.
+7. Submit feedback (Nailed it / Kinda / Nope).
+8. See Taste DNA update.
+9. Start another session.
+10. Demonstrate that the recommendation changed because of step 7.
+
+---
+
+## 2. Locked decisions
+
+Each row is something a teammate would otherwise get wrong on their first commit. These are
+settled. Raise an objection before you start, not in a PR.
+
+| Ticket text says | We are doing | Why |
+|---|---|---|
+| Tailwind, deep purple, poppy yellow, large rounded controls | The existing ink, paper, saffron system. No Tailwind. Flat fills, square corners, spacing led | `.cursor/rules/design-system.mdc` and `CLAUDE.md` are checked in and win |
+| "Create the Next.js application" | It already exists (Next 16, React 19, TypeScript). Ticket 1 shrinks to stubbing four routes and confirming the deploy | Repo state |
+| Homepage is the marketing hero | `/` becomes the app entry ("Hungry?"). `/prd` and `/strategy` stay reachable from the footer | Saves a tap in a three minute demo |
+| `PRD.md` lists Taste DNA as out of scope | `PRD.md` is knowingly left stale. Time goes to code | Deliberate call, noted here so nobody "fixes" it mid build |
+| "No external AI is required for the core flow" | Preserved exactly. AI is an enhancement layer and never a dependency | Ticket 4 |
+
+**Dropped, do not build:** Google Places or any map API, the three lane structure (Go Out /
+Make Something / Grab a snack), recipes, and PostHog analytics. Feedback lives entirely in
+local Taste DNA.
+
+---
+
+## 3. Architecture
+
+Client side only. No database, no auth, one API route that the product works fine without.
+
+```
+  /                    /taste                  /result/[id]              /dna
+  "Hungry?"     ->     4 questions      ->     dish + actions     ->     Taste profile
+                            |                       |    ^                     |
+                            v                       v    | "Not feeling it"    |
+                     sessionStorage           localStorage  (router.replace)   |
+                     answers, rejected         Taste DNA <------ ratings ------+
+                            |                       |
+                            +---> rank(answers, dna, session) ---> primary + 3+ alternates
+```
+
+### Why `/result/[id]` keys on the food id
+
+`[id]` is the **food id**, not a session id. The URL stays truthful, "Not feeling it" is a
+`router.replace` to the next candidate (updates in place, no history stacking), and a shared or
+refreshed URL still resolves to a real dish. An unknown id returns a 404.
+
+### Storage split
+
+| Store | Holds | Why that one |
+|---|---|---|
+| `sessionStorage` | `answers`, `rejectedIds`, `servedIds` | Survives refresh in the same tab, and clears naturally between demo runs |
+| `localStorage` | Taste DNA | Must persist across sessions for the step 10 payoff |
+
+**Read both only inside `useEffect`, never during render.** Reading browser storage during
+render throws a hydration mismatch and blanks the page. This is the most likely bug in the
+build. See risk 1.
+
+---
+
+## 4. Data model
+
+Tickets 2, 4, and 7 are written by different people against these types. Land this file first.
+
+```ts
+// src/lib/taste-types.ts
+
+export const FLAVORS = ['savory', 'spicy', 'sweet', 'fresh'] as const
+export const TEXTURES = ['crunchy', 'creamy', 'juicy', 'soft'] as const
+export const HEAVINESS = ['light', 'medium', 'filling'] as const
+export const ADVENTURE = ['safe', 'curious', 'surprise'] as const
+
+export type Flavor = (typeof FLAVORS)[number]
+export type Texture = (typeof TEXTURES)[number]
+export type Heaviness = (typeof HEAVINESS)[number]
+export type Adventure = (typeof ADVENTURE)[number]
+
+export type Food = {
+  id: string                    // kebab-case, stable, appears in the URL
+  name: string                  // a specific dish, never a cuisine
+  description: string           // one line, what it actually is
+  flavorTags: Flavor[]
+  textureTags: Texture[]
+  heaviness: Heaviness
+  temperature: 'hot' | 'cold' | 'room'
+  adventurousness: 1 | 2 | 3 | 4 | 5
+  dietaryTags: string[]         // 'vegetarian' | 'vegan' | 'gluten-free' | 'contains-pork' ...
+  image: string                 // see section 8
+  reasonTemplate: string        // "{flavor} and {texture}, and it eats {heaviness}."
+}
+
+export type Answers = {
+  flavor: Flavor
+  texture: Texture
+  heaviness: Heaviness | 'any'  // 'any' is the "I don't care" option
+  adventure: Adventure
+}
+
+export type DnaDimension =
+  | 'sweet' | 'spicy' | 'savory' | 'fresh'
+  | 'crunchy' | 'creamy' | 'juicy' | 'soft'
+  | 'light' | 'filling' | 'adventurous'
+
+export type DnaEntry = {
+  score: number        // 0 to 1, starts at 0.5 (neutral, not unknown)
+  confidence: number   // 0 to 1, derived from samples
+  samples: number
+}
+
+export type DnaProfile = Record<DnaDimension, DnaEntry>
+
+export type SessionState = {
+  answers: Answers
+  rejectedIds: string[]
+  servedIds: string[]
+}
+
+export type ScoredFood = {
+  food: Food
+  score: number
+  matchedAttributes: string[]   // up to 3, display ready
+  explanation: string
+}
+
+export type Recommendation = {
+  primary: ScoredFood
+  alternates: ScoredFood[]      // always 2 or more, so 3+ candidates total
+}
+```
+
+---
+
+## 5. The scoring formula
+
+This is the contract between Tickets 2, 4, and 7. `rank()` is pure: same inputs, same output,
+no IO, no randomness.
+
+```
+score = 0.75 * quizMatch
+      + 0.20 * dnaMatch
+      + 0.05 * novelty
+      - rejectionPenalty
+      - recentPenalty
+```
+
+Every component normalizes to 0 to 1 **before** weighting. If they do not, the percentages are
+decorative.
+
+**Neutral is 0.5, and neutral is not negative.** "I don't care" on heaviness, and any dimension
+with no DNA evidence, both score 0.5. A missing signal must never read as a bad match.
+
+### quizMatch (weighted mean of four sub scores)
+
+| Sub score | Weight | Rule |
+|---|---|---|
+| flavor | 0.35 | 1.0 on a tag hit, 0.5 on an adjacent flavor, else 0 |
+| texture | 0.30 | 1.0 on a tag hit, 0.5 on an adjacent texture, else 0 |
+| heaviness | 0.20 | `'any'` gives 0.5 to everything. Else `1 - abs(a - b) / 2` on light=0, medium=1, filling=2 |
+| adventure | 0.15 | Target is safe=1.5, curious=3, surprise=4.5. Score is `1 - abs(food.adventurousness - target) / 4` |
+
+Adjacency (this is what stops hard zeroes from flattening the ranking):
+
+```ts
+const NEAR_FLAVOR  = { savory: ['spicy'], spicy: ['savory'], sweet: ['fresh'], fresh: ['sweet'] }
+const NEAR_TEXTURE = { crunchy: ['juicy'], juicy: ['crunchy'], creamy: ['soft'], soft: ['creamy'] }
+```
+
+### dnaMatch
+
+Collect the food's dimensions: its `flavorTags`, its `textureTags`, its `heaviness` when
+`light` or `filling`, and `adventurous` when `adventurousness >= 4`. For each, fade the stored
+score toward neutral by its confidence, then average:
+
+```
+effective(d) = 0.5 + (dna[d].score - 0.5) * dna[d].confidence
+dnaMatch     = mean(effective) over the food's dimensions, or 0.5 if none have samples
+```
+
+Confidence weighting is what stops one early rating from dominating the ranking.
+
+### novelty and penalties
+
+```
+novelty          = 1 - min(1, timesServed / 3)
+rejectionPenalty = 0.5 if id is in session.rejectedIds     // large by design, sinks it
+recentPenalty    = 0.1 if id is in the last 5 served
+```
+
+Rejected foods stay in the ranked list rather than being filtered out, so `alternates` never
+runs dry unexpectedly. They just sort to the bottom.
+
+**Ties break on stable id sort.** This is what makes "identical inputs produce predictable
+results" true.
+
+### DNA update on feedback
+
+Only dimensions the rated food actually carries are touched.
+
+```
+base = { nailed: +0.20, kinda: +0.07, nope: -0.12 }[rating]
+learningRate = 1 / (1 + samples * 0.5)     // 1.0, 0.67, 0.50, 0.40, 0.33 ...
+delta = base * learningRate
+
+score      = clamp(score + delta, 0, 1)
+samples   += 1
+confidence = min(1, samples / 5)
+```
+
+The decaying learning rate is the acceptance criterion "a single rating cannot radically change
+a score". A flat delta fails Ticket 7. Do not simplify this.
+
+Discovery percentage on `/dna` is the mean confidence across all eleven dimensions.
+
+---
+
+## 6. Tickets
+
+All P0. Dependencies are listed so parallel tracks are unambiguous.
+
+| # | Ticket | Depends on | Can run parallel with |
+|---|---|---|---|
+| 1 | App shell and deploy | none | 2 |
+| 2 | Food catalog | none | 1 |
+| 3 | Quiz flow | 1 | 2 |
+| 4 | Recommendation engine | 2 | 3 |
+| 5 | Result experience | 3, 4 | none |
+| 6 | Not feeling it | 5 | 7 |
+| 7 | Feedback and Taste DNA | 5 | 6 |
+| 8 | Taste DNA dashboard | 7 | none |
+| 9 | QA and submission | all | none |
+
+Land `src/lib/taste-types.ts` before anything else. It unblocks 2, 4, and 7 simultaneously.
+
+---
+
+### Ticket 1: App shell and deploy
+
+**Reduced scope.** The Next.js app, TypeScript, ESLint, and the design system already exist.
+There is no scaffolding and no Tailwind.
+
+Stub `/`, `/taste`, `/result/[id]`, and `/dna` so they render without errors, wire navigation
+between them, extend the `current` union in `src/components/SiteHeader.tsx`, and confirm a
+Vercel deploy from `main` while the screens are still empty. Deploying before feature work is
+the entire point of this ticket.
+
+- [ ] App loads from a public URL with no authentication
+- [ ] Mobile layout works at roughly 375px
+- [ ] Desktop layout stays centered and usable
+- [ ] All four routes render without errors
+- [ ] A deploy completes before feature work is finished
+
+---
+
+### Ticket 2: Food catalog
+
+About 30 foods in `src/lib/catalog.ts`, matching the `Food` type exactly. Specific dishes only.
+"Spicy vodka rigatoni" is a food. "Italian" is not.
+
+Seed examples from the spec: crispy hot honey chicken sandwich, spicy vodka rigatoni, birria
+tacos, poke bowl, grilled cheese and tomato soup, sour gummy candy, mango with Tajin, garlic
+butter noodles.
+
+**Coverage is the real acceptance criterion, not the row count.** Write a throwaway script or a
+test that asserts at least five foods score well against every one of the fourteen answer
+values. A path with two candidates produces an obviously wrong recommendation on stage.
+
+Spread `adventurousness` across the full 1 to 5 range, or "Surprise me" returns the same dish
+as "Safe favorite".
+
+- [ ] Every food has complete structured attributes
+- [ ] Foods cover all available quiz answers
+- [ ] Names are specific dishes, never broad cuisines
+- [ ] At least five foods reasonably match each major preference direction
+- [ ] Catalog imports with no API and no database
+
+---
+
+### Ticket 3: Four question craving flow
+
+Homepage: "Hungry?", "Let's figure out what you actually want.", one primary start button. The
+existing `.hero`, `.lede`, and `.cta` classes already do this.
+
+Questions, in order:
+
+1. **What kind of flavor?** Savory / Spicy / Sweet / Fresh
+2. **What texture sounds right?** Crunchy / Creamy / Juicy / Soft
+3. **How heavy?** Light / Medium / Filling / I don't care
+4. **How adventurous?** Safe favorite / A little different / Surprise me
+
+One question per screen, single tap to answer and advance. Keep the step in a URL search param
+so browser back works on mobile instinct, and render a visible Back control as well. Answers
+are preserved when stepping backward. On completion, write `SessionState` to `sessionStorage`
+and route to `/result/<primaryId>`.
+
+- [ ] Starts with no account
+- [ ] Exactly four questions
+- [ ] Usable one handed on mobile
+- [ ] Back does not restart the flow
+- [ ] Completed answers reach the engine
+- [ ] Typical completion under 20 seconds
+
+---
+
+### Ticket 4: Recommendation engine
+
+`rank(answers, dna, session): Recommendation` in `src/lib/engine.ts`. Pure function, formula in
+section 5. Explanation building lives in `src/lib/explain.ts` and interpolates the food's
+`reasonTemplate` with the words the user actually tapped.
+
+- [ ] Identical inputs produce predictable results
+- [ ] Different answer combinations produce meaningfully different foods
+- [ ] Taste DNA affects ranking
+- [ ] Rejected foods take a strong penalty
+- [ ] The primary is never a broad category
+- [ ] At least three ranked candidates return
+- [ ] No external AI or restaurant API is needed for this to work
+
+---
+
+### Ticket 5: Result experience
+
+`/result/[id]/page.tsx` is a server component: await `params`, look the food up, `notFound()`
+on an unknown id, hand the food to a client `ResultView`. `ResultView` reads session and DNA in
+an effect and re-ranks.
+
+Display "We got it.", the food image, the dish name as the dominant element, three matched
+attributes, and the explanation. Actions: Nailed it, Kinda, Nope, Not feeling it, and "Why
+this?" which expands the explanation inline.
+
+**Direct navigation with no session is the crash path.** A valid `/result/<id>` opened in a
+fresh tab must render the dish, its description, and a prompt to start a session. Never a blank
+screen, never a thrown error.
+
+- [ ] Result appears immediately after the fourth answer
+- [ ] Dish name is visually dominant
+- [ ] Explanation references the user's actual answers
+- [ ] Feedback actions are clearly visible
+- [ ] Works with no restaurant or delivery integration
+- [ ] Refresh and direct navigation do not crash
+
+---
+
+### Ticket 6: Not feeling it
+
+Keep the answers, mark the current food rejected in session state, take the next ranked
+candidate, and `router.replace` to it so the screen updates in place without stacking history.
+Optionally show "Okay, different direction."
+
+- [ ] User does not return to question one
+- [ ] The rejected food is not shown again immediately
+- [ ] The alternative still matches the original craving
+- [ ] Multiple alternatives can be requested in a row
+- [ ] A real empty state appears when alternatives run out
+
+---
+
+### Ticket 7: Feedback and local Taste DNA
+
+Eleven dimensions in `localStorage`, update math in section 5. After a rating, show "Your Taste
+DNA changed." with the deltas, for example "Spicy up, Crunchy up".
+
+Ship a reset control. Repeated demo runs need it, and it is an acceptance criterion.
+
+- [ ] Taste DNA persists across refresh
+- [ ] First time users do not see a large empty profile
+- [ ] Only matched dimensions update
+- [ ] One rating cannot radically move a score
+- [ ] Updated DNA affects ranking in a later session
+- [ ] Local data can be reset for repeated demos
+
+---
+
+### Ticket 8: Taste DNA dashboard
+
+`/dna`: "Your Taste", discovery percentage, strongest flavor preferences, strongest texture
+preferences, confidence or sample counts, recent changes, and a button to start another
+session. Only render dimensions with actual evidence.
+
+- [ ] Works after one completed rating
+- [ ] Strongest dimensions are easy to understand
+- [ ] Discovery percentage rises as feedback accumulates
+- [ ] Profile updates without an account
+- [ ] Empty state points at the first session
+- [ ] Demo ready on mobile
+
+---
+
+### Ticket 9: Polish, QA, submission
+
+Run the full ten step demo above. Then: loading states, error states, responsive QA,
+keyboard and focus states, a `.cursorrules` file at the repo root (the repo currently has
+`.cursor/rules/*.mdc` but not this file, and it is an acceptance criterion), public GitHub
+repo, README, final Vercel deploy, submission links.
+
+README covers what was built, how recommendations work, the tech stack, what is out of scope,
+and what comes next.
+
+- [ ] Full demo performs in under three minutes
+- [ ] Public URL works in incognito
+- [ ] No login required
+- [ ] Repository is public
+- [ ] `.cursorrules` is committed
+- [ ] README covers all five topics
+- [ ] No broken buttons on the demo path
+- [ ] Production console has no blocking errors
+
+---
+
+## 7. External AI
+
+Providers: **Gemini free tier** first, **OpenAI via Azure** as the fallback. Two scopes, and
+the runtime one is deliberately tiny.
+
+### Offline, during the build
+
+Draft the roughly 30 catalog entries and their `reasonTemplate` strings. A human reviews the
+output and commits it as static data. Nothing that ships depends on this.
+
+### Runtime, explanation polish only
+
+The engine picks the dish and renders its template reason immediately. A server route then
+tries to rewrite that one sentence:
+
+```
+engine -> dish + template reason         (instant, always rendered)
+             |   after paint, ~2.5s abort
+        Gemini free tier
+             |   on error, quota, or timeout
+        Azure OpenAI
+             |   on error or timeout
+        keep the template
+```
+
+Rules:
+
+- Keys stay server side in `/api/explain`. Never `NEXT_PUBLIC_`.
+- Env vars, documented in `.env.example` with no real values: `GEMINI_API_KEY`,
+  `AZURE_OPENAI_ENDPOINT`, `AZURE_OPENAI_API_KEY`, `AZURE_OPENAI_DEPLOYMENT`.
+- **Model output is untrusted input.** Strip markup and control characters, collapse
+  whitespace, enforce one sentence and a length cap, and reject any em dash, which this repo
+  bans everywhere. Any violation silently falls back to the template.
+- The result screen is fully usable before the call resolves. If both providers are down, the
+  demo is visually identical except for one sentence.
+- Free tier quota is a live risk during judging. That is exactly why the chain exists.
+- Confirm the free tier's data use terms before sending anything. Prompts carry dish names and
+  answer words only. Nothing user identifying goes to a provider.
+
+---
+
+## 8. Design system
+
+`.cursor/rules/design-system.mdc` governs every screen. Two tones plus one accent, flat fills,
+separation by space and type.
+
+- `--ink` `#14110f`, `--paper` `#f2ebe0`, `--accent` `#e4a01a` (saffron, small marks only).
+  Every other neutral is a `color-mix` of the first two. No fourth hue.
+- **No gradients, no borders, no shadows, no card grids, no `border-radius` above 2px.**
+- Extend `src/app/globals.css`. Use the existing spacing ramp, do not invent values.
+- Primary actions invert the tones (paper background, ink text). That is the only filled
+  element in the system, and `.cta` already implements it.
+- Keep `:focus-visible` rings on everything interactive.
+
+**Quiz choices are the trap.** A four option question wants bordered pills. Build it as a large
+type list separated by the spacing ramp. Selected state reads as tone and weight (`--paper`
+against `--paper-quiet`), never a ring or a box. The progress indicator reuses the accent
+`.step` treatment as "01 / 04".
+
+**Feedback buttons are type, not colored chips.** There is no success green or failure red in
+this palette. Nailed it and Nope are distinguished by placement and weight.
+
+### Food images
+
+`Food.image` holds a single emoji glyph, rendered large. Offline safe, zero dependency, and it
+does not fight a flat two tone system the way food photography would. Swapping to real photos
+later is a one field change plus `remotePatterns` in `next.config.ts`.
+
+This is the one visible element chosen rather than specified. Flag it now if you disagree.
+
+---
+
+## 9. Risks, ranked
+
+| # | Risk | Mitigation |
+|---|---|---|
+| 1 | **Hydration mismatch.** Every screen reads `sessionStorage` or `localStorage`. A read during render blanks the page | All storage reads go inside `useEffect`. Render a neutral first paint |
+| 2 | **Quiz UI versus the design system.** Borders and rounded pills are banned | Section 8. Tone and weight carry selection |
+| 3 | **Catalog coverage.** Fewer than five matches on a path returns something obviously wrong | Ticket 2 ships a coverage assertion, not just 30 rows |
+| 4 | **DNA learning rate.** A flat delta lets one rating swing a dimension and fails Ticket 7 | Decaying rate, section 5 |
+| 5 | **AI latency on stage** | Render first, swap after, hard timeout, two fallbacks |
+| 6 | **Direct navigation to `/result/[id]` with no session** | Explicit no session fallback, Ticket 5 |
+| 7 | **Scope creep at hour six** | Section 11 |
+
+---
+
+## 10. QA checklist
+
+- [ ] `npm run lint` and `npm run build` clean
+- [ ] Production console free of blocking errors
+- [ ] Full judged path at 390px wide, timed under three minutes
+- [ ] Refresh the result page, it survives
+- [ ] Open a valid `/result/<id>` in a fresh incognito tab, no session fallback renders
+- [ ] Open `/result/not-a-real-dish`, get a 404 and not an exception
+- [ ] Clear `localStorage`, `/dna` shows its empty state
+- [ ] Reset control returns `/dna` to the empty state after several ratings
+- [ ] "Not feeling it" three times in a row, then the empty state
+- [ ] Keyboard only pass through a full session, focus rings visible throughout
+- [ ] With `GEMINI_API_KEY` unset, the result page renders instantly with the template line and
+      no console error
+- [ ] Public URL loads in incognito with no login
+
+---
+
+## 11. Explicitly not tonight
+
+No tickets, no branches, no "quick" additions:
+
+authentication, restaurants or map APIs, live menu search, recipes, saved history, favorites,
+quests, badges, XP, Food Passport, social functionality, native apps, image recognition.
+
+Also dropped from earlier drafts of this project: Google Places, the three lane structure, and
+PostHog analytics.
+
+---
+
+## 12. Build order
+
+1. `taste-types.ts`, then app shell and deploy (Ticket 1) alongside the catalog (Ticket 2)
+2. Quiz flow (3) alongside the engine (4)
+3. Result experience (5)
+4. Not feeling it (6) alongside feedback and Taste DNA (7)
+5. Dashboard (8)
+6. QA and submission (9)
+
+Tickets 1 and 2 run in parallel. Ticket 8 does not start until Ticket 7 works.
+
+Optional if the clock allows: `vitest` over `engine.ts` and `dna.ts`, covering reproducibility,
+rejection sinking, and the bound on a single rating's effect. It is the safest thing to cut.
+
+---
+
+## 13. Open items for review
+
+1. Food images as emoji glyphs (section 8). Object now if you want photos.
+2. `PRD.md` stays stale by choice. It currently lists Taste DNA as out of scope and describes a
+   three lane flow that we are not building. `/prd` is publicly linked.
+3. Git commits, making the repository public, and the Vercel deploy need an explicit go ahead.
