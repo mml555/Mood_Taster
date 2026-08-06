@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { RotateCcw, Sparkles } from "lucide-react";
-import { useCallback, useSyncExternalStore } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   DNA_DIMENSIONS,
   createNeutralDna,
@@ -17,42 +17,27 @@ import type { DnaDimension, DnaProfile } from "@/lib/taste-types";
 const FLAVOR_DIMS: DnaDimension[] = ["savory", "spicy", "sweet", "fresh"];
 const TEXTURE_DIMS: DnaDimension[] = ["crunchy", "creamy", "juicy", "soft"];
 
-const DNA_EVENT = "mood-taster-dna-changed";
-
-function subscribeDna(onStoreChange: () => void) {
-  if (typeof window === "undefined") return () => {};
-  const handler = () => onStoreChange();
-  window.addEventListener("storage", handler);
-  window.addEventListener(DNA_EVENT, handler);
-  return () => {
-    window.removeEventListener("storage", handler);
-    window.removeEventListener(DNA_EVENT, handler);
-  };
-}
-
-function getDnaSnapshot(): DnaProfile {
-  return readDna();
-}
-
-function getServerDnaSnapshot(): DnaProfile {
-  return createNeutralDna();
-}
-
-function notifyDnaChanged() {
-  window.dispatchEvent(new Event(DNA_EVENT));
-}
-
 export function DnaDashboard() {
-  const dna = useSyncExternalStore(
-    subscribeDna,
-    getDnaSnapshot,
-    getServerDnaSnapshot,
-  );
+  const [dna, setDna] = useState<DnaProfile | null>(null);
+
+  useEffect(() => {
+    setDna(readDna());
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- browser storage bootstrap
+  }, []);
 
   const onReset = useCallback(() => {
     resetDna();
-    notifyDnaChanged();
+    setDna(createNeutralDna());
   }, []);
+
+  if (!dna) {
+    return (
+      <section className="dna">
+        <p className="eyebrow">Your Taste</p>
+        <h1 className="dna-title">Loading…</h1>
+      </section>
+    );
+  }
 
   const discovery = discoveryPercent(dna);
   const evidenced = DNA_DIMENSIONS.filter((d) => dna[d].samples > 0);

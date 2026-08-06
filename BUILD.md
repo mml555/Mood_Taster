@@ -651,11 +651,12 @@ to put a burger under "poke bowl". This needs a human pass, not a search-and-pas
 | 2 | **Quiz UI versus the design system.** Borders and rounded pills are banned | Section 8. Tone and weight carry selection |
 | 3 | **Catalog coverage.** Fewer than five matches on a path returns something obviously wrong | Ticket 2 ships a coverage assertion, not just 30 rows |
 | 4 | **DNA learning rate.** A flat delta lets one rating swing a dimension and fails Ticket 7 | Decaying rate, section 5 |
-| 5 | **AI latency on stage** | Render first, swap after, hard timeout, two fallbacks |
-| 6 | **Direct navigation to `/result/[id]` with no session** | Explicit no session fallback, Ticket 5 |
-| 7 | **A photo that does not match its dish.** Thirty images sourced fast is thirty chances to put a burger under "poke bowl" | Human review pass over the whole catalog, Ticket 2 |
-| 8 | **Image payload.** Unoptimized downloads can push a page into multiple MB on venue wifi | 800px, quality 80, under 120KB each, `next/image` with `priority` only on the result hero |
-| 9 | **Scope creep at hour six** | Section 11 |
+| 5 | **The explanation generation run is a schedule bottleneck.** It cannot start until both the catalog and the engine are done, and a catalog edit afterwards means regenerating | Freeze the catalog before the run. Batch at 10 per request so a regeneration costs ~96 of the 500 daily requests, not 960 |
+| 6 | **AI latency on stage** | Precomputed line renders instantly. Azure is after paint with a hard timeout, and failure is invisible |
+| 7 | **Direct navigation to a result URL** | Answers are in the query string, so it just works. Validate the params and 404 on garbage |
+| 8 | **A photo that does not match its dish.** Thirty images sourced fast is thirty chances to put a burger under "poke bowl" | Human review pass over the whole catalog, Ticket 2 |
+| 9 | **Image payload.** Unoptimized downloads can push a page into multiple MB on venue wifi | 800px, quality 80, under 120KB each, `next/image` with `priority` only on the result hero |
+| 10 | **Scope creep at hour six** | Section 11 |
 
 ---
 
@@ -665,14 +666,19 @@ to put a burger under "poke bowl". This needs a human pass, not a search-and-pas
 - [ ] Production console free of blocking errors
 - [ ] Full judged path at 390px wide, timed under three minutes
 - [ ] Refresh the result page, it survives
-- [ ] Open a valid `/result/<id>` in a fresh incognito tab, no session fallback renders
+- [ ] Open a valid result URL in a fresh incognito tab, the full result renders
 - [ ] Open `/result/not-a-real-dish`, get a 404 and not an exception
+- [ ] Open a result URL with a garbage answer param, get a 404 and not a wrong result
+- [ ] `explanations.json` covers every one of the 192 combinations, verified by a script and not
+      by spot checking
+- [ ] Every precomputed line has been read by a human
 - [ ] Clear `localStorage`, `/dna` shows its empty state
 - [ ] Reset control returns `/dna` to the empty state after several ratings
 - [ ] "Not feeling it" three times in a row, then the empty state
 - [ ] Keyboard only pass through a full session, focus rings visible throughout
-- [ ] With `GEMINI_API_KEY` unset, the result page renders instantly with the template line and
-      no console error
+- [ ] With all Azure variables unset, the result page renders instantly with the precomputed
+      line and no console error
+- [ ] `GEMINI_API_KEY` is NOT present in the Vercel environment
 - [ ] Public URL loads in incognito with no login
 - [ ] Every one of the 30 photos loads, and each one shows the dish it is labelled with
 - [ ] Rename one image file locally and confirm the fallback block renders instead of a broken
@@ -698,12 +704,18 @@ PostHog analytics.
 
 1. `taste-types.ts`, then app shell and deploy (Ticket 1) alongside the catalog (Ticket 2)
 2. Quiz flow (3) alongside the engine (4)
-3. Result experience (5)
-4. Not feeling it (6) alongside feedback and Taste DNA (7)
-5. Dashboard (8)
-6. QA and submission (9)
+3. **Freeze the catalog, then run `generate-explanations.ts`** (section 7)
+4. Result experience (5)
+5. Not feeling it (6) alongside feedback and Taste DNA (7)
+6. Dashboard (8)
+7. QA and submission (9)
 
 Tickets 1 and 2 run in parallel. Ticket 8 does not start until Ticket 7 works.
+
+**Step 3 is the one hard sequencing constraint in the night.** It needs the catalog and the
+engine both finished, it takes real wall-clock time, and every catalog edit after it means
+another run. Work that ordering into the schedule rather than discovering it at 2am. The result
+screen can be built against a handful of hand-written explanations while the run is in flight.
 
 Optional if the clock allows: `vitest` over `engine.ts` and `dna.ts`, covering reproducibility,
 rejection sinking, and the bound on a single rating's effect. It is the safest thing to cut.
@@ -716,6 +728,10 @@ rejection sinking, and the bound on a single rating's effect. It is the safest t
    and credited images is plausibly two hours of one person's night, and it blocks nothing else
    if it starts first. Assign it to a dedicated owner on Ticket 2 rather than folding it into
    the attribute tagging.
-2. `PRD.md` stays stale by choice. It currently lists Taste DNA as out of scope and describes a
+2. **Azure spend.** With explanations precomputed, Azure is a per-view billed call that improves
+   an already-good sentence. Somebody should confirm the cost of a night of team testing plus
+   judging is acceptable, and decide whether it stays on for the demo or is a nice-to-have that
+   gets switched off by unsetting four variables.
+3. `PRD.md` stays stale by choice. It currently lists Taste DNA as out of scope and describes a
    three lane flow that we are not building. `/prd` is publicly linked.
-3. Git commits, making the repository public, and the Vercel deploy need an explicit go ahead.
+4. Git commits, making the repository public, and the Vercel deploy need an explicit go ahead.

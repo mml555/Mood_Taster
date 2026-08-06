@@ -11,16 +11,9 @@ import {
   Sparkles,
   X,
 } from "lucide-react";
-import {
-  useCallback,
-  useEffect,
-  useMemo,
-  useState,
-  useSyncExternalStore,
-} from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   applyRating,
-  createNeutralDna,
   labelDimension,
   readDna,
   writeDna,
@@ -33,52 +26,30 @@ import {
   readSession,
   writeSession,
 } from "@/lib/session";
-import type { Food, Rating } from "@/lib/taste-types";
+import type { Food, Rating, SessionState } from "@/lib/taste-types";
+import type { DnaProfile } from "@/lib/taste-types";
 
 type ResultViewProps = {
   food: Food;
 };
 
-const SESSION_EVENT = "mood-taster-session-changed";
-const DNA_EVENT = "mood-taster-dna-changed";
-
-function subscribeSession(onStoreChange: () => void) {
-  if (typeof window === "undefined") return () => {};
-  const handler = () => onStoreChange();
-  window.addEventListener(SESSION_EVENT, handler);
-  return () => window.removeEventListener(SESSION_EVENT, handler);
-}
-
-function subscribeDna(onStoreChange: () => void) {
-  if (typeof window === "undefined") return () => {};
-  const handler = () => onStoreChange();
-  window.addEventListener("storage", handler);
-  window.addEventListener(DNA_EVENT, handler);
-  return () => {
-    window.removeEventListener("storage", handler);
-    window.removeEventListener(DNA_EVENT, handler);
-  };
-}
-
-function notifySession() {
-  window.dispatchEvent(new Event(SESSION_EVENT));
-}
-
-function notifyDna() {
-  window.dispatchEvent(new Event(DNA_EVENT));
-}
+type ViewModel = {
+  hasSession: boolean;
+  explanation: string;
+  attrs: string[];
+};
 
 export function ResultView({ food }: ResultViewProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const rejectNote = searchParams.get("alt") === "1";
-  const session = useSyncExternalStore(
-    subscribeSession,
-    readSession,
-    () => null,
-  );
-  const dna = useSyncExternalStore(subscribeDna, readDna, createNeutralDna);
 
+  const [ready, setReady] = useState(false);
+  const [view, setView] = useState<ViewModel>({
+    hasSession: false,
+    explanation: food.description,
+    attrs: [],
+  });
   const [whyOpen, setWhyOpen] = useState(false);
   const [imgFailed, setImgFailed] = useState(false);
   const [deltas, setDeltas] = useState<DnaDelta[] | null>(null);
@@ -86,44 +57,38 @@ export function ResultView({ food }: ResultViewProps) {
   const [emptyAlts, setEmptyAlts] = useState(false);
 
   useEffect(() => {
-    if (!session) return;
-    if (session.servedIds.includes(food.id)) return;
-    writeSession(markServed(session, food.id));
-    notifySession();
-  }, [session, food.id]);
+    setWhyOpen(false);
+    setImgFailed(false);
+    setDeltas(null);
+    setRated(false);
+    setEmptyAlts(false);
 
-  const view = useMemo(() => {
+    const session = readSession();
+    const dna = readDna();
+
     if (!session) {
-      return {
-        hasSession: false as const,
+      setView({
+        hasSession: false,
         explanation: food.description,
         attrs: [
           ...food.flavorTags.map(capitalize),
           capitalize(food.heaviness),
         ].slice(0, 3),
-      };
+      });
+      setReady(true);
+      return;
     }
 
-    const rec = rank(session.answers, dna, session);
-    const match =
-      rec.primary.food.id === food.id
-        ? rec.primary
-        : rec.alternates.find((s) => s.food.id === food.id);
-
-    if (match) {
-      return {
-        hasSession: true as const,
-        explanation: match.explanation,
-        attrs: match.matchedAttributes,
-      };
+    if (!session.servedIds.includes(food.id)) {
+      writeSession(markServed(session, food.id));
     }
 
-    return {
-      hasSession: true as const,
-      explanation: food.description,
-      attrs: food.flavorTags.map(capitalize).slice(0, 3),
-    };
-  }, [session, dna, food]);
+    const active = readSession() ?? session;
+    setView(buildView(food, active, dna));
+    setReady(true);
+    // Storage must be read after mount to avoid hydration mismatch (BUILD risk 1).
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- browser storage bootstrap
+  }, [food]);
 
   const onReject = useCallback(() => {
     const current = readSession();
@@ -136,9 +101,7 @@ export function ResultView({ food }: ResultViewProps) {
       setEmptyAlts(true);
       return;
     }
-    const updated = markServed(markRejected(current, food.id), next.food.id);
-    writeSession(updated);
-    notifySession();
+    writeSession(markServed(markRejected(current, food.id), next.food.id));
     router.replace(`/result/${next.food.id}?alt=1`);
   }, [food.id, router]);
 
@@ -150,12 +113,20 @@ export function ResultView({ food }: ResultViewProps) {
         rating,
       );
       writeDna(next);
-      notifyDna();
       setDeltas(changes.filter((d) => d.direction !== "flat"));
       setRated(true);
     },
     [food],
   );
+
+  if (!ready) {
+    return (
+      <section className="result" aria-busy="true">
+        <p className="eyebrow">Finding it</p>
+        <h1 className="result-title">One moment…</h1>
+      </section>
+    );
+  }
 
   if (emptyAlts) {
     return (
@@ -307,6 +278,32 @@ export function ResultView({ food }: ResultViewProps) {
       )}
     </section>
   );
+}
+
+function buildView(
+  food: Food,
+  session: SessionState,
+  dna: DnaProfile,
+): ViewModel {
+  const rec = rank(session.answers, dna, session);
+  const match =
+    rec.primary.food.id === food.id
+      ? rec.primary
+      : rec.alternates.find((s) => s.food.id === food.id);
+
+  if (match) {
+    return {
+      hasSession: true,
+      explanation: match.explanation,
+      attrs: match.matchedAttributes,
+    };
+  }
+
+  return {
+    hasSession: true,
+    explanation: food.description,
+    attrs: food.flavorTags.map(capitalize).slice(0, 3),
+  };
 }
 
 function capitalize(s: string): string {

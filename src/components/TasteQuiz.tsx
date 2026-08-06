@@ -2,7 +2,7 @@
 
 import { useRouter, useSearchParams } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
-import { useCallback, useMemo, useSyncExternalStore } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { readDna } from "@/lib/dna";
 import { rank } from "@/lib/engine";
 import { emptySession, writeSession } from "@/lib/session";
@@ -59,7 +59,6 @@ const STEPS = [
 type PartialAnswers = Partial<Answers>;
 
 const DRAFT_KEY = "mood-taster-quiz-draft";
-const DRAFT_EVENT = "mood-taster-quiz-draft";
 
 function readDraft(): PartialAnswers {
   if (typeof window === "undefined") return {};
@@ -74,19 +73,10 @@ function readDraft(): PartialAnswers {
 
 function writeDraft(answers: PartialAnswers) {
   sessionStorage.setItem(DRAFT_KEY, JSON.stringify(answers));
-  window.dispatchEvent(new Event(DRAFT_EVENT));
 }
 
 function clearDraft() {
   sessionStorage.removeItem(DRAFT_KEY);
-  window.dispatchEvent(new Event(DRAFT_EVENT));
-}
-
-function subscribeDraft(onChange: () => void) {
-  if (typeof window === "undefined") return () => {};
-  const handler = () => onChange();
-  window.addEventListener(DRAFT_EVENT, handler);
-  return () => window.removeEventListener(DRAFT_EVENT, handler);
 }
 
 function parseStep(raw: string | null): number {
@@ -113,7 +103,14 @@ export function TasteQuiz() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const step = parseStep(searchParams.get("step"));
-  const answers = useSyncExternalStore(subscribeDraft, readDraft, () => ({}));
+  const [answers, setAnswers] = useState<PartialAnswers>({});
+  const [hydrated, setHydrated] = useState(false);
+
+  useEffect(() => {
+    setAnswers(readDraft());
+    setHydrated(true);
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- browser storage bootstrap
+  }, []);
 
   const current = STEPS[step - 1];
   const stepLabel = String(step).padStart(2, "0");
@@ -143,7 +140,8 @@ export function TasteQuiz() {
   const onChoose = useCallback(
     (value: string) => {
       if (!current) return;
-      const next = { ...readDraft(), [current.key]: value };
+      const next = { ...answers, [current.key]: value };
+      setAnswers(next);
       writeDraft(next);
 
       if (step < 4) {
@@ -155,15 +153,12 @@ export function TasteQuiz() {
         finish(next);
       }
     },
-    [current, finish, goStep, step],
+    [answers, current, finish, goStep, step],
   );
 
-  const selected = useMemo(() => {
-    if (!current) return undefined;
-    return answers[current.key];
-  }, [answers, current]);
-
   if (!current) return null;
+
+  const selected = hydrated ? answers[current.key] : undefined;
 
   return (
     <section className="quiz" aria-labelledby="quiz-question">
