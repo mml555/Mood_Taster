@@ -56,32 +56,47 @@ local Taste DNA.
 Client side only. No database, no auth, one API route that the product works fine without.
 
 ```
-  /                    /taste                  /result/[id]              /dna
-  "Hungry?"     ->     4 questions      ->     dish + actions     ->     Taste profile
-                            |                       |    ^                     |
-                            v                       v    | "Not feeling it"    |
-                     sessionStorage           localStorage  (router.replace)   |
-                     answers, rejected         Taste DNA <------ ratings ------+
-                            |                       |
-                            +---> rank(answers, dna, session) ---> primary + 3+ alternates
+  /                 /taste              /result/[id]?f&t&h&a           /dna
+  "Hungry?"   ->   4 questions   ->    dish + actions          ->    Taste profile
+                        |                   |    ^                        |
+                        v                   v    | "Not feeling it"       |
+                  answers into         localStorage  (router.replace)     |
+                  the URL              Taste DNA <------ ratings ---------+
+                        |                   |
+                        +---> rank(answers, dna, session) ---> primary + 3+ alternates
 ```
 
-### Why `/result/[id]` keys on the food id
+### The result URL carries the answers
 
-`[id]` is the **food id**, not a session id. The URL stays truthful, "Not feeling it" is a
-`router.replace` to the next candidate (updates in place, no history stacking), and a shared or
-refreshed URL still resolves to a real dish. An unknown id returns a 404.
+```
+/result/birria-tacos?f=savory&t=crunchy&h=filling&a=surprise
+```
+
+`[id]` is the **food id**, not a session id, and the four answers ride in the query string.
+
+This falls out of the precompute decision in section 7. The explanation lookup key is
+(answers + food id), and a server component cannot read `sessionStorage`, so the answers have
+to be in the URL for the lookup to happen on the server. That is what keeps the roughly 960
+entry `explanations.json` out of the client bundle.
+
+It pays for itself three more times: direct navigation works with no session, refresh works,
+and a result is shareable. "Not feeling it" stays a `router.replace` to the next candidate,
+carrying the same query string, so it updates in place without stacking history.
+
+Validate every param against the const arrays in section 4. An unknown food id or an
+unparseable answer set returns a 404 rather than rendering something wrong.
 
 ### Storage split
 
 | Store | Holds | Why that one |
 |---|---|---|
-| `sessionStorage` | `answers`, `rejectedIds`, `servedIds` | Survives refresh in the same tab, and clears naturally between demo runs |
+| URL query string | The four answers | Readable by the server component, survives refresh and sharing |
+| `sessionStorage` | `rejectedIds`, `servedIds` | Per-run state that should clear between demo runs |
 | `localStorage` | Taste DNA | Must persist across sessions for the step 10 payoff |
 
-**Read both only inside `useEffect`, never during render.** Reading browser storage during
-render throws a hydration mismatch and blanks the page. This is the most likely bug in the
-build. See risk 1.
+**Read both storages only inside `useEffect`, never during render.** Reading browser storage
+during render throws a hydration mismatch and blanks the page. This is the most likely bug in
+the build. See risk 1. The URL is exempt, which is another reason the answers live there.
 
 ---
 
@@ -138,8 +153,8 @@ export type DnaEntry = {
 
 export type DnaProfile = Record<DnaDimension, DnaEntry>
 
+// Answers now travel in the URL query string, not here. See section 3.
 export type SessionState = {
-  answers: Answers
   rejectedIds: string[]
   servedIds: string[]
 }
@@ -327,8 +342,8 @@ Questions, in order:
 
 One question per screen, single tap to answer and advance. Keep the step in a URL search param
 so browser back works on mobile instinct, and render a visible Back control as well. Answers
-are preserved when stepping backward. On completion, write `SessionState` to `sessionStorage`
-and route to `/result/<primaryId>`.
+are preserved when stepping backward. On completion, route to
+`/result/<primaryId>?f=&t=&h=&a=` with the answers in the query string (section 3).
 
 - [ ] Starts with no account
 - [ ] Exactly four questions
@@ -357,17 +372,22 @@ section 5. Explanation building lives in `src/lib/explain.ts` and interpolates t
 
 ### Ticket 5: Result experience
 
-`/result/[id]/page.tsx` is a server component: await `params`, look the food up, `notFound()`
-on an unknown id, hand the food to a client `ResultView`. `ResultView` reads session and DNA in
-an effect and re-ranks.
+`/result/[id]/page.tsx` is a server component: await `params` and `searchParams`, validate both,
+look the food up, `notFound()` on an unknown id or unparseable answers, read the precomputed
+explanation from `explanations.json`, and hand the food plus its explanation to a client
+`ResultView`. The explanation JSON stays on the server and never enters the client bundle.
+
+`ResultView` reads DNA and session state in an effect and re-ranks, then optionally calls
+`/api/explain` after paint for the Azure-polished line.
 
 Display "We got it.", the food image, the dish name as the dominant element, three matched
 attributes, and the explanation. Actions: Nailed it, Kinda, Nope, Not feeling it, and "Why
 this?" which expands the explanation inline.
 
-**Direct navigation with no session is the crash path.** A valid `/result/<id>` opened in a
-fresh tab must render the dish, its description, and a prompt to start a session. Never a blank
-screen, never a thrown error.
+**Direct navigation still works**, because the answers are in the URL. A valid result link
+opened in a fresh incognito tab renders the full result. Only the DNA-influenced part of the
+ranking is missing, which is invisible to the viewer. This is a real improvement over reading
+answers from `sessionStorage`, where the same link rendered a degraded page.
 
 - [ ] Result appears immediately after the fourth answer
 - [ ] Dish name is visually dominant
@@ -375,6 +395,8 @@ screen, never a thrown error.
 - [ ] Feedback actions are clearly visible
 - [ ] Works with no restaurant or delivery integration
 - [ ] Refresh and direct navigation do not crash
+- [ ] A result URL pasted into a fresh incognito tab renders the full result
+- [ ] `explanations.json` does not appear in the client bundle
 
 ---
 
@@ -448,42 +470,91 @@ a judge.
 
 ## 7. External AI
 
-Providers: **Gemini free tier** first, **OpenAI via Azure** as the fallback. Two scopes, and
-the runtime one is deliberately tiny.
+Two providers, two phases, and they do not overlap.
 
-### Offline, during the build
+| Phase | Provider | Runs | Ships to production |
+|---|---|---|---|
+| Build time | Gemini free tier | Once, as a script | No. Only its committed output |
+| Runtime | Azure OpenAI | On the result screen | Yes, as optional enhancement |
 
-Draft the roughly 30 catalog entries and their `reasonTemplate` strings. A human reviews the
-output and commits it as static data. Nothing that ships depends on this.
+### Why explanations are precomputed
 
-### Runtime, explanation polish only
+Measured on our own project, Gemini free tier gives **20 requests per day** on the Flash models
+and **500 RPD** on the Flash Lite models. We hit the 2.5 Flash ceiling during planning. Twenty
+requests is one result screen, twenty times. A night of team testing plus judging would exhaust
+it before the demo starts.
 
-The engine picks the dish and renders its template reason immediately. A server route then
-tries to rewrite that one sentence:
+The engine is a pure function, so the explanation is too. The answer space is finite and small:
 
 ```
-engine -> dish + template reason         (instant, always rendered)
+4 flavors x 4 textures x 4 heaviness (incl. "any") x 3 adventure = 192 combinations
+```
+
+Each combination resolves deterministically to a ranked list of dishes, so every explanation
+the product will ever show can be generated once, reviewed by a human, and committed. Runtime
+quota stops being a risk because there is no runtime quota.
+
+### Build time: `scripts/generate-explanations.ts`
+
+Generates an explanation for the **top 5 dishes per combination**, not just the primary, because
+"Not feeling it" walks down the ranking and every dish it surfaces needs a line. That is up to
+960 entries, written to `src/lib/explanations.json`.
+
+**Batch the combinations, roughly 10 per request.** This is a quota requirement, not an
+optimization. Unbatched, one run is 960 requests against a 500 RPD ceiling and cannot finish. At
+10 per call a run costs about 96 requests, which leaves room to regenerate several times in one
+day. Late catalog changes need that room.
+
+Dependencies: the script needs both the catalog (Ticket 2) and the engine (Ticket 4) finished,
+since it has to know which dish each combination resolves to. **Budget for this in the
+schedule.** It is the one build step that cannot start early and cannot be rushed, and a
+catalog edit afterwards means regenerating.
+
+A human reads the output before it is committed. Also use Gemini offline to draft the catalog
+entries themselves, same review rule.
+
+### Runtime: Azure OpenAI, enhancement only
+
+```
+engine -> dish + precomputed explanation   (instant, from JSON, always correct)
              |   after paint, ~2.5s abort
-        Gemini free tier
-             |   on error, quota, or timeout
-        Azure OpenAI
-             |   on error or timeout
-        keep the template
+        Azure OpenAI  -> a fresher line
+             |   on error, timeout, or unset
+        keep the precomputed line
 ```
+
+The floor here is an AI-written sentence that a human already approved, not a template. If
+Azure never responds, the demo is still showing generated copy.
 
 Rules:
 
-- Keys stay server side in `/api/explain`. Never `NEXT_PUBLIC_`.
-- Env vars, documented in `.env.example` with no real values: `GEMINI_API_KEY`,
-  `AZURE_OPENAI_ENDPOINT`, `AZURE_OPENAI_API_KEY`, `AZURE_OPENAI_DEPLOYMENT`.
-- **Model output is untrusted input.** Strip markup and control characters, collapse
-  whitespace, enforce one sentence and a length cap, and reject any em dash, which this repo
-  bans everywhere. Any violation silently falls back to the template.
-- The result screen is fully usable before the call resolves. If both providers are down, the
-  demo is visually identical except for one sentence.
-- Free tier quota is a live risk during judging. That is exactly why the chain exists.
-- Confirm the free tier's data use terms before sending anything. Prompts carry dish names and
-  answer words only. Nothing user identifying goes to a provider.
+- Keys stay server side in `/api/explain`. Never `NEXT_PUBLIC_`. There is no legitimate
+  `NEXT_PUBLIC_` variable in this build, so treat any new one as a mistake.
+- **Every variable is optional.** The app must build, deploy, and pass the full demo with an
+  empty environment. Anything that throws on a missing key is a bug.
+- **`GEMINI_API_KEY` is never set in Vercel.** It is a local build tool credential. Setting it
+  in production means someone wired Gemini into a request path, which is a bug.
+- Env vars, documented in `.env.example` with no real values:
+
+  | Variable | Phase | Notes |
+  |---|---|---|
+  | `GEMINI_API_KEY` | build | Local only. Never in Vercel |
+  | `GEMINI_MODEL` | build | Must be a Flash Lite variant. The 20 RPD models cannot finish a run |
+  | `GEMINI_BATCH_SIZE` | build | Default 10. Lower values risk exceeding the daily ceiling |
+  | `AZURE_OPENAI_ENDPOINT` | runtime | No trailing slash |
+  | `AZURE_OPENAI_API_KEY` | runtime | |
+  | `AZURE_OPENAI_DEPLOYMENT` | runtime | The **deployment** name, not the model name. Most common Azure misconfiguration |
+  | `AZURE_OPENAI_API_VERSION` | runtime | Sent as `?api-version=`. Azure requests fail without it |
+
+  The four Azure variables are all-or-nothing. Three of four means "Azure not configured" and
+  the call is skipped, not attempted and failed.
+- **Model output is untrusted input**, at build time and at runtime both. Strip markup and
+  control characters, collapse whitespace, enforce one sentence and a length cap, and reject any
+  em dash, which this repo bans everywhere. A violation at build time fails the entry loudly so
+  a human fixes it. A violation at runtime silently keeps the precomputed line.
+- Azure is billed per call. It fires once per result view, after paint. Confirm the spend is
+  acceptable for a night of testing before wiring it up.
+- Prompts carry dish names and answer words only. Nothing user identifying goes to a provider.
 
 ---
 

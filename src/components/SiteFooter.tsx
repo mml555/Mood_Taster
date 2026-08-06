@@ -11,6 +11,8 @@ export function SiteFooter() {
         {" · "}
         <Link href="/brand">Brand</Link>
         {" · "}
+        <Link href="/dna">Taste DNA</Link>
+        {" · "}
         <Link href="/privacy">Privacy</Link>
         {" · "}
         <Link href="/terms">Terms</Link>

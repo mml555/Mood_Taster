@@ -1,0 +1,25 @@
+# Mood Taster
+
+Match how you feel to what you should taste. Mood first, menus second.
+
+## Product
+
+- Flow: craving quiz → one dish → act (rate / reject) → Taste DNA
+- Client-only for Ship Night: no auth, no DB, no Places
+- Specific dishes only, never cuisine categories
+
+## Design
+
+- Two tones (`--ink`, `--paper`) + saffron `--accent`
+- No gradients, borders, shadows, or card grids
+- Quiz choices are type lists (tone + weight), not bordered pills
+- No semantic green/red for feedback
+- No em dashes in copy
+
+## Code
+
+- Types in `src/lib/taste-types.ts`
+- Pure `rank()` in `src/lib/engine.ts`
+- Storage reads only inside `useEffect` (hydration)
+- Prefer small diffs; do not invent features outside BUILD.md scope
+- Do not commit secrets or push unless asked
