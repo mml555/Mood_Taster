@@ -67,12 +67,18 @@ export async function POST(request: Request) {
       instructions: WHY_RULES,
       input: `${context} Current line: ${buildExplanation(food, answers)}`,
       maxOutputTokens: 400,
+      // Measured latency for this deployment is ~4s. This fires after paint on
+      // an already-complete result screen, so waiting costs the user nothing.
+      timeoutMs: 8000,
       maxLength: 160,
     }),
     askForLine({
       instructions: RIFF_RULES,
       input: context,
       maxOutputTokens: 400,
+      // Measured latency for this deployment is ~4s. This fires after paint on
+      // an already-complete result screen, so waiting costs the user nothing.
+      timeoutMs: 8000,
       maxLength: 140,
     }),
   ]);

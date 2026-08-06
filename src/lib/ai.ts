@@ -80,7 +80,6 @@ function readText(body: ResponsesOutput): string | null {
  */
 export function sanitizeLine(raw: string, maxLength = 180): string | null {
   let text = raw
-    // eslint-disable-next-line no-control-regex
     .replace(/[\u0000-\u001F\u007F]/g, " ")
     .replace(/<[^>]*>/g, "")
     .replace(/[*_`#>]/g, "")

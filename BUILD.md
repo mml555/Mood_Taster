@@ -45,9 +45,22 @@ settled. Raise an objection before you start, not in a PR.
 | `PRD.md` lists Taste DNA as out of scope | `PRD.md` is knowingly left stale. Time goes to code | Deliberate call, noted here so nobody "fixes" it mid build |
 | "No external AI is required for the core flow" | Preserved exactly. AI is an enhancement layer and never a dependency | Ticket 4 |
 
-**Dropped, do not build:** Google Places or any map API, the three lane structure (Go Out /
-Make Something / Grab a snack), recipes, and PostHog analytics. Feedback lives entirely in
-local Taste DNA.
+**Dropped, do not build:** the three lane structure (Go Out / Make Something / Grab a snack),
+recipes, and PostHog analytics.
+
+**Added after the tickets were written**, on an explicit call, so the "not tonight" list in
+section 11 no longer governs these:
+
+| Surface | What it does |
+|---|---|
+| AI why line | Azure rewrites the deterministic explanation after paint |
+| AI riff | One practical tip about eating the dish |
+| Conversational reject | "Not feeling it" takes a reason ("too heavy"), and the model moves the craving axes. Ranking stays deterministic |
+| Google Places | Nearby spots on the result screen, auto-loaded on mount |
+
+Places auto-loads rather than waiting for a tap. That fires a location permission prompt inside
+the judged flow, which was raised and accepted. The mitigation is that the same slot renders a
+maps deep link the instant permission is denied, so the region is never dead.
 
 ---
 
@@ -553,11 +566,18 @@ Content-Type: application/json
 Read the text off `output_text`. Use raw `fetch` rather than adding the `openai` package. It is
 a single POST, and `coding-standards.mdc` says to avoid abstraction until a second use appears.
 
-**Smoke test the model before wiring it into the UI.** `gpt-5.6-terra` (version 2026-07-09) is
-newer than anything this document's author can vouch for. Confirm with one curl which optional
-parameters it accepts, since reasoning-tier models commonly reject `temperature` and may return
-an empty `output_text` while spending tokens on internal reasoning. Find that out with curl, not
-on stage.
+**Measured behaviour of this deployment**, confirmed against the live resource rather than
+assumed:
+
+- **Latency is about 4 seconds**, not the 2.5s this document originally guessed. Any timeout
+  below that silently returns nothing. `/api/explain` uses 8s, which is safe because it fires
+  after paint on an already-complete result screen.
+- **There is no top-level `output_text` in the REST response.** That field is an SDK
+  convenience. Raw callers must walk `output[]` for the item with `type: "message"`, then its
+  `content[]` for `type: "output_text"`. Coding to the docs' example returns `undefined`.
+- **It is a reasoning model**, defaulting to `effort: "medium"`. We send `low`. Budget
+  `max_output_tokens` well above the sentence length you want, since reasoning is spent first.
+- `store: true` is the default, so Azure retains responses.
 
 Rules:
 
@@ -577,6 +597,14 @@ Rules:
   | `AZURE_OPENAI_ENDPOINT` | runtime | Includes the `/openai/v1/` suffix, **with** trailing slash |
   | `AZURE_OPENAI_API_KEY` | runtime | Sent as the `api-key` header |
   | `AZURE_OPENAI_DEPLOYMENT` | runtime | Deployment name, sent in the body as `model`. Currently `gpt-5.6-terra` |
+  | `AZURE_OPENAI_REASONING_EFFORT` | runtime | Defaults to `low` in code. The model's own default is `medium`, which costs latency |
+  | `GOOGLE_PLACES_API_KEY` | runtime | **Must not carry an HTTP referrer restriction.** See below |
+
+  **The Places key cannot be a browser-restricted key.** Server calls send no referrer, so a
+  referrer-restricted key returns `403 API_KEY_HTTP_REFERRER_BLOCKED` and every nearby lookup
+  silently falls back to the maps link. In the GCP console set Application restrictions to
+  None, and scope the key with API restrictions (Places API New) instead. This is safe here
+  because the key is only ever read server side in `/api/places`.
 
   The three Azure variables are all-or-nothing. Two of three means "Azure not configured" and
   the call is skipped, not attempted and failed.
