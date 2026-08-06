@@ -23,6 +23,7 @@ export default function StrategyPage() {
           </p>
           <p className="doc-meta">
             Status: v1.0 · Last updated: August 6, 2026 · Mobile-first web ·{" "}
+            <a href="/brand">Brand</a> ·{" "}
             <a href="https://github.com/mml555/Mood_Taster">Source repo</a>
           </p>
         </header>

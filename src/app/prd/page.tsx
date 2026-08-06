@@ -26,7 +26,7 @@ export default function PrdPage() {
               Markdown
             </a>{" "}
             ·{" "}
-            <a href="/strategy">Strategy</a> ·{" "}
+            <a href="/strategy">Strategy</a> · <a href="/brand">Brand</a> ·{" "}
             <a href="https://github.com/mml555/Mood_Taster">GitHub</a>
           </p>
         </header>

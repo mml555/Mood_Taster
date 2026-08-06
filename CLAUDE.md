@@ -10,7 +10,7 @@ Mood Taster recommends what to eat or drink based on how you feel. Mood first, m
 - Follow IA in `.cursor/rules/information-architecture.mdc`
 - Follow coding standards in `.cursor/rules/coding-standards.mdc`
 - Follow the visual system in `.cursor/rules/design-system.mdc`
-- Public source-of-truth pages: PRD (`/prd`), Strategy (`/strategy`); Brand Guide forthcoming
+- Public source-of-truth pages: PRD (`/prd`), Strategy (`/strategy`), Brand Guide (`/brand`)
 - Prefer minimal diffs; do not refactor unrelated code
 - Do not invent product features that break the mood → match → act flow
 - Monetization must follow Strategy trust rules (organic primary rec; sponsors labeled)

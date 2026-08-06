@@ -481,6 +481,232 @@ a {
   margin-bottom: var(--space-3);
 }
 
+/* Brand guide demos: flat fills and space only */
+
+.brand-guide .swatch-grid {
+  list-style: none;
+  margin: 0 0 var(--space-6);
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(9.5rem, 1fr));
+  gap: var(--space-5);
+}
+
+.brand-guide .swatch-grid li {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.brand-guide .swatch {
+  display: block;
+  width: 100%;
+  aspect-ratio: 1.4 / 1;
+  border-radius: 0;
+  position: relative;
+}
+
+/* Paper cradle so dark fills read on ink pages without a stroke */
+.brand-guide .swatch-ink,
+.brand-guide .swatch-ink-raised {
+  background: var(--paper);
+}
+
+.brand-guide .swatch-ink::after,
+.brand-guide .swatch-ink-raised::after {
+  content: "";
+  position: absolute;
+  inset: var(--space-2);
+}
+
+.brand-guide .swatch-ink::after {
+  background: var(--ink);
+}
+
+.brand-guide .swatch-ink-raised::after {
+  background: var(--ink-raised);
+}
+
+.brand-guide .swatch-paper {
+  background: var(--paper);
+}
+
+.brand-guide .swatch-accent {
+  background: var(--accent);
+}
+
+.brand-guide .swatch-paper-muted {
+  background: var(--paper-muted);
+}
+
+.brand-guide .swatch-paper-quiet {
+  background: var(--paper-quiet);
+}
+
+.brand-guide .swatch-name {
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  font-weight: 500;
+  color: var(--paper);
+}
+
+.brand-guide .swatch-meta {
+  font-size: 0.8rem;
+  line-height: 1.4;
+  color: var(--paper-quiet);
+}
+
+.brand-guide .swatch-meta code,
+.brand-guide code {
+  font-size: 0.85em;
+  color: var(--paper-muted);
+}
+
+.brand-demos {
+  display: grid;
+  gap: var(--space-6);
+  margin: 0 0 var(--space-5);
+}
+
+@media (min-width: 640px) {
+  .brand-demos {
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-5);
+  }
+}
+
+.brand-demo-label {
+  margin: 0 0 var(--space-3);
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.brand-demo-do {
+  padding: var(--space-5);
+  background: var(--ink-raised);
+  border-radius: 0;
+}
+
+.brand-demo-do .eyebrow {
+  margin-bottom: var(--space-3);
+}
+
+.brand-demo-title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 1.35rem;
+  font-weight: 500;
+  line-height: 1.2;
+  color: var(--paper);
+}
+
+.brand-demo-copy {
+  margin: var(--space-3) 0 0;
+  color: var(--paper-muted);
+  font-size: 0.95rem;
+}
+
+.brand-demo-cta {
+  display: inline-block;
+  margin-top: var(--space-5);
+  padding: var(--space-3) var(--space-5);
+  background: var(--paper);
+  color: var(--ink);
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-decoration: none;
+  border-radius: 0;
+}
+
+.brand-demo-dont {
+  padding: var(--space-5);
+  background: var(--ink-raised);
+  border-radius: 0;
+}
+
+.brand-demo-dont p {
+  margin: 0;
+  color: var(--paper-quiet);
+  font-size: 0.95rem;
+}
+
+.type-sample-display {
+  font-family: var(--font-display);
+  font-size: 1.75rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.type-sample-body {
+  font-family: var(--font-body);
+  font-size: 1.15rem;
+  font-weight: 500;
+  letter-spacing: 0;
+}
+
+.space-ramp {
+  list-style: none;
+  margin: 0 0 var(--space-4);
+  padding: 0;
+  display: grid;
+  gap: var(--space-3);
+}
+
+.space-ramp li {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  font-size: 0.9rem;
+  color: var(--paper-muted);
+}
+
+.space-bar {
+  display: block;
+  height: 0.65rem;
+  flex-shrink: 0;
+  background: var(--accent);
+  border-radius: 0;
+}
+
+.space-bar-wide {
+  width: min(5rem, 30vw);
+}
+
+.brand-sponsored-sample {
+  margin: 0 0 var(--space-5);
+  padding: var(--space-5);
+  background: var(--ink-raised);
+  border-radius: 0;
+}
+
+.brand-sponsored-sample .eyebrow {
+  margin-bottom: var(--space-3);
+}
+
+.brand-checklist {
+  list-style: none;
+  margin: 0 0 var(--space-4);
+  padding: 0;
+  display: grid;
+  gap: var(--space-3);
+}
+
+.brand-checklist li {
+  margin: 0;
+  padding-left: 0;
+  color: var(--paper-muted);
+}
+
+.brand-checklist li::before {
+  content: "✓ ";
+  color: var(--accent);
+}
+
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;

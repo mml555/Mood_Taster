@@ -21,7 +21,7 @@ Keep this sequence intact. Do not bury mood capture behind long onboarding.
 | Home / landing | Brand + one CTA into mood flow | `src/app/page.tsx` |
 | PRD | Public product requirements | `src/app/prd/page.tsx` → `/prd` |
 | Strategy | GTM, growth & monetization | `src/app/strategy/page.tsx` → `/strategy` |
-| Brand Guide | Brand voice & visual system | Planned companion source-of-truth |
+| Brand Guide | Brand voice & visual system | `src/app/brand/page.tsx` → `/brand` |
 | Mood entry | Select or describe mood | Fast; one job |
 | Results | Short list with “why it fits” | No endless scroll walls |
 | Detail | Single pick: recipe, place, or tasting note | One primary action |
@@ -38,7 +38,7 @@ Keep this sequence intact. Do not bury mood capture behind long onboarding.
 ## Navigation rules
 
 - Primary nav: Mood → Results path only until product expands
-- Footer: PRD, Strategy, Brand Guide (when live), Privacy, GitHub
+- Footer: PRD, Strategy, Brand, Privacy, GitHub
 - Avoid mega-menus, pill clusters, and competing CTAs on the same surface
 
 ## Naming

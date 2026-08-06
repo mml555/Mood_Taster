@@ -1,7 +1,7 @@
 import Link from "next/link";
 
 type SiteHeaderProps = {
-  current?: "home" | "prd" | "strategy";
+  current?: "home" | "prd" | "strategy" | "brand" | "legal";
 };
 
 export function SiteHeader({ current = "home" }: SiteHeaderProps) {
@@ -15,6 +15,12 @@ export function SiteHeader({ current = "home" }: SiteHeaderProps) {
         aria-current={current === "strategy" ? "page" : undefined}
       >
         Strategy
+      </Link>
+      <Link
+        href="/brand"
+        aria-current={current === "brand" ? "page" : undefined}
+      >
+        Brand
       </Link>
     </>
   );

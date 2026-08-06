@@ -5,6 +5,7 @@ Match how you feel to what you should taste.
 **Site:** [mood-taster.vercel.app](https://mood-taster.vercel.app/)  
 **PRD (Ship Night):** [mood-taster.vercel.app/prd](https://mood-taster.vercel.app/prd) · [Markdown](https://raw.githubusercontent.com/mml555/Mood_Taster/main/PRD.md)  
 **Strategy:** [GTM & monetization](https://mood-taster.vercel.app/strategy)  
+**Brand:** [Rules & design guidelines](https://mood-taster.vercel.app/brand)  
 **Repo:** [github.com/mml555/Mood_Taster](https://github.com/mml555/Mood_Taster)
 
 ## Stack
@@ -18,7 +19,7 @@ Match how you feel to what you should taste.
 |-----|-----|------|
 | PRD | `/prd` | What we’re building |
 | Strategy | `/strategy` | How we grow and monetize (trust first) |
-| Brand Guide | TBD | Planned companion |
+| Brand Guide | `/brand` | Voice and visual system |
 
 ## Getting started
 
@@ -38,7 +39,7 @@ npm run lint
 
 | Path | Purpose |
 |------|---------|
-| `src/app/` | Next.js pages (home, PRD, strategy) and global styles |
+| `src/app/` | Next.js pages (home, PRD, strategy, brand) and global styles |
 | `src/content/` | Long-form public doc content modules |
 | `.cursor/rules/` | Cursor agent rules (IA, coding standards, overview) |
 | `CLAUDE.md` | Claude project instructions |
