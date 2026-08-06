@@ -14,10 +14,10 @@
 # Next.js
 /.next/
 /out/
-/docs/
 
 # Production
 /build
+/docs/
 
 # Misc
 .DS_Store

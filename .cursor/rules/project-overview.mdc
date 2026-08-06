@@ -21,4 +21,4 @@ Mood Taster matches how you feel to what you should taste — food, drink, or re
 - Do not commit or push unless explicitly asked
 - Keep secrets out of the repo; use env examples only
 - Update docs when APIs, schema, or IA change materially
-- Site deploys via GitHub Actions on push to `main`
+- Production site is on Vercel (`https://mood-taster.vercel.app/`)

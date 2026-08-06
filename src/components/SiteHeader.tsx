@@ -14,12 +14,12 @@ export function SiteHeader({ current = "home" }: SiteHeaderProps) {
         {current === "home" ? (
           <>
             <a href="#how">How it works</a>
-            <Link href="/prd/">PRD</Link>
+            <Link href="/prd">PRD</Link>
           </>
         ) : (
           <>
             <Link href="/">Home</Link>
-            <Link href="/prd/" aria-current="page">
+            <Link href="/prd" aria-current="page">
               PRD
             </Link>
           </>

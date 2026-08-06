@@ -2,14 +2,14 @@
 
 Match how you feel to what you should taste.
 
-**Site:** [GitHub Pages](https://mml555.github.io/Mood_Taster/)  
-**PRD:** [Product requirements](https://mml555.github.io/Mood_Taster/prd/)  
+**Site:** [mood-taster.vercel.app](https://mood-taster.vercel.app/)  
+**PRD:** [Product requirements](https://mood-taster.vercel.app/prd/)  
 **Repo:** [github.com/mml555/Mood_Taster](https://github.com/mml555/Mood_Taster)
 
 ## Stack
 
 - [Next.js](https://nextjs.org) App Router + TypeScript
-- Static export deployed to GitHub Pages via Actions (`.github/workflows/deploy-pages.yml`)
+- Hosted on [Vercel](https://vercel.com)
 
 ## Getting started
 
@@ -21,8 +21,7 @@ npm run dev
 Open [http://localhost:3000](http://localhost:3000).
 
 ```bash
-npm run build         # local static export → out/
-GITHUB_PAGES=true npm run build   # export with /Mood_Taster basePath
+npm run build
 npm run lint
 ```
 
@@ -31,7 +30,6 @@ npm run lint
 | Path | Purpose |
 |------|---------|
 | `src/app/` | Next.js pages (home, PRD) and global styles |
-| `.github/workflows/` | Pages build + deploy |
 | `.cursor/rules/` | Cursor agent rules (IA, coding standards, overview) |
 | `CLAUDE.md` | Claude project instructions |
 | `AGENTS.md` | Shared agent orientation |

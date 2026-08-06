@@ -7,8 +7,7 @@ alwaysApply: false
 # Next.js
 
 - App Router under `src/app/`; shared UI in `src/components/`
-- Use `next/link` for internal routes (respects `basePath`)
-- Static export only: no server actions, no default `next/image` optimizer
-- Production Pages build: GitHub Actions sets `GITHUB_PAGES=true` and deploys `out/`
+- Use `next/link` for internal routes
+- Hosted on Vercel — no `basePath`, no static-export requirement
 - Prefer server components by default; add `"use client"` only when needed
-- Do not hand-edit generated `docs/` or `out/`
+- Do not reintroduce GitHub Pages `output: 'export'` / `basePath` unless asked

@@ -15,8 +15,8 @@ Mood Taster recommends what to eat or drink based on how you feel. Mood first, m
 ## Stack
 
 - Next.js App Router + TypeScript in `src/`
-- GitHub Pages deploys from Actions (`.github/workflows/deploy-pages.yml`)
-- Do not commit generated `out/` or `docs/` — CI builds the static export
+- Production: [Vercel](https://mood-taster.vercel.app/)
+- Shared styles in `src/app/globals.css`
 
 ## Safety
 
