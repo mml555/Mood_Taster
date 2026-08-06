@@ -1,0 +1,342 @@
+:root {
+  --ink: #14110f;
+  --ink-soft: #2a2420;
+  --paper: #f2ebe0;
+  --paper-dim: #d9cfc0;
+  --saffron: #e4a01a;
+  --zest: #b8c85a;
+  --smoke: rgba(242, 235, 224, 0.72);
+  --font-display: "Fraunces", "Times New Roman", serif;
+  --font-body: "Sora", system-ui, sans-serif;
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  color: var(--paper);
+  font-family: var(--font-body);
+  font-weight: 400;
+  line-height: 1.55;
+  background:
+    radial-gradient(120% 80% at 80% 0%, #3a2a14 0%, transparent 55%),
+    radial-gradient(90% 70% at 10% 90%, #1e2a18 0%, transparent 50%),
+    linear-gradient(165deg, #1a1612 0%, var(--ink) 45%, #0c0a09 100%);
+  overflow-x: hidden;
+}
+
+.grain {
+  pointer-events: none;
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  opacity: 0.08;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  mix-blend-mode: overlay;
+}
+
+a {
+  color: inherit;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.2em;
+}
+
+.top {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.25rem clamp(1.25rem, 4vw, 3rem);
+  animation: rise 0.9s var(--ease) both;
+}
+
+.mark {
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  text-decoration: none;
+}
+
+.top nav {
+  display: flex;
+  gap: 1.5rem;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.top nav a {
+  text-decoration: none;
+  opacity: 0.75;
+  transition: opacity 0.2s ease;
+}
+
+.top nav a:hover,
+.top nav a:focus-visible {
+  opacity: 1;
+}
+
+.hero {
+  position: relative;
+  z-index: 1;
+  min-height: calc(100vh - 4.5rem);
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: clamp(2rem, 8vh, 5rem) clamp(1.25rem, 4vw, 3rem)
+    clamp(3rem, 10vh, 6rem);
+  max-width: 52rem;
+}
+
+.eyebrow {
+  margin: 0 0 0.75rem;
+  font-size: 0.8rem;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--zest);
+  animation: rise 1s var(--ease) 0.1s both;
+}
+
+.hero h1 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(3.4rem, 12vw, 7rem);
+  font-weight: 700;
+  line-height: 0.95;
+  letter-spacing: -0.02em;
+  color: var(--paper);
+  animation: rise 1s var(--ease) 0.18s both;
+}
+
+.lede {
+  margin: 1.35rem 0 0;
+  max-width: 28rem;
+  font-size: clamp(1rem, 2.4vw, 1.2rem);
+  color: var(--smoke);
+  animation: rise 1s var(--ease) 0.28s both;
+}
+
+.cta-row {
+  margin-top: 2rem;
+  animation: rise 1s var(--ease) 0.4s both;
+}
+
+.cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.9rem 1.4rem;
+  border: 1px solid color-mix(in srgb, var(--saffron) 70%, white);
+  background: var(--saffron);
+  color: var(--ink);
+  font-size: 0.95rem;
+  font-weight: 600;
+  text-decoration: none;
+  border-radius: 2px;
+  transition: transform 0.25s var(--ease), background 0.2s ease;
+}
+
+.cta:hover,
+.cta:focus-visible {
+  background: #f0b53a;
+  transform: translateY(-2px);
+}
+
+.hero-plane {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.bloom {
+  position: absolute;
+  right: -10%;
+  top: 10%;
+  width: min(70vw, 34rem);
+  height: min(70vw, 34rem);
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    color-mix(in srgb, var(--saffron) 35%, transparent) 0%,
+    transparent 68%
+  );
+  filter: blur(8px);
+  animation: pulse 8s ease-in-out infinite alternate;
+}
+
+.ring {
+  position: absolute;
+  right: 8%;
+  top: 18%;
+  border: 1px solid color-mix(in srgb, var(--paper) 18%, transparent);
+  border-radius: 50%;
+}
+
+.ring-a {
+  width: min(52vw, 26rem);
+  height: min(52vw, 26rem);
+  animation: spin 48s linear infinite;
+}
+
+.ring-b {
+  width: min(38vw, 18rem);
+  height: min(38vw, 18rem);
+  right: 14%;
+  top: 26%;
+  border-color: color-mix(in srgb, var(--zest) 35%, transparent);
+  animation: spin 36s linear infinite reverse;
+}
+
+.how,
+.about {
+  position: relative;
+  z-index: 1;
+  padding: clamp(3.5rem, 10vh, 6rem) clamp(1.25rem, 4vw, 3rem);
+  border-top: 1px solid color-mix(in srgb, var(--paper) 12%, transparent);
+  max-width: 64rem;
+}
+
+.how h2,
+.about h2 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(1.8rem, 4vw, 2.6rem);
+  font-weight: 500;
+  line-height: 1.15;
+}
+
+.section-lede,
+.about p {
+  margin: 0.85rem 0 0;
+  max-width: 36rem;
+  color: var(--smoke);
+}
+
+.flow {
+  list-style: none;
+  margin: 2.5rem 0 0;
+  padding: 0;
+  display: grid;
+  gap: 1.75rem;
+}
+
+@media (min-width: 720px) {
+  .flow {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2rem;
+  }
+}
+
+.flow li {
+  padding-top: 1rem;
+  border-top: 1px solid color-mix(in srgb, var(--paper) 14%, transparent);
+}
+
+.step {
+  display: block;
+  font-size: 0.75rem;
+  letter-spacing: 0.12em;
+  color: var(--saffron);
+  margin-bottom: 0.65rem;
+}
+
+.flow h3 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 1.45rem;
+  font-weight: 500;
+}
+
+.flow p {
+  margin: 0.5rem 0 0;
+  color: var(--smoke);
+  font-size: 0.95rem;
+}
+
+.foot {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 1.5rem;
+  align-items: baseline;
+  justify-content: space-between;
+  padding: 2rem clamp(1.25rem, 4vw, 3rem) 2.5rem;
+  border-top: 1px solid color-mix(in srgb, var(--paper) 12%, transparent);
+}
+
+.foot-brand {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 700;
+}
+
+.foot-meta {
+  margin: 0;
+  font-size: 0.85rem;
+  opacity: 0.7;
+}
+
+.foot-meta a {
+  text-decoration: none;
+}
+
+.foot-meta a:hover,
+.foot-meta a:focus-visible {
+  text-decoration: underline;
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes pulse {
+  from {
+    transform: scale(1);
+    opacity: 0.85;
+  }
+  to {
+    transform: scale(1.08);
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}

@@ -1,0 +1,28 @@
+# Environment
+.env
+.env.*
+!.env.example
+
+# OS / editor
+.DS_Store
+Thumbs.db
+*.swp
+.idea/
+.vscode/
+*.code-workspace
+
+# Dependencies / build (for future app code)
+node_modules/
+dist/
+build/
+.next/
+.venv/
+__pycache__/
+*.pyc
+coverage/
+.turbo/
+
+# Logs & secrets
+*.log
+*.pem
+credentials.json

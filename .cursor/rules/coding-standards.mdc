@@ -1,0 +1,41 @@
+---
+description: Basic coding standards for Mood Taster
+alwaysApply: true
+---
+
+# Coding standards
+
+## General
+
+- Prefer clarity over cleverness; name things for their role
+- Keep functions small and single-purpose
+- Handle errors explicitly; never swallow exceptions silently
+- Validate all external input (API, forms, query params) before use
+- No secrets in source; use environment variables
+
+## Style
+
+- Consistent formatting via project tooling (formatter/linter when present)
+- Prefer early returns over deep nesting
+- Avoid unnecessary abstraction until a second real use appears
+- Comments explain *why*, not what the code already says
+
+## UI / web
+
+- Semantic HTML; meaningful labels and alt text
+- Keyboard-accessible interactive elements
+- Mobile-responsive by default
+- Prefer CSS variables for brand color/type tokens
+
+## APIs & data
+
+- Schema-validate request/response bodies
+- Use structured logging with context (no PII in logs)
+- Paginate large collections; index hot query paths
+- Fail gracefully for non-critical dependencies
+
+## Tests
+
+- Cover core business logic and failure paths
+- Mock external services
+- Run relevant tests before shipping risky changes
