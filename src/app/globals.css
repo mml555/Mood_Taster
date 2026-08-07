@@ -28,8 +28,17 @@
   --space-5: 2rem; /* 32 */
   --space-6: 3rem; /* 48 */
   --space-7: 4rem; /* 64 */
-  --space-8: clamp(4rem, 12vh, 7rem);
-  --page-inset: clamp(1.25rem, 4vw, 3rem);
+  /* Section break for marketing/docs. Prefer space-4/5 on product screens. */
+  --space-8: clamp(2.5rem, 6vh, 4rem);
+  --page-inset: clamp(1rem, 3vw, 2rem);
+
+  /* One measure for every surface. Header, main and footer share this column
+     so their left and right edges line up at every width. Phone and desktop
+     then differ only in how much paper sits outside the column, never in
+     where the content starts. Widen this and the whole site widens together. */
+  --measure: 40rem;
+  /* Long-form reading only (PRD, Strategy). Still centered on --measure. */
+  --measure-doc: 44rem;
 
   /* Shape language */
   --radius-sm: 12px;
@@ -213,14 +222,14 @@ button {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  gap: var(--space-6);
-  min-height: calc(100vh - 4.5rem);
-  min-height: calc(100dvh - 4.5rem);
+  justify-content: flex-start;
+  gap: var(--space-4);
+  /* Content-sized: no full-viewport void that floats the CTA in empty paper. */
+  min-height: auto;
   width: 100%;
   max-width: 40rem;
   margin-inline: auto;
-  padding: var(--space-5) var(--page-inset) var(--space-7);
+  padding: var(--space-5) var(--page-inset) var(--space-4);
   text-align: center;
 }
 
@@ -228,9 +237,9 @@ button {
   display: flex;
   flex-direction: column;
   align-items: center;
-  flex: 1;
-  justify-content: center;
-  gap: var(--space-4);
+  flex: 0 1 auto;
+  justify-content: flex-start;
+  gap: var(--space-3);
   width: 100%;
 }
 
@@ -238,8 +247,8 @@ button {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: var(--space-3);
-  margin-bottom: var(--space-2);
+  gap: var(--space-2);
+  margin-bottom: 0;
   animation: rise 1s var(--ease) 0.1s both;
 }
 
@@ -309,7 +318,7 @@ button {
 }
 
 .cta-row {
-  margin-top: var(--space-6);
+  margin-top: var(--space-4);
   animation: rise 1s var(--ease) 0.4s both;
 }
 
@@ -318,10 +327,10 @@ button {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: var(--space-3);
+  gap: var(--space-2);
   width: 100%;
   max-width: 22rem;
-  padding-bottom: var(--space-4);
+  padding-bottom: var(--space-2);
   animation: rise 1s var(--ease) 0.4s both;
 }
 
@@ -342,7 +351,7 @@ button {
 }
 
 .intent-picker {
-  margin-top: var(--space-6);
+  margin-top: var(--space-4);
   display: grid;
   grid-template-columns: 1fr;
   gap: var(--space-3);
@@ -437,20 +446,23 @@ button {
 .about {
   position: relative;
   z-index: 1;
-  max-width: 64rem;
-  padding: var(--space-8) var(--page-inset) 0;
+  width: 100%;
+  max-width: var(--measure);
+  margin-inline: auto;
+  padding: var(--space-6) var(--page-inset) 0;
 }
 
 .about {
-  padding-bottom: var(--space-8);
+  padding-bottom: var(--space-6);
 }
 
 /* Quiet home below-fold: one short column, no competing CTAs. */
 .how-quiet {
-  max-width: 28rem;
-  margin-inline: auto;
-  padding-top: var(--space-6);
-  padding-bottom: var(--space-8);
+  /* Inherits --measure from .how. A narrower cap here made the step cards
+     shrink as the viewport grew, which is what made desktop read as a
+     stretched phone. Prose inside stays short via its own caps. */
+  padding-top: var(--space-4);
+  padding-bottom: var(--space-5);
   text-align: center;
 }
 
@@ -461,10 +473,10 @@ button {
 
 .flow-quiet {
   list-style: none;
-  margin: var(--space-5) 0 0;
+  margin: var(--space-4) 0 0;
   padding: 0;
   display: grid;
-  gap: var(--space-3);
+  gap: var(--space-2);
   text-align: left;
 }
 
@@ -490,7 +502,7 @@ button {
 }
 
 .how-stance {
-  margin: var(--space-5) auto 0;
+  margin: var(--space-3) auto 0;
   max-width: 22rem;
   color: var(--paper-muted);
   font-size: 0.95rem;
@@ -516,10 +528,10 @@ button {
 
 .flow {
   list-style: none;
-  margin: var(--space-7) 0 0;
+  margin: var(--space-5) 0 0;
   padding: 0;
   display: grid;
-  gap: var(--space-6);
+  gap: var(--space-4);
 }
 
 @media (min-width: 720px) {
@@ -573,8 +585,8 @@ button {
 }
 
 .about-tight {
-  padding-top: var(--space-6);
-  padding-bottom: var(--space-7);
+  padding-top: var(--space-5);
+  padding-bottom: var(--space-5);
 }
 
 .about-tight p {
@@ -604,9 +616,9 @@ button {
 }
 
 .lane-list {
-  margin: var(--space-7) 0 0;
+  margin: var(--space-5) 0 0;
   display: grid;
-  gap: var(--space-6);
+  gap: var(--space-4);
   max-width: 40rem;
 }
 
@@ -627,10 +639,14 @@ button {
   z-index: 1;
   display: flex;
   flex-wrap: wrap;
-  gap: var(--space-3) var(--space-5);
+  gap: var(--space-3) var(--space-4);
   align-items: baseline;
   justify-content: space-between;
-  padding: var(--space-7) var(--page-inset) var(--space-6);
+  /* Same column as .top and the main surfaces. */
+  width: 100%;
+  max-width: var(--measure);
+  margin-inline: auto;
+  padding: var(--space-5) var(--page-inset) var(--space-4);
 }
 
 .foot-brand {
@@ -680,11 +696,11 @@ button {
   z-index: 1;
   max-width: 44rem;
   margin: 0 auto;
-  padding: 0 var(--page-inset) var(--space-8);
+  padding: 0 var(--page-inset) var(--space-6);
 }
 
 .doc-hero {
-  padding: var(--space-6) 0 var(--space-5);
+  padding: var(--space-5) 0 var(--space-4);
   animation: rise 0.9s var(--ease) both;
 }
 
@@ -710,8 +726,8 @@ button {
 
 /* Detaches by tone step, not by a rule or a stroke. */
 .callout {
-  margin: 0 0 var(--space-6);
-  padding: var(--space-4) var(--space-5);
+  margin: 0 0 var(--space-4);
+  padding: var(--space-4);
   background: var(--ink-raised);
   border-radius: var(--radius-card);
   animation: rise 1s var(--ease) 0.08s both;
@@ -740,7 +756,7 @@ button {
 }
 
 .toc {
-  margin: 0 0 var(--space-7);
+  margin: 0 0 var(--space-5);
   animation: rise 1s var(--ease) 0.12s both;
 }
 
@@ -775,7 +791,7 @@ button {
 }
 
 .doc-body section {
-  padding: var(--space-7) 0 0;
+  padding: var(--space-5) 0 0;
   scroll-margin-top: var(--space-4);
 }
 
@@ -850,11 +866,11 @@ button {
 
 .brand-guide .swatch-grid {
   list-style: none;
-  margin: 0 0 var(--space-6);
+  margin: 0 0 var(--space-5);
   padding: 0;
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(9.5rem, 1fr));
-  gap: var(--space-5);
+  gap: var(--space-4);
 }
 
 .brand-guide .swatch-grid li {
@@ -920,11 +936,11 @@ button {
 
 .brand-guide .logo-grid {
   list-style: none;
-  margin: 0 0 var(--space-6);
+  margin: 0 0 var(--space-5);
   padding: 0;
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(14rem, 1fr));
-  gap: var(--space-5);
+  gap: var(--space-4);
 }
 
 .brand-guide .logo-grid li {
@@ -989,8 +1005,8 @@ button {
 
 .brand-demos {
   display: grid;
-  gap: var(--space-6);
-  margin: 0 0 var(--space-5);
+  gap: var(--space-4);
+  margin: 0 0 var(--space-4);
 }
 
 @media (min-width: 640px) {
@@ -1136,9 +1152,10 @@ button {
 .product-main {
   position: relative;
   z-index: 1;
-  max-width: 40rem;
+  width: 100%;
+  max-width: var(--measure);
   margin: 0 auto;
-  padding: var(--space-5) var(--page-inset) var(--space-7);
+  padding: var(--space-4) var(--page-inset) var(--space-5);
   min-height: auto;
 }
 
@@ -1163,7 +1180,7 @@ button {
   grid-template-columns: 2.75rem minmax(0, 1fr) 2.75rem;
   align-items: center;
   gap: var(--space-2);
-  margin: 0 0 var(--space-5);
+  margin: 0 0 var(--space-4);
 }
 
 .quiz-top-spacer {
@@ -1272,18 +1289,18 @@ button {
 
 .quiz-options {
   list-style: none;
-  margin: var(--space-5) 0 0;
+  margin: var(--space-4) 0 0;
   padding: 0;
   display: flex;
   flex-direction: column;
-  gap: var(--space-3);
+  gap: var(--space-2);
 }
 
 .quiz-options-grid,
 .quiz-options-stack {
   display: flex;
   flex-direction: column;
-  gap: var(--space-3);
+  gap: var(--space-2);
 }
 
 .quiz-option {
@@ -1293,12 +1310,12 @@ button {
   gap: var(--space-3);
   width: 100%;
   text-align: left;
-  min-height: 4.25rem;
-  padding: var(--space-4);
+  min-height: 3.5rem;
+  padding: var(--space-3) var(--space-4);
   background: var(--ink-raised);
   color: var(--ink);
   font-family: var(--font-display);
-  font-size: 1.1rem;
+  font-size: 1.05rem;
   font-weight: 700;
   cursor: pointer;
   border: 0;
@@ -1317,8 +1334,8 @@ button {
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  width: 3rem;
-  height: 3rem;
+  width: 2.5rem;
+  height: 2.5rem;
   border-radius: var(--radius-pill);
   background: color-mix(in srgb, var(--ink) 8%, var(--paper));
   color: inherit;
@@ -1409,6 +1426,49 @@ button {
   background: var(--ink-raised);
 }
 
+.quiz-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-6);
+  min-height: min(70vh, 32rem);
+  text-align: center;
+  animation: rise 0.7s var(--ease) both;
+}
+
+.quiz-loading-brand {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.quiz-loading-mark {
+  width: 4rem;
+  height: 4rem;
+  object-fit: contain;
+}
+
+.quiz-loading-wordmark {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 1.35rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  text-transform: lowercase;
+  color: var(--ink);
+}
+
+.quiz-loading-msg {
+  margin: 0;
+  min-height: 1.5em;
+  color: var(--paper-muted);
+  font-size: 1.15rem;
+  font-weight: 700;
+  animation: rise 0.45s var(--ease) both;
+}
+
 /* Swipeable recommendation card */
 .result-eyebrow {
   text-align: center;
@@ -1418,7 +1478,7 @@ button {
 
 .result-card {
   position: relative;
-  margin: var(--space-4) 0 0;
+  margin: var(--space-3) 0 0;
   padding: 0;
   overflow: hidden;
   background: var(--paper);
@@ -1500,7 +1560,8 @@ button {
 .result-media {
   margin: 0;
   width: 100%;
-  aspect-ratio: 5 / 4;
+  aspect-ratio: 4 / 3;
+  max-height: min(36vh, 22rem);
   background: var(--ink-soft);
   overflow: hidden;
   border-radius: 0;
@@ -1529,7 +1590,7 @@ button {
 }
 
 .result-card-body {
-  padding: var(--space-4) var(--space-4) var(--space-5);
+  padding: var(--space-3) var(--space-4) var(--space-4);
 }
 
 .result-title {
@@ -1539,6 +1600,17 @@ button {
   font-weight: 700;
   line-height: 1.1;
   color: var(--ink);
+  pointer-events: none;
+}
+
+.result-venue {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  margin: var(--space-3) 0 0;
+  color: var(--paper-muted);
+  font-size: 0.95rem;
+  font-weight: 700;
   pointer-events: none;
 }
 
@@ -1571,6 +1643,37 @@ button {
   border-radius: var(--radius-pill);
 }
 
+.result-meta {
+  margin-top: var(--space-4);
+  padding: var(--space-3) var(--space-4);
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-4);
+  background: var(--ink-raised);
+  border-radius: var(--radius-card);
+  pointer-events: none;
+}
+
+.result-meta-end {
+  text-align: right;
+}
+
+.result-meta-label {
+  display: block;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--paper-quiet);
+}
+
+.result-meta-value {
+  display: block;
+  margin-top: 0.2rem;
+  font-weight: 700;
+  color: var(--ink);
+}
+
 .why-toggle {
   display: inline-flex;
   align-items: center;
@@ -1597,7 +1700,7 @@ button {
   display: flex;
   flex-wrap: wrap;
   gap: var(--space-3);
-  margin-top: var(--space-5);
+  margin-top: var(--space-4);
   align-items: center;
 }
 
@@ -1611,7 +1714,7 @@ button {
 }
 
 .reaction-dock {
-  margin-top: var(--space-5);
+  margin-top: var(--space-4);
 }
 
 .reaction-btn {
@@ -1814,8 +1917,8 @@ button {
 }
 
 .account-delete {
-  margin-top: var(--space-6);
-  padding-top: var(--space-5);
+  margin-top: var(--space-5);
+  padding-top: var(--space-4);
 }
 
 .account-delete-confirm {
@@ -1885,43 +1988,91 @@ button {
 }
 
 .result-done {
-  margin-top: var(--space-5);
-  padding: var(--space-4);
-  background: var(--ink-raised);
-  border-radius: var(--radius-card);
+  margin-top: var(--space-4);
+  padding: var(--space-4) var(--space-3);
+  background: transparent;
+  border-radius: 0;
   text-align: center;
   animation: rise 0.7s var(--ease) both;
 }
 
 .result-done-mark {
-  margin: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 3.5rem;
+  height: 3.5rem;
+  margin: 0 auto;
+  background: var(--accent);
   color: var(--ink);
-  font-size: 1.75rem;
+  font-size: 1.5rem;
+  font-weight: 700;
   line-height: 1;
+  border-radius: var(--radius-pill);
 }
 
 .result-done-title {
-  margin: var(--space-2) 0 0;
+  margin: var(--space-3) 0 0;
   font-family: var(--font-display);
   font-size: clamp(1.5rem, 5vw, 2rem);
-  font-weight: 600;
+  font-weight: 700;
   line-height: 1.15;
   color: var(--ink);
 }
 
 .result-done-copy {
   margin: var(--space-3) auto 0;
-  max-width: 28rem;
+  max-width: 20rem;
   color: var(--paper-muted);
-  font-size: 0.95rem;
+  font-size: 1.1rem;
+}
+
+.result-done-pick {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  width: 100%;
+  max-width: 22rem;
+  margin: var(--space-4) auto 0;
+  padding: var(--space-3);
+  text-align: left;
+  background: var(--ink-raised);
+  border-radius: var(--radius-card);
+}
+
+.result-done-thumb {
+  flex-shrink: 0;
+  width: 3.5rem;
+  height: 3.5rem;
+  object-fit: cover;
+  border-radius: var(--radius-sm);
+  background: var(--ink-soft);
+}
+
+.result-done-pick-copy {
+  min-width: 0;
+}
+
+.result-done-pick-name {
+  margin: 0;
+  font-weight: 700;
+  color: var(--ink);
+  line-height: 1.25;
 }
 
 .result-done-actions {
   display: flex;
-  flex-wrap: wrap;
+  flex-direction: column;
+  align-items: stretch;
   gap: var(--space-3);
-  justify-content: center;
-  margin-top: var(--space-4);
+  max-width: 22rem;
+  margin: var(--space-4) auto 0;
+}
+
+.result-done-actions .cta,
+.result-done-actions .cta-secondary {
+  width: 100%;
+  max-width: none;
 }
 
 .result-done-dna {
@@ -1954,7 +2105,7 @@ button {
 }
 
 .result-dna-link {
-  margin: var(--space-5) 0 0;
+  margin: var(--space-4) 0 0;
 }
 
 .result-dna-link a {
@@ -1992,7 +2143,7 @@ button {
 .dna-title {
   margin: 0;
   font-family: var(--font-display);
-  font-size: clamp(2rem, 7vw, 3rem);
+  font-size: clamp(1.75rem, 6vw, 2.5rem);
   font-weight: 600;
   line-height: 1.1;
   color: var(--ink);
@@ -2012,7 +2163,7 @@ button {
 }
 
 .dna-meter {
-  margin-top: var(--space-4);
+  margin-top: var(--space-3);
   width: 100%;
   max-width: 20rem;
   height: 0.55rem;
@@ -2034,20 +2185,20 @@ button {
 }
 
 .dna-lede {
-  margin: var(--space-4) 0 0;
+  margin: var(--space-3) 0 0;
   color: var(--paper-muted);
   max-width: 32rem;
 }
 
 .dna-block {
-  margin-top: var(--space-6);
+  margin-top: var(--space-4);
   padding: var(--space-4);
   background: var(--ink-raised);
   border-radius: var(--radius-card);
 }
 
 .dna-heading {
-  margin: 0 0 var(--space-4);
+  margin: 0 0 var(--space-3);
   font-family: var(--font-display);
   font-size: 1.15rem;
   font-weight: 500;
@@ -2059,7 +2210,7 @@ button {
   padding: 0;
   display: flex;
   flex-direction: column;
-  gap: var(--space-3);
+  gap: var(--space-2);
 }
 
 .dna-list li {
@@ -2092,7 +2243,7 @@ button {
 }
 
 .dna-develop {
-  margin-top: var(--space-5);
+  margin-top: var(--space-4);
   margin-bottom: 0;
 }
 
@@ -2114,7 +2265,7 @@ button {
 /* Auth + account */
 
 .auth-form {
-  margin-top: var(--space-6);
+  margin-top: var(--space-4);
   display: flex;
   flex-direction: column;
   gap: var(--space-3);
@@ -2151,7 +2302,7 @@ button {
 }
 
 .auth-submit {
-  margin-top: var(--space-5);
+  margin-top: var(--space-3);
   align-self: flex-start;
 }
 
@@ -2179,9 +2330,9 @@ button {
 }
 
 .account-facts {
-  margin: var(--space-6) 0 0;
+  margin: var(--space-4) 0 0;
   display: grid;
-  gap: var(--space-5);
+  gap: var(--space-4);
 }
 
 .account-facts dt {
@@ -2201,8 +2352,8 @@ button {
 }
 
 .profile-nudge {
-  margin-top: var(--space-6);
-  padding: var(--space-5) 0 0;
+  margin-top: var(--space-4);
+  padding: var(--space-3) 0 0;
   max-width: 32rem;
 }
 
@@ -2278,12 +2429,12 @@ button {
 }
 
 .nearby {
-  margin-top: var(--space-5);
+  margin-top: var(--space-4);
 }
 
 .recipe {
-  margin-top: var(--space-5);
-  scroll-margin-top: var(--space-5);
+  margin-top: var(--space-4);
+  scroll-margin-top: var(--space-4);
 }
 
 .recipe-label {
@@ -2376,7 +2527,7 @@ button {
 
 .favorites-list {
   list-style: none;
-  margin: var(--space-5) 0 0;
+  margin: var(--space-4) 0 0;
   padding: 0;
 }
 
@@ -2710,12 +2861,13 @@ button {
   }
 
   .hero {
-    min-height: calc(100dvh - 4rem);
-    gap: var(--space-5);
-    padding: var(--space-4) var(--page-inset) var(--space-5);
+    min-height: auto;
+    gap: var(--space-4);
+    padding: var(--space-4) var(--page-inset) var(--space-3);
   }
 
   .hero-body {
+    flex: 0 1 auto;
     gap: var(--space-3);
   }
 
@@ -2781,17 +2933,17 @@ button {
   }
 
   .about {
-    padding-bottom: var(--space-6);
+    padding-bottom: var(--space-5);
   }
 
   .about-tight {
-    padding-top: var(--space-5);
-    padding-bottom: var(--space-6);
+    padding-top: var(--space-4);
+    padding-bottom: var(--space-5);
   }
 
   .flow {
-    margin-top: var(--space-5);
-    gap: var(--space-5);
+    margin-top: var(--space-4);
+    gap: var(--space-4);
   }
 
   .flow-icon {
@@ -2824,14 +2976,14 @@ button {
 
   .product-main {
     max-width: 100%;
-    padding: var(--space-3) var(--page-inset) var(--space-6);
-    padding-bottom: max(var(--space-6), calc(env(safe-area-inset-bottom) + var(--space-4)));
+    padding: var(--space-3) var(--page-inset) var(--space-5);
+    padding-bottom: max(var(--space-5), calc(env(safe-area-inset-bottom) + var(--space-3)));
     min-height: auto;
   }
 
   /* Sticky reaction dock needs room under the card, not under every product page. */
   .product-main:has(.result) {
-    padding-bottom: max(6.5rem, calc(env(safe-area-inset-bottom) + 5.5rem));
+    padding-bottom: max(5.75rem, calc(env(safe-area-inset-bottom) + 4.75rem));
   }
 
   .quiz-progress {
@@ -2853,18 +3005,18 @@ button {
   }
 
   .quiz-options {
-    margin-top: var(--space-4);
+    margin-top: var(--space-3);
   }
 
   .quiz-options-stack .quiz-option {
-    min-height: 4rem;
+    min-height: 3.5rem;
     padding: var(--space-3) var(--space-4);
     font-size: 1.05rem;
   }
 
   .quiz-option-icon {
-    width: 2.75rem;
-    height: 2.75rem;
+    width: 2.5rem;
+    height: 2.5rem;
   }
 
   .quiz-back {
@@ -2883,8 +3035,8 @@ button {
   }
 
   .result-media {
-    aspect-ratio: 5 / 4;
-    max-height: min(42vh, 20rem);
+    aspect-ratio: 4 / 3;
+    max-height: min(34vh, 16rem);
   }
 
   .result-title {
@@ -3006,7 +3158,7 @@ button {
   }
 
   .doc-body section {
-    padding-top: var(--space-6);
+    padding-top: var(--space-5);
   }
 
   .toc a {
@@ -3210,7 +3362,7 @@ button {
 .explore {
   display: flex;
   flex-direction: column;
-  gap: var(--space-5);
+  gap: var(--space-4);
 }
 
 .explore-block {
@@ -3389,6 +3541,6 @@ button {
   }
 
   .product-main-with-nav {
-    padding-bottom: max(5.5rem, calc(env(safe-area-inset-bottom) + 4.5rem));
+    padding-bottom: max(5rem, calc(env(safe-area-inset-bottom) + 4rem));
   }
 }

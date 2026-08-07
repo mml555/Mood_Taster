@@ -58,6 +58,12 @@ const FOOD_CUISINE: Record<string, Cuisine> = {
   elote: "Mexican",
   "pad-thai": "Thai",
   affogato: "Italian",
+  "butter-chicken": "Indian",
+  "vegetable-samosas": "Indian",
+  "chicken-souvlaki": "Greek",
+  "greek-salad": "Greek",
+  "doro-wat": "Ethiopian",
+  "misir-wat": "Ethiopian",
 };
 
 export function isCuisine(raw: unknown): raw is Cuisine {

@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import dynamic from "next/dynamic";
 import { useRouter, useSearchParams } from "next/navigation";
-import { ArrowRight, ChefHat, Heart, MapPin, Sparkles } from "lucide-react";
+import { ArrowRight, ChefHat, Heart, MapPin, Search, Sparkles } from "lucide-react";
 import {
   useCallback,
   useEffect,
@@ -113,7 +113,6 @@ export function ResultView({ food }: ResultViewProps) {
     ),
   );
   const [sessionReady, setSessionReady] = useState(false);
-  const [whyOpen, setWhyOpen] = useState(false);
   const [imgFailed, setImgFailed] = useState(false);
   const [deltas, setDeltas] = useState<DnaDelta[] | null>(null);
   const [lastRating, setLastRating] = useState<Rating | null>(null);
@@ -157,7 +156,6 @@ export function ResultView({ food }: ResultViewProps) {
 
     queueMicrotask(() => {
       setImgFailed(false);
-      setWhyOpen(false);
       setDeltas(null);
       setLevelLabel(null);
       setLastRating(null);
@@ -548,7 +546,6 @@ export function ResultView({ food }: ResultViewProps) {
       }
       setPendingRating(rating);
       setFeedbackTags([]);
-      setWhyOpen(false);
       setWhyPanelOpen(false);
     },
     [lastRating, pendingRating],
@@ -1094,7 +1091,6 @@ export function ResultView({ food }: ResultViewProps) {
                   className="text-link"
                   onClick={() => {
                     setWhyPanelOpen((v) => !v);
-                    setWhyOpen(false);
                   }}
                   aria-expanded={whyPanelOpen}
                   disabled={adjusting || rated}

@@ -27,7 +27,7 @@ import {
   shouldFinishQuizEarly,
 } from "./adaptive-quiz";
 import { NOVELTY_WEIGHT, parseExploreBalance } from "./explore-balance";
-import { cuisineForFood } from "./cuisines";
+import { cuisineForFood, foodIdForCuisine, CUISINES } from "./cuisines";
 import { rank } from "./engine";
 import type { Answers, SessionState } from "./taste-types";
 import {
@@ -68,6 +68,21 @@ describe("passport", () => {
     expect(cuisine).toBe("Mexican");
     expect(passportProgress(state).explored).toBe(1);
     expect(state.stamps[0]?.favoriteDishName).toBe("Birria tacos");
+  });
+
+  it("can stamp every passport cuisine from catalog foods", () => {
+    for (const cuisine of CUISINES) {
+      const foodId = foodIdForCuisine(cuisine);
+      expect(foodId, `missing catalog food for ${cuisine}`).toBeTruthy();
+      expect(cuisineForFood(foodId!)).toBe(cuisine);
+      const { isNew, cuisine: stamped } = confirmPassportExperience(
+        parsePassport(null),
+        { foodId: foodId!, foodName: cuisine, matchScore: 1 },
+        new Date("2026-08-06T12:00:00Z"),
+      );
+      expect(stamped).toBe(cuisine);
+      expect(isNew).toBe(true);
+    }
   });
 });
 

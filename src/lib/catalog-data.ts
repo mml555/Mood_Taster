@@ -565,7 +565,7 @@ export const RANK_FOODS: RankFood[] = [
     heaviness: "filling",
     temperature: "hot",
     adventurousness: 3,
-    dietaryTags: ["contains-dairy", "gluten-free"],
+    dietaryTags: ["contains-dairy", "contains-gluten"],
     image: "/food/butter-chicken.jpg",
     imageAlt: "Butter chicken curry with rice and flatbread",
     imageCredit: "Unsplash",

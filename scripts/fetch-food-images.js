@@ -43,6 +43,11 @@ const IMAGES = {
   "elote": "photo-1551754655-cd27e38d2076",
   "pad-thai": "photo-1559314809-0d155014e29e",
   "affogato": "photo-1495474472287-4d71bcdd2085",
+  "butter-chicken": "photo-1631452180519-c014fe946bc7",
+  "vegetable-samosas": "photo-1601050690597-df0568f70950",
+  "chicken-souvlaki": "photo-1603360946369-dc9bb6258143",
+  "greek-salad": "photo-1540189549336-e6e99c3679fe",
+  // doro-wat and misir-wat use Wikimedia Commons stills in public/food/
 };
 
 function download(url, dest) {

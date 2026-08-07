@@ -13,6 +13,7 @@ import {
   shouldFinishQuizEarly,
 } from "@/lib/adaptive-quiz";
 import { ExploreBalanceControl } from "@/components/ExploreBalanceControl";
+import { QuizLoading } from "@/components/QuizLoading";
 import { readExploreBalance } from "@/lib/explore-balance";
 import { readFavorites } from "@/lib/favorites";
 import { loadFavoritesForUser } from "@/lib/favorites-sync";
@@ -66,11 +67,6 @@ const INTENT_STEP: StepDef = {
       value: "snack",
       label: "Grab a snack",
       description: "Find a quick bite.",
-    },
-    {
-      value: "clue",
-      label: "I have no clue",
-      description: "Answer broad pairs. We will pick.",
     },
   ],
 };
@@ -316,6 +312,7 @@ export function TasteQuiz() {
   const [answers, setAnswers] = useState<PartialAnswers>({});
   const [hydrated, setHydrated] = useState(false);
   const [dietError, setDietError] = useState(false);
+  const [matching, setMatching] = useState(false);
   const finishedRef = useRef(false);
   const abandonMetaRef = useRef({
     step,
@@ -414,6 +411,8 @@ export function TasteQuiz() {
     (finalAnswers: Answers) => {
       clearDraft();
       setDietError(false);
+      setMatching(true);
+      const matchStartedAt = Date.now();
       const session = emptySession(finalAnswers);
       const { dna } = applyQuizPrefs(readDna(), finalAnswers);
       void persistDna(dna);
@@ -426,7 +425,12 @@ export function TasteQuiz() {
         warmGeolocation();
       }
 
-      const go = (foodId: string) => {
+      const go = async (foodId: string) => {
+        // Keep the interstitial on screen long enough to read one beat.
+        const wait = Math.max(0, 900 - (Date.now() - matchStartedAt));
+        if (wait > 0) {
+          await new Promise((resolve) => window.setTimeout(resolve, wait));
+        }
         finishedRef.current = true;
         writeSession({
           ...session,
@@ -465,13 +469,14 @@ export function TasteQuiz() {
             }),
           });
           if (res.status === 422) {
+            setMatching(false);
             setDietError(true);
             return;
           }
           if (res.ok) {
             const data = (await res.json()) as { foodId?: string };
             if (typeof data.foodId === "string" && data.foodId) {
-              go(data.foodId);
+              await go(data.foodId);
               return;
             }
           }
@@ -487,12 +492,14 @@ export function TasteQuiz() {
             favoriteIds,
             readExploreBalance(),
           );
-          go(rec.primary.food.id);
+          await go(rec.primary.food.id);
         } catch (err) {
           if (err instanceof NoDietaryMatchError) {
+            setMatching(false);
             setDietError(true);
             return;
           }
+          setMatching(false);
           throw err;
         }
       })();
@@ -625,6 +632,10 @@ export function TasteQuiz() {
         </div>
       </section>
     );
+  }
+
+  if (matching) {
+    return <QuizLoading />;
   }
 
   return (
