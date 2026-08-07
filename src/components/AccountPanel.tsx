@@ -65,11 +65,10 @@ export function AccountPanel() {
 
   useEffect(() => {
     if (auth.status !== "user") {
-      setProfile(null);
       return;
     }
     if (!isSupabaseConfigured()) {
-      setError("Accounts are not configured.");
+      queueMicrotask(() => setError("Accounts are not configured."));
       return;
     }
 
@@ -92,6 +91,11 @@ export function AccountPanel() {
       });
     })();
   }, [auth]);
+
+  const displayProfile =
+    auth.status === "user"
+      ? profile ?? { email: null, username: auth.username }
+      : null;
 
   const radarData = useMemo(() => {
     if (!dna) return [];
@@ -208,7 +212,7 @@ export function AccountPanel() {
     );
   }
 
-  const displayName = profile?.username ?? auth.username ?? "Friend";
+  const displayName = displayProfile?.username ?? "Friend";
 
   return (
     <section className="profile-panel">
@@ -230,8 +234,8 @@ export function AccountPanel() {
         <div>
           <h1 className="profile-name">{displayName}</h1>
           <p className="profile-sub">DNA Profile: {dnaLabel}</p>
-          {profile?.email ? (
-            <p className="profile-sub">{profile.email}</p>
+          {displayProfile?.email ? (
+            <p className="profile-sub">{displayProfile.email}</p>
           ) : null}
         </div>
       </div>

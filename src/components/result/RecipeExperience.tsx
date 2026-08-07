@@ -108,7 +108,7 @@ export function RecipeExperience({
     <section className="recipe-experience" aria-labelledby="recipe-exp-title">
       <div className="recipe-exp-top">
         <Link
-          href={`/result/${food.id}/done`}
+          href={`/result/${food.id}`}
           className="press-btn press-btn-icon"
           aria-label="Back"
         >
@@ -146,7 +146,7 @@ export function RecipeExperience({
       </div>
 
       {tab === "recipe" ? (
-        <div className="flex flex-col gap-6">
+        <div>
           <Image
             src={food.image}
             alt={food.imageAlt}
@@ -155,20 +155,20 @@ export function RecipeExperience({
             className="recipe-exp-image"
             priority
           />
-          <div className="recipe-exp-meta">
+          <div className="recipe-exp-meta" style={{ marginTop: "1.5rem" }}>
             <div className="recipe-exp-meta-card">
               <span className="recipe-exp-meta-label">Prep Time</span>
-              <span className="font-bold">{recipe.timeMinutes} min</span>
+              <span style={{ fontWeight: 700 }}>{recipe.timeMinutes} min</span>
             </div>
             <div className="recipe-exp-meta-card">
               <span className="recipe-exp-meta-label">Difficulty</span>
-              <span className="font-bold">
+              <span style={{ fontWeight: 700 }}>
                 {difficultyLabel(recipe.timeMinutes)}
               </span>
             </div>
           </div>
 
-          <div>
+          <div style={{ marginTop: "1.5rem" }}>
             <h2 className="recipe-heading">Ingredients</h2>
             {shoppingList ? (
               <div className="recipe-shopping">
@@ -203,7 +203,6 @@ export function RecipeExperience({
                 <PressButton
                   variant="secondary"
                   fullWidth
-                  className="mt-4"
                   onClick={createShoppingList}
                   style={{ marginTop: "1rem" }}
                 >
@@ -213,7 +212,7 @@ export function RecipeExperience({
             )}
           </div>
 
-          <div>
+          <div style={{ marginTop: "1.5rem" }}>
             <h2 className="recipe-heading">Steps</h2>
             <ol className="recipe-steps">
               {recipe.steps.map((step) => (
@@ -262,8 +261,11 @@ export function RecipeExperience({
               onClick={() => void send()}
               disabled={loading || !input.trim()}
               aria-label="Send"
-              className="bg-indigo"
-              style={{ background: "var(--ink)", color: "var(--paper)", border: 0 }}
+              style={{
+                background: "var(--ink)",
+                color: "var(--paper)",
+                border: 0,
+              }}
             >
               <Send size={18} strokeWidth={2} aria-hidden />
             </PressButton>

@@ -4,7 +4,7 @@ import Link from "next/link";
 export const metadata: Metadata = {
   title: "Brand Guide",
   description:
-    "Mood Taster Brand Guide v1: Ghost White, Indigo Purple, Royal Gold. Minimal, playful, fast. See, react, swipe.",
+    "Mood Taster Brand Guide: Ghost White, Indigo Purple, Royal Gold. Playful pressable chrome. See, tap, taste.",
 };
 
 export default function BrandPage() {
@@ -15,14 +15,14 @@ export default function BrandPage() {
           <p className="doc-back">
             <Link href="/">Mood Taster</Link>
           </p>
-          <p className="eyebrow">Brand guide · v1</p>
+          <p className="eyebrow">Brand guide · v1.1</p>
           <h1>Don&apos;t make me think. Let me react.</h1>
           <p className="lede">
-            Mood Taster should feel minimal, playful, fast, premium, and simple.
-            See → React → Swipe → Get something better.
+            Mood Taster should feel playful, pressable, fast, and clear. See →
+            Tap → Taste → Get something better.
           </p>
           <p className="doc-meta">
-            Status: v1 · Last updated: August 6, 2026 ·{" "}
+            Status: v1.1 · Last updated: August 6, 2026 ·{" "}
             <a href="/prd">PRD</a> · <a href="/strategy">Strategy</a> ·{" "}
             <a href="https://github.com/mml555/Mood_Taster">GitHub</a>
           </p>
@@ -32,9 +32,9 @@ export default function BrandPage() {
           <p className="callout-label">Hard rules</p>
           <p>
             Ghost White dominates. Indigo drives actions. Gold is a surprise,
-            not a second primary. One radius system. 8px spacing. No emojis. No
-            outlined buttons. Almost no shadows. Short copy. One primary CTA per
-            screen.
+            not a second primary. Pressable thick bottom borders on product
+            controls. Soft shadows on primary cards. No emojis. Short copy. One
+            primary CTA per screen.
           </p>
         </aside>
 
@@ -57,7 +57,7 @@ export default function BrandPage() {
               <a href="#buttons">5. Buttons &amp; icons</a>
             </li>
             <li>
-              <a href="#swipe">6. Swipe &amp; cards</a>
+              <a href="#swipe">6. Cards &amp; reactions</a>
             </li>
             <li>
               <a href="#copy">7. Copy</a>
@@ -261,12 +261,12 @@ export default function BrandPage() {
             <h3>Buttons</h3>
             <ul>
               <li>
-                <strong>Primary:</strong> Indigo background, light text. No
-                border. No shadow normally.
+                <strong>Primary:</strong> Indigo fill, ghost text, thick bottom
+                edge in deeper indigo. Compress on press.
               </li>
               <li>
-                <strong>Secondary:</strong> Soft purple tint, indigo text. No
-                border.
+                <strong>Secondary:</strong> White fill, indigo border, thick
+                bottom edge.
               </li>
               <li>
                 <strong>Highlight:</strong> Gold background, indigo text.
@@ -274,8 +274,8 @@ export default function BrandPage() {
               </li>
             </ul>
             <p>
-              Avoid outlined buttons. Button copy stays tiny: Show me, Try
-              again, I like it, Not for me, Pick this, Next.
+              Product chrome is pressable. Button copy stays tiny: Show me,
+              Taste my mood, Let&apos;s go, Make this.
             </p>
 
             <h3>Icons</h3>
@@ -287,7 +287,7 @@ export default function BrandPage() {
               <li>♡ Like</li>
               <li>× Not for me</li>
               <li>↻ Try something else</li>
-              <li>← → Browse / swipe</li>
+              <li>← → Browse</li>
               <li>＋ Add</li>
               <li>✓ Pick / confirm</li>
               <li>⌕ Search</li>
@@ -295,28 +295,25 @@ export default function BrandPage() {
           </section>
 
           <section id="swipe" aria-labelledby="swipe-title">
-            <h2 id="swipe-title">6. Swipe &amp; cards</h2>
+            <h2 id="swipe-title">6. Cards &amp; reactions</h2>
             <p>
-              Personality comes from physical reactions instead of menus. A
+              Personality comes from clear reactions instead of menus. A
               recommendation appears:
             </p>
             <ul>
-              <li>Swipe right / ♡ → Like</li>
-              <li>Swipe left / × → Not for me</li>
-              <li>↻ → Try again</li>
-              <li>Tap → Learn more</li>
+              <li>× → Not for me / next match</li>
+              <li>♡ + CTA → Like (Let&apos;s go / Make this / That&apos;s the one)</li>
+              <li>Tap quiet links for Kinda, Why, or Off</li>
             </ul>
             <p>
-              Favor swipes, taps, and choices over forms. The user should feel
-              like they are teaching Mood Taster their taste simply by using it.
+              Favor taps and choices over forms. Quiz craving steps use a
+              2-column icon grid. Intent stays full-width cards.
             </p>
             <h3>Cards</h3>
             <p>
-              Large, clean, content-driven. Avoid heavy borders, constant drop
-              shadows, nested cards, and tiny buttons everywhere. Shadows are
-              rare. If we use one, it means: look here, this is important. The
-              main recommendation card may get subtle elevation. Everything else
-              stays flat.
+              Large, clean, content-driven. White cards with indigo borders and
+              a thick bottom edge. Soft shadows are allowed on the main result
+              card and key stats cards.
             </p>
           </section>
 
@@ -424,10 +421,10 @@ export default function BrandPage() {
               <li>One consistent radius system</li>
               <li>8px spacing system</li>
               <li>No emojis</li>
-              <li>No unnecessary borders or outlined buttons</li>
-              <li>Almost no shadows</li>
+              <li>Pressable borders and thick bottom edges on product controls</li>
+              <li>Soft shadows on primary result and stats cards only</li>
               <li>Icons explain actions</li>
-              <li>Favor swipes, taps, and reactions over forms</li>
+              <li>Favor taps and reactions over forms</li>
               <li>One clear primary CTA per screen</li>
               <li>Copy stays extremely short</li>
               <li>Focus states still visible on keyboard nav</li>

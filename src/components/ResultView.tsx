@@ -132,8 +132,9 @@ export function ResultView({ food }: ResultViewProps) {
 
   const [riff, setRiff] = useState<string | null>(null);
   const [cookTip, setCookTip] = useState<string | null>(null);
-  /** Model copy landed after this dish had already painted, so dissolve it in. */
-  const [polished, setPolished] = useState(false);
+  /** Model copy landed after this dish painted, so dissolve it in rather than cut. */
+  const [swappedWhy, setSwappedWhy] = useState(false);
+  const [lateRiff, setLateRiff] = useState(false);
   const [places, setPlaces] = useState<NearbyPlace[]>([]);
   const [placesState, setPlacesState] = useState<PlacesState>("locating");
   const [locationError, setLocationError] = useState<string | null>(null);
@@ -165,7 +166,8 @@ export function ResultView({ food }: ResultViewProps) {
       setEmptyAlts(false);
       setRiff(null);
       setCookTip(null);
-      setPolished(false);
+      setSwappedWhy(false);
+      setLateRiff(false);
       setWhyPanelOpen(false);
       setRejectNoteText("");
       setExitDir(null);
@@ -227,8 +229,14 @@ export function ResultView({ food }: ResultViewProps) {
     /**
      * Swaps in warmer copy. The quiz starts this fetch during the interstitial,
      * so in the normal flow it is already cached here and lands in this same
-     * paint with nothing visibly changing. Arriving late is the exception, and
-     * `polished` marks it so the line dissolves instead of snapping.
+     * paint with nothing visibly changing.
+     *
+     * Three arrival windows, because rewriting a line the user is mid-sentence
+     * through is worse than never rewriting it:
+     *   cached        applied in the first paint, no transition needed
+     *   under 2s      the line dissolves into the new one
+     *   after 2s      the why line is left alone; only the riff and cook tip
+     *                 apply, and those are additive rather than a rewrite
      *
      * Never awaited by the caller, never throws, never aborts: the request is
      * shared with any prefetch still in flight, so cancelling it on unmount
@@ -236,12 +244,22 @@ export function ResultView({ food }: ResultViewProps) {
      * dropped by the paint token instead.
      */
     function polish(foodId: string, answers: Answers, paintToken: number) {
+      const paintedAt = Date.now();
+
       const paint = (copy: PolishedCopy | null, late: boolean) => {
         if (!copy || paintToken !== renderId.current) return;
-        if (copy.why) setExplanation(copy.why);
-        if (copy.riff) setRiff(copy.riff);
+        // Past the deadline the reader owns that line. Taking it back reads as
+        // a glitch, not as an improvement.
+        const rewritable = Date.now() - paintedAt < SWAP_DEADLINE_MS;
+        if (copy.why && rewritable) {
+          setExplanation(copy.why);
+          if (late) setSwappedWhy(true);
+        }
+        if (copy.riff) {
+          setRiff(copy.riff);
+          if (late) setLateRiff(true);
+        }
         if (copy.cookTip) setCookTip(copy.cookTip);
-        if (late) setPolished(true);
       };
 
       const { cached, pending } = loadCopyForFood(foodId, answers);

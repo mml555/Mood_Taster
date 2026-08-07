@@ -12,10 +12,11 @@ Match how you feel to what you should taste. Mood first, menus second.
 ## Design
 
 - Ghost White `--paper` `#fdfaff`, Indigo `--ink` `#510c85`, Gold `--accent` `#ffdf6e`
-- Rounded language (`--radius-card` 20px, buttons 14px). 8px spacing
-- No gradients, no outlined buttons, almost no shadows
-- Swipe + ♡ × ↻ on the result card
-- No emojis. No semantic green/red. No em dashes in copy
+- Pressable chrome: thick bottom borders, white cards, soft shadows on primary cards
+- Rounded language (`--radius-card` 24px, buttons 16px). 8px spacing
+- Result: × + ♡ CTA (Let's go / Make this / That's the one). No swipe required
+- Quiz: intent stack cards; craving steps 2-col icon grid
+- No emojis. No em dashes in copy
 
 ## Code
 
