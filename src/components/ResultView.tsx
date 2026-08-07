@@ -19,7 +19,6 @@ import {
   useEffect,
   useRef,
   useState,
-  type PointerEvent as ReactPointerEvent,
 } from "react";
 import {
   applyRating,
@@ -114,8 +113,6 @@ type ResultViewProps = {
   food: Food;
 };
 
-const SWIPE_THRESHOLD = 80;
-
 function prefersReducedMotion(): boolean {
   if (typeof window === "undefined") return false;
   return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -162,19 +159,13 @@ export function ResultView({ food }: ResultViewProps) {
   const [adjustNote, setAdjustNote] = useState<string | null>(null);
   const [leaving, setLeaving] = useState(false);
 
-  const [dragging, setDragging] = useState(false);
   const [exitDir, setExitDir] = useState<"left" | "right" | null>(null);
-  const [swipeHint, setSwipeHint] = useState<"like" | "nope" | null>(null);
   const [saved, setSaved] = useState(false);
 
   // Identifies the current dish render, so a slow reply about a previous dish
   // cannot overwrite the copy for the one now on screen.
   const renderId = useRef(0);
-  const pointerId = useRef<number | null>(null);
-  const startX = useRef(0);
-  const dragXRef = useRef(0);
   const busyRef = useRef(false);
-  const cardRef = useRef<HTMLDivElement>(null);
   /** User opted into city/ZIP; ignore late browser geolocation results. */
   const placesManualRef = useRef(false);
 

@@ -55,17 +55,17 @@ const INTENT_STEP: StepDef = {
   options: [
     {
       value: "restaurant",
-      label: "Go out",
+      label: "Go Out",
       description: "Find something worth leaving the house for.",
     },
     {
       value: "recipe",
-      label: "Make something",
+      label: "Make Food",
       description: "Find something you can make.",
     },
     {
       value: "snack",
-      label: "Grab a snack",
+      label: "Grab a Snack",
       description: "Find a quick bite.",
     },
   ],
@@ -512,6 +512,11 @@ export function TasteQuiz() {
       if (!current) return;
       const next: PartialAnswers = { ...answers, [current.key]: value };
 
+      // Brief selected state before advancing (prototype ~200ms).
+      const advance = (fn: () => void) => {
+        window.setTimeout(fn, 200);
+      };
+
       if (current.key === "intent") {
         const intent = value as Intent;
         const seeded: PartialAnswers = {
@@ -525,7 +530,7 @@ export function TasteQuiz() {
         writeDraft(seeded);
         track(ANALYTICS_EVENTS.intent, { intent, source: "quiz" });
         if (intent === "restaurant") warmGeolocation();
-        goStep(1, intent);
+        advance(() => goStep(1, intent));
         return;
       }
 
@@ -562,13 +567,13 @@ export function TasteQuiz() {
       ) {
         const complete = fillAnswerDefaults(next, intent);
         if (complete && isComplete(complete)) {
-          finish(complete);
+          advance(() => finish(complete));
           return;
         }
       }
 
       if (step < totalSteps) {
-        goStep(step + 1);
+        advance(() => goStep(step + 1));
         return;
       }
 
@@ -580,7 +585,7 @@ export function TasteQuiz() {
         vibe: next.vibe ?? "any",
       };
       if (isComplete(complete)) {
-        finish(complete);
+        advance(() => finish(complete));
       }
     },
     [answers, current, finish, goStep, seededIntent, step, totalSteps],
@@ -590,9 +595,11 @@ export function TasteQuiz() {
 
   const selected = hydrated ? answers[current.key] : undefined;
   const StepIcon = QUIZ_STEP_ICONS[current.key];
-  // Reference layout: full-width list cards. Stack always reads clearer than a
-  // 2-up tile grid for tap targets and short descriptions.
-  const tileClass = "quiz-options quiz-options-stack";
+  // Intent: full-width cards. Craving steps: 2-col icon grid (prototype).
+  const tileClass =
+    current.key === "intent"
+      ? "quiz-options quiz-options-stack quiz-options-intent"
+      : "quiz-options quiz-options-grid";
 
   const showBack = step > 1 || Boolean(seededIntent) || fromHome;
   const onBack = () => {

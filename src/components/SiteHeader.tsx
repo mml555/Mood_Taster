@@ -32,36 +32,30 @@ export function SiteHeader({ current = "home" }: SiteHeaderProps) {
     current === "strategy" ||
     current === "brand" ||
     current === "legal";
-  const onAuthSurface =
-    current === "account" &&
-    (typeof window === "undefined" || true);
+  const hideAuthCta = current === "account" || current === "home";
 
   return (
     <header className={current === "home" ? "top top-home" : "top top-compact"}>
-      <div className="nav-brand-row">
-        {auth.status === "user" ? (
-          <Link href="/account" className="nav-brand-row">
-            <span
-              className="profile-avatar"
-              style={{ width: "2.75rem", height: "2.75rem", fontSize: "1rem" }}
-              aria-hidden
-            >
-              {(auth.username ?? "M").charAt(0).toUpperCase()}
-            </span>
-            <span className="nav-welcome">
-              <span className="nav-welcome-label">Welcome,</span>
-              <span className="nav-welcome-name">
-                {auth.username ?? "Friend"}
-              </span>
-            </span>
-          </Link>
-        ) : (
-          <Link href="/" className="nav-brand-row">
-            <Utensils size={22} strokeWidth={2} aria-hidden />
-            <span>Mood Taster</span>
-          </Link>
-        )}
-      </div>
+      {auth.status === "user" ? (
+        <Link href="/account" className="nav-brand-row">
+          <span
+            className="profile-avatar"
+            style={{ width: "2.75rem", height: "2.75rem", fontSize: "1rem" }}
+            aria-hidden
+          >
+            {(auth.username ?? "M").charAt(0).toUpperCase()}
+          </span>
+          <span className="nav-welcome">
+            <span className="nav-welcome-label">Welcome,</span>
+            <span className="nav-welcome-name">{auth.username ?? "Friend"}</span>
+          </span>
+        </Link>
+      ) : (
+        <Link href="/" className="nav-brand-row">
+          <Utensils size={22} strokeWidth={2} aria-hidden />
+          <span>Mood Taster</span>
+        </Link>
+      )}
       <nav aria-label="Primary">
         {onDocs ? (
           <>
@@ -80,7 +74,7 @@ export function SiteHeader({ current = "home" }: SiteHeaderProps) {
             <Dna size={16} strokeWidth={2} aria-hidden />
             DNA Profile
           </Link>
-        ) : onAuthSurface && current === "account" ? null : (
+        ) : hideAuthCta ? null : (
           <AuthNav current={current} compact />
         )}
       </nav>

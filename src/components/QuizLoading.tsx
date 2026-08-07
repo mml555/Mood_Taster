@@ -12,7 +12,6 @@ const MESSAGES = [
 
 /**
  * Full-screen interstitial between the last quiz tap and the result.
- * Message rotates with rise only. No looping logo motion.
  */
 export function QuizLoading() {
   const [msgIndex, setMsgIndex] = useState(0);
@@ -31,7 +30,7 @@ export function QuizLoading() {
       aria-busy="true"
       aria-label="Finding your match"
     >
-      <div className="quiz-loading-brand">
+      <div className="quiz-loading-brand quiz-loading-mark-pulse">
         <Image
           className="quiz-loading-mark"
           src="/brand/mark-purple.png"
