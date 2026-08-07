@@ -4,7 +4,11 @@
  */
 
 import { underexploredDimensions, labelDimension } from "./dna";
-import { unexploredCuisines, type Cuisine } from "./cuisines";
+import {
+  foodIdForCuisine,
+  unexploredCuisines,
+  type Cuisine,
+} from "./cuisines";
 import { stampedCuisineSet, type PassportState } from "./passport";
 import type { DnaDimension, DnaProfile } from "./taste-types";
 
@@ -184,7 +188,9 @@ export function ensureTodaysQuest(
   if (under[0]) {
     quest = dimQuest(under[0].dimension, iso);
   } else {
-    const missing = unexploredCuisines(stampedCuisineSet(passport), 1);
+    const missing = unexploredCuisines(stampedCuisineSet(passport), 8).filter(
+      (c) => foodIdForCuisine(c) != null,
+    );
     if (missing[0]) {
       quest = passportQuest(missing[0], iso);
     } else {

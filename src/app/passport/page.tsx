@@ -1,20 +1,20 @@
 import { SiteFooter } from "@/components/SiteFooter";
 import { SiteHeader } from "@/components/SiteHeader";
 import { ProductBottomNav } from "@/components/ProductBottomNav";
-import { HistoryList } from "@/components/HistoryList";
+import { PassportView } from "@/components/PassportView";
 
 export const metadata = {
-  title: "History",
+  title: "Food Passport",
 };
 
-export default function HistoryPage() {
+export default function PassportPage() {
   return (
     <>
-      <SiteHeader current="history" />
+      <SiteHeader current="explore" />
       <main className="product-main product-main-with-nav">
-        <HistoryList />
+        <PassportView />
       </main>
-      <ProductBottomNav current="history" />
+      <ProductBottomNav current="explore" />
       <SiteFooter />
     </>
   );

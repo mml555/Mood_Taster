@@ -95,11 +95,6 @@ video {
   .grain {
     display: none;
   }
-
-  .hero-peek li:nth-child(2),
-  .hero-peek li:nth-child(4) {
-    transform: none;
-  }
 }
 
 a {
@@ -140,6 +135,12 @@ button {
   padding: var(--space-3) var(--page-inset);
   padding-top: max(var(--space-3), env(safe-area-inset-top));
   animation: rise 0.9s var(--ease) both;
+}
+
+/* Home: nav only. Brand lives in the hero, not a second lockup. */
+.top-home {
+  justify-content: flex-end;
+  padding-bottom: var(--space-2);
 }
 
 .mark {
@@ -209,59 +210,54 @@ button {
 .hero {
   position: relative;
   z-index: 1;
-  display: grid;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
   gap: var(--space-6);
-  align-content: start;
   min-height: calc(100vh - 4.5rem);
   min-height: calc(100dvh - 4.5rem);
-  max-width: 64rem;
-  padding: var(--space-5) var(--page-inset) var(--space-7);
-}
-
-.hero-copy {
-  max-width: 28rem;
-}
-
-.hero-peek {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  gap: var(--space-3);
-  overflow-x: auto;
-  scroll-snap-type: x mandatory;
-  -webkit-overflow-scrolling: touch;
-  scrollbar-width: none;
-  animation: rise 1s var(--ease) 0.5s both;
-}
-
-.hero-peek::-webkit-scrollbar {
-  display: none;
-}
-
-.hero-peek li {
-  flex: 0 0 auto;
-  width: 7.5rem;
-  scroll-snap-align: start;
-}
-
-.hero-peek-image {
-  display: block;
   width: 100%;
-  height: auto;
-  aspect-ratio: 1;
-  object-fit: cover;
-  border-radius: var(--radius-card);
-  background: var(--ink-soft);
+  max-width: 40rem;
+  margin-inline: auto;
+  padding: var(--space-5) var(--page-inset) var(--space-7);
+  text-align: center;
 }
 
-.hero-peek-name {
-  display: block;
-  margin-top: var(--space-2);
-  color: var(--paper-muted);
-  font-size: 0.75rem;
-  font-weight: 500;
-  line-height: 1.3;
+.hero-body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1;
+  justify-content: center;
+  gap: var(--space-4);
+  width: 100%;
+}
+
+.hero-logo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3);
+  margin-bottom: var(--space-2);
+  animation: rise 1s var(--ease) 0.1s both;
+}
+
+.hero-mark {
+  width: 3.5rem;
+  height: 3.5rem;
+  object-fit: contain;
+}
+
+.hero-brand {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(1.35rem, 3.5vw, 1.6rem);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+  text-transform: lowercase;
+  color: var(--ink);
 }
 
 .eyebrow {
@@ -288,21 +284,28 @@ button {
 
 .hero h1 {
   margin: 0;
+  max-width: 20rem;
   font-family: var(--font-display);
-  font-size: clamp(3.4rem, 12vw, 6.5rem);
+  font-size: clamp(1.75rem, 5.5vw, 2.15rem);
   font-weight: 700;
-  line-height: 0.95;
+  line-height: 1.2;
   letter-spacing: -0.02em;
   color: var(--ink);
   animation: rise 1s var(--ease) 0.18s both;
 }
 
 .lede {
-  margin: var(--space-4) 0 0;
+  margin: var(--space-3) 0 0;
   max-width: 28rem;
-  font-size: clamp(1rem, 2.4vw, 1.2rem);
+  font-size: clamp(1rem, 2.4vw, 1.15rem);
+  line-height: 1.45;
   color: var(--paper-muted);
   animation: rise 1s var(--ease) 0.28s both;
+}
+
+.hero .lede {
+  margin: 0;
+  max-width: 18rem;
 }
 
 .cta-row {
@@ -310,46 +313,32 @@ button {
   animation: rise 1s var(--ease) 0.4s both;
 }
 
-/* One primary start path, then lighter path picks. */
+/* Reference landing: one primary CTA, pinned under the copy. */
 .hero-start {
-  margin-top: var(--space-5);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3);
+  width: 100%;
   max-width: 22rem;
+  padding-bottom: var(--space-4);
   animation: rise 1s var(--ease) 0.4s both;
 }
 
 .hero-start-primary {
   width: 100%;
-  min-height: 3.25rem;
-  font-size: 1.05rem;
+  min-height: 3.5rem;
+  padding-block: 1rem;
+  font-size: 1.1rem;
+  border-radius: var(--radius-lg);
 }
 
 .hero-start-hint {
-  margin: var(--space-2) 0 0;
+  margin: 0;
   color: var(--paper-quiet);
   font-size: 0.85rem;
+  font-weight: 700;
   line-height: 1.4;
-}
-
-.hero-start-divider {
-  margin: var(--space-4) 0 var(--space-3);
-  color: var(--paper-quiet);
-  font-size: 0.75rem;
-  font-weight: 600;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-}
-
-.hero-paths {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: var(--space-2);
-}
-
-.hero-path {
-  width: 100%;
-  justify-content: flex-start;
-  padding-inline: 1.1rem;
-  font-size: 0.9rem;
 }
 
 .intent-picker {
@@ -368,57 +357,6 @@ button {
 
 .about .intent-picker {
   margin-top: var(--space-5);
-}
-
-@media (min-width: 900px) {
-  .hero {
-    grid-template-columns: minmax(0, 26rem) minmax(18rem, 1fr);
-    align-items: center;
-    gap: clamp(var(--space-5), 5vw, var(--space-8));
-    max-width: 72rem;
-    padding-top: clamp(var(--space-5), 6vh, var(--space-7));
-    padding-bottom: var(--space-7);
-  }
-
-  .hero-peek {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: var(--space-3);
-    overflow: visible;
-    max-width: 26rem;
-    justify-self: end;
-  }
-
-  .hero-peek li {
-    width: auto;
-  }
-
-  .hero-peek li:nth-child(2),
-  .hero-peek li:nth-child(4) {
-    transform: translateY(var(--space-5));
-  }
-
-  .hero-peek-name {
-    font-size: 0.8rem;
-  }
-
-  .hero-paths {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-
-  .hero-path {
-    justify-content: center;
-    flex-direction: column;
-    gap: 0.35rem;
-    padding: 0.85rem 0.5rem;
-    font-size: 0.8rem;
-    text-align: center;
-    line-height: 1.2;
-  }
-
-  .hero-start {
-    max-width: none;
-  }
 }
 
 
@@ -2601,30 +2539,30 @@ button {
   }
 
   .hero {
-    min-height: auto;
+    min-height: calc(100dvh - 4rem);
     gap: var(--space-5);
-    padding: var(--space-4) var(--page-inset) var(--space-6);
+    padding: var(--space-4) var(--page-inset) var(--space-5);
+  }
+
+  .hero-body {
+    gap: var(--space-3);
+  }
+
+  .hero-mark {
+    width: 3rem;
+    height: 3rem;
+  }
+
+  .hero-brand {
+    font-size: 1.25rem;
   }
 
   .hero h1 {
-    font-size: clamp(2.75rem, 14vw, 4rem);
-  }
-
-  /* Bleeds to the right edge so the strip reads as scrollable, but a snapped
-     tile still lands on the page inset rather than flush to the glass. */
-  .hero-peek {
-    margin-right: calc(-1 * var(--page-inset));
-    padding-right: var(--page-inset);
-    scroll-padding-left: var(--page-inset);
-    gap: var(--space-2);
-  }
-
-  .hero-peek li {
-    width: 6.5rem;
+    max-width: 18rem;
+    font-size: clamp(1.6rem, 6.5vw, 1.9rem);
   }
 
   .lede {
-    margin-top: var(--space-3);
     font-size: 1rem;
   }
 
@@ -2633,30 +2571,14 @@ button {
   }
 
   .hero-start {
-    margin-top: var(--space-4);
     max-width: none;
+    padding-bottom: var(--space-2);
   }
 
   .hero-start-primary {
-    min-height: 3.25rem;
-  }
-
-  .hero-start-divider {
-    margin: var(--space-3) 0 var(--space-2);
-  }
-
-  .hero-paths {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-
-  .hero-path {
-    justify-content: center;
-    flex-direction: column;
-    gap: 0.35rem;
-    padding: 0.7rem 0.4rem;
-    font-size: 0.78rem;
-    text-align: center;
-    line-height: 1.2;
+    width: 100%;
+    max-width: none;
+    min-height: 3.5rem;
   }
 
   .intent-picker {
@@ -2673,8 +2595,7 @@ button {
     touch-action: manipulation;
   }
 
-  .hero-start-primary,
-  .hero-path {
+  .hero .cta.hero-start-primary {
     max-width: none;
   }
 
@@ -3024,30 +2945,40 @@ button {
 @media (max-height: 520px) and (pointer: coarse) {
   .hero {
     min-height: auto;
-    gap: var(--space-4);
-    padding-top: var(--space-4);
-    padding-bottom: var(--space-5);
+    gap: var(--space-3);
+    padding-top: var(--space-3);
+    padding-bottom: var(--space-4);
+  }
+
+  .hero-body {
+    flex: 0 1 auto;
+    gap: var(--space-2);
+  }
+
+  .hero-logo {
+    margin-bottom: 0;
+    gap: var(--space-2);
+  }
+
+  .hero-mark {
+    width: 2.5rem;
+    height: 2.5rem;
+  }
+
+  .hero-brand {
+    font-size: 1.1rem;
   }
 
   .hero h1 {
-    font-size: clamp(2.25rem, 11vh, 4rem);
+    font-size: clamp(1.35rem, 5vh, 1.75rem);
   }
 
   .lede {
-    margin-top: var(--space-2);
+    font-size: 0.95rem;
   }
 
-  .cta-row,
   .hero-start {
-    margin-top: var(--space-3);
-  }
-
-  .hero-peek {
-    display: none;
-  }
-
-  .hero-peek li {
-    width: 5.5rem;
+    padding-bottom: 0;
   }
 
   .product-main {
@@ -3106,5 +3037,193 @@ button {
 
   .mark-lockup {
     height: 1.35rem;
+  }
+}
+
+/* P2 Explore loop */
+
+.explore {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+.explore-block {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.explore-block-title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  color: var(--ink);
+}
+
+.explore-note {
+  margin: 0;
+  color: var(--paper-muted);
+  font-size: 0.95rem;
+}
+
+.dna-level {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.dna-streak {
+  margin: 0;
+  color: var(--paper-muted);
+  font-size: 0.95rem;
+}
+
+.result-done-level {
+  margin: 0;
+  color: var(--paper-muted);
+  font-size: 0.95rem;
+}
+
+.explore-balance {
+  border: 0;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.explore-balance-compact {
+  margin-top: var(--space-4);
+  gap: var(--space-2);
+}
+
+.explore-balance-hint {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--paper-muted);
+}
+
+.explore-balance-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.explore-balance-btn {
+  appearance: none;
+  border: 0;
+  border-radius: var(--radius-btn);
+  padding: 0.65rem 1rem;
+  background: var(--ink-raised);
+  color: var(--ink);
+  font: inherit;
+  font-size: 0.95rem;
+  cursor: pointer;
+}
+
+.explore-balance-btn.is-selected {
+  background: var(--ink);
+  color: var(--paper);
+}
+
+.explore-balance-btn:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 2px;
+}
+
+.passport-grid {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-2);
+}
+
+.passport-chip {
+  appearance: none;
+  width: 100%;
+  border: 0;
+  border-radius: var(--radius-btn);
+  padding: 0.75rem 0.85rem;
+  background: var(--ink-raised);
+  color: var(--paper-muted);
+  font: inherit;
+  font-size: 0.9rem;
+  text-align: left;
+  cursor: pointer;
+}
+
+.passport-chip.is-stamped {
+  background: var(--ink);
+  color: var(--paper);
+}
+
+.passport-chip:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 2px;
+}
+
+.passport-detail {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.passport-detail p {
+  margin: 0;
+}
+
+.product-bottom-nav {
+  display: none;
+}
+
+@media (max-width: 720px) {
+  .product-bottom-nav {
+    display: block;
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 40;
+    background: var(--paper);
+    padding: var(--space-2) var(--page-inset);
+    padding-bottom: max(var(--space-2), env(safe-area-inset-bottom));
+  }
+
+  .product-bottom-nav-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--space-2);
+  }
+
+  .product-bottom-nav-link {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.2rem;
+    padding: 0.45rem 0.25rem;
+    border-radius: var(--radius-btn);
+    color: var(--paper-muted);
+    text-decoration: none;
+    font-size: 0.72rem;
+  }
+
+  .product-bottom-nav-link.is-active {
+    color: var(--ink);
+    background: var(--ink-raised);
+  }
+
+  .product-bottom-nav-link:focus-visible {
+    outline: 2px solid var(--ink);
+    outline-offset: 2px;
+  }
+
+  .product-main-with-nav {
+    padding-bottom: max(5.5rem, calc(env(safe-area-inset-bottom) + 4.5rem));
   }
 }

@@ -68,6 +68,14 @@ export function cuisineForFood(foodId: string): Cuisine | null {
   return FOOD_CUISINE[foodId] ?? null;
 }
 
+/** Any catalog food tagged with this cuisine, for quest confirm stamps. */
+export function foodIdForCuisine(cuisine: Cuisine): string | null {
+  for (const [id, c] of Object.entries(FOOD_CUISINE)) {
+    if (c === cuisine) return id;
+  }
+  return null;
+}
+
 export function labelCuisine(cuisine: Cuisine): string {
   return cuisine;
 }

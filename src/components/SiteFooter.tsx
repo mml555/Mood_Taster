@@ -23,6 +23,10 @@ export function SiteFooter() {
         {" · "}
         <Link href="/dna">Taste DNA</Link>
         {" · "}
+        <Link href="/explore">Explore</Link>
+        {" · "}
+        <Link href="/passport">Passport</Link>
+        {" · "}
         <Link href="/favorites">Favorites</Link>
         {" · "}
         <Link href="/history">History</Link>

@@ -14,6 +14,7 @@ import {
 } from "react";
 import {
   applyRating,
+  foodDimensions,
   formatDnaChangeLine,
   HIT_TAGS,
   MISS_TAGS,
@@ -28,16 +29,21 @@ import { ProfileNudge } from "@/components/ProfileNudge";
 import type { PlacesState } from "@/components/result/NearbySection";
 import { readDietary } from "@/lib/dietary";
 import { nextAfterReject, rank } from "@/lib/engine";
+import { readExploreBalance } from "@/lib/explore-balance";
 import {
   isFavorite,
   readFavorites,
   toggleFavorite,
 } from "@/lib/favorites";
 import { persistFavorites } from "@/lib/favorites-sync";
+import { persistGamification } from "@/lib/gamification-sync";
 import {
   recordRecommendationRating,
   recordRecommendationShown,
 } from "@/lib/history-sync";
+import { confirmPassportExperience, readPassport } from "@/lib/passport";
+import { recordMeaningfulAction } from "@/lib/streak";
+import { awardRatingXp, overallTasteLabel, readXp, writeXp } from "@/lib/xp";
 import { capitalize } from "@/lib/explain";
 import { parsePlacesResponse } from "@/lib/api-schemas";
 import {
@@ -111,6 +117,7 @@ export function ResultView({ food }: ResultViewProps) {
   const [imgFailed, setImgFailed] = useState(false);
   const [deltas, setDeltas] = useState<DnaDelta[] | null>(null);
   const [lastRating, setLastRating] = useState<Rating | null>(null);
+  const [levelLabel, setLevelLabel] = useState<string | null>(null);
   const [pendingRating, setPendingRating] = useState<Rating | null>(null);
   const [feedbackTags, setFeedbackTags] = useState<string[]>([]);
   const [emptyAlts, setEmptyAlts] = useState(false);
@@ -152,6 +159,7 @@ export function ResultView({ food }: ResultViewProps) {
       setImgFailed(false);
       setWhyOpen(false);
       setDeltas(null);
+      setLevelLabel(null);
       setLastRating(null);
       setEmptyAlts(false);
       setRiff(null);
@@ -442,6 +450,7 @@ export function ResultView({ food }: ResultViewProps) {
         food.id,
         readDietary(),
         readFavorites().foodIds,
+        readExploreBalance(),
       );
       if (!next) {
         setEmptyAlts(true);
@@ -559,6 +568,21 @@ export function ResultView({ food }: ResultViewProps) {
         detail,
       );
       void persistDna(next);
+
+      const dims = foodDimensions(food);
+      const xpResult = awardRatingXp(readXp(), dims, rating);
+      writeXp(xpResult.state);
+      recordMeaningfulAction();
+
+      if (rating === "nailed" || rating === "kinda") {
+        confirmPassportExperience(readPassport(), {
+          foodId: food.id,
+          foodName: food.name,
+          matchScore: rating === "nailed" ? 1 : 0.6,
+        });
+      }
+      void persistGamification();
+
       const current = readSession();
       track(ANALYTICS_EVENTS.feedback, {
         food_id: food.id,
@@ -587,6 +611,7 @@ export function ResultView({ food }: ResultViewProps) {
       setLastRating(rating);
       setPendingRating(null);
       setFeedbackTags([]);
+      setLevelLabel(overallTasteLabel(xpResult.state));
 
       if (rating === "nope") {
         if (!current) {
@@ -842,6 +867,9 @@ export function ResultView({ food }: ResultViewProps) {
                   ? formatDnaChangeLine(deltas)
                   : "Got it. Your Taste DNA learned from this pick."}
               </p>
+              {levelLabel ? (
+                <p className="result-done-level">{levelLabel}</p>
+              ) : null}
               <div className="result-done-actions">
                 {intent === "recipe" ? (
                   food.recipe ? (
@@ -1143,6 +1171,7 @@ function applySessionView(
     session,
     readDietary(),
     readFavorites().foodIds,
+    readExploreBalance(),
   );
   const match =
     rec.primary.food.id === food.id

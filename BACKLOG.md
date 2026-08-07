@@ -182,7 +182,7 @@ Add optional vibe / hunger / direction questions when snack/clue are not in play
 
 Only after P0 recommendation quality is solid.
 
-### P2-1 · Explore page shell
+### P2-1 · Explore page shell · done
 **Routes:** new `/explore`  
 **PRD:** §50  
 
@@ -190,9 +190,11 @@ Sections: Today’s quest (stub), Develop your taste, Quick Bite, Passport progr
 
 **Done when:** Authenticated mobile user can reach Explore from persistent nav.
 
+**Shipped:** `/explore` with quest, develop, Quick Bite, passport, achievements. `ProductBottomNav` on taste/DNA/explore/history for signed-in users.
+
 ---
 
-### P2-2 · Quick Bites (active learning)
+### P2-2 · Quick Bites (active learning) · done
 **Routes:** `/explore`, `/dna`  
 **PRD:** §48–49  
 
@@ -200,9 +202,11 @@ One-tap pairwise questions prioritized by low-confidence dimensions. Updates DNA
 
 **Done when:** Answering a Quick Bite visibly moves a low-confidence dimension.
 
+**Shipped:** `quick-bites.ts` + Explore Quick Bite UI. Prefs nudge + XP; streak on answer.
+
 ---
 
-### P2-3 · Flavor XP and levels
+### P2-3 · Flavor XP and levels · done
 **Modules:** DNA model, `/dna`  
 **PRD:** §36–38  
 
@@ -210,9 +214,11 @@ XP per dimension from try/rate/quest/Quick Bite. Levels secondary to DNA viz. Ov
 
 **Done when:** Rating a match awards dimension XP and level label can change.
 
+**Shipped:** `xp.ts`; rating awards XP in ResultView; DNA shows overall label + per-dim levels.
+
 ---
 
-### P2-4 · Taste Quests
+### P2-4 · Taste Quests · done
 **Routes:** `/explore`, `/dna`  
 **PRD:** §39–41  
 
@@ -220,9 +226,11 @@ Rule-generated quests (tangy, creamy, cuisine, comfort breaker). MVP completion 
 
 **Done when:** User can start and complete one quest; DNA/experience updates.
 
+**Shipped:** `quests.ts` on Explore; confirm bumps experience XP; cuisine quests stamp passport when catalog has that cuisine.
+
 ---
 
-### P2-5 · Food Passport
+### P2-5 · Food Passport · done
 **Routes:** `/explore`, passport detail  
 **PRD:** §42–44  
 
@@ -230,9 +238,11 @@ Cuisine stamps from confirmed experiences. Progress N / M. Detail: experiences, 
 
 **Done when:** Completing a cuisine-tagged recommendation (with confirm) stamps the passport.
 
+**Shipped:** `cuisines.ts` + `passport.ts`; nailed/kinda ratings stamp; `/passport` detail grid.
+
 ---
 
-### P2-6 · Weekly Taste Streak
+### P2-6 · Weekly Taste Streak · done
 **Routes:** `/dna` or `/explore`  
 **PRD:** §47  
 
@@ -240,9 +250,11 @@ Weekly meaningful action streak (feedback / quest / Quick Bite), not daily force
 
 **Done when:** Completing one meaningful action in consecutive weeks increments the streak.
 
+**Shipped:** `streak.ts`; shown on Explore and DNA; increments on feedback, quest, Quick Bite.
+
 ---
 
-### P2-7 · Adaptive question engine
+### P2-7 · Adaptive question engine · done
 **Routes:** `/taste`  
 **PRD:** §15, V1.5  
 
@@ -250,15 +262,19 @@ Dynamic stop when craving confidence is enough. Use DNA gaps and prior answers. 
 
 **Done when:** High-signal early answers can end the quiz early with equal or better Nailed it rate.
 
+**Shipped:** `adaptive-quiz.ts`; TasteQuiz finishes early when flavor+texture+enough signal (≥0.75). Clue path stays fixed.
+
 ---
 
-### P2-8 · Comfort vs Explore control
+### P2-8 · Comfort vs Explore control · done
 **Routes:** `/taste` or result  
 **PRD:** §58  
 
 User-facing balance control. Default balanced. Novelty weight adjustable without breaking hard constraints.
 
 **Done when:** Explore mode increases novel catalog picks while staying inside predicted liking.
+
+**Shipped:** `explore-balance.ts` + control on DNA and quiz; `rank()` novelty weight comfort 0.02 / balanced 0.05 / explore 0.14.
 
 ---
 

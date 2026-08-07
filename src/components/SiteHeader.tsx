@@ -1,6 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
-import { Clock, Heart, Sparkles } from "lucide-react";
+import { Clock, Compass, Heart, Sparkles } from "lucide-react";
 import { AuthNav } from "@/components/AuthNav";
 
 type SiteHeaderProps = {
@@ -9,6 +9,7 @@ type SiteHeaderProps = {
     | "taste"
     | "result"
     | "dna"
+    | "explore"
     | "favorites"
     | "history"
     | "account"
@@ -20,21 +21,29 @@ type SiteHeaderProps = {
 
 export function SiteHeader({ current = "home" }: SiteHeaderProps) {
   const inLoop = current === "taste" || current === "result";
+  const onHome = current === "home";
 
   return (
-    <header className={inLoop ? "top top-compact" : "top"}>
-      <Link className="mark" href="/">
-        <Image
-          className="mark-lockup"
-          src="/brand/lockup-purple-sm.png"
-          alt="Mood Taster"
-          width={200}
-          height={26}
-          priority
-        />
-      </Link>
+    <header
+      className={
+        onHome ? "top top-home" : inLoop ? "top top-compact" : "top"
+      }
+    >
+      {/* Home hero already owns the brand mark; skip the lockup there. */}
+      {!onHome ? (
+        <Link className="mark" href="/">
+          <Image
+            className="mark-lockup"
+            src="/brand/lockup-purple-sm.png"
+            alt="Mood Taster"
+            width={200}
+            height={26}
+            priority
+          />
+        </Link>
+      ) : null}
       <nav aria-label="Primary">
-        {current === "home" ? (
+        {onHome ? (
           <>
             <Link className="nav-primary" href="/taste">
               Start
@@ -60,6 +69,14 @@ export function SiteHeader({ current = "home" }: SiteHeaderProps) {
           <>
             <Link className="nav-primary" href="/taste">
               Quiz
+            </Link>
+            <Link
+              className="nav-primary nav-with-icon"
+              href="/explore"
+              aria-current={current === "explore" ? "page" : undefined}
+            >
+              <Compass size={16} strokeWidth={1.5} aria-hidden />
+              <span className="nav-dna-label">Explore</span>
             </Link>
             <Link
               className="nav-primary nav-with-icon"

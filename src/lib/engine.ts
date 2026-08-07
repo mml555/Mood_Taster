@@ -261,14 +261,18 @@ function scoreOnly(
   dna: DnaProfile,
   ctx: ScoreContext,
   favorites: ReadonlySet<string>,
+  noveltyWeight: number,
 ): { food: RankFood; score: number } {
   const q = quizMatch(answers, food);
   const d = dnaMatch(dna, food);
   const n = noveltyScore(food.id, ctx);
+  // Keep quiz+DNA dominant; noveltyWeight shifts Comfort ↔ Explore.
+  const quizW = QUIZ_WEIGHT;
+  const dnaW = DNA_WEIGHT;
   const score =
-    0.75 * q +
-    0.2 * d +
-    0.05 * n +
+    quizW * q +
+    dnaW * d +
+    noveltyWeight * n +
     (favorites.has(food.id) ? FAVORITE_BOOST : 0) -
     rejectionPenalty(food.id, ctx) -
     recentPenalty(food.id, ctx);
@@ -319,6 +323,7 @@ export function rank(
   session: SessionState,
   dietary: DietaryPrefs = EMPTY_DIETARY,
   favoriteIds: ReadonlySet<string> | readonly string[] = [],
+  exploreBalance: ExploreBalance = DEFAULT_EXPLORE_BALANCE,
 ): Recommendation {
   const pool = candidatePool(answers, dietary);
 
@@ -328,8 +333,11 @@ export function rank(
 
   const favorites = favoriteIdSet(favoriteIds);
   const ctx = buildScoreContext(session);
+  const noveltyWeight = NOVELTY_WEIGHT[exploreBalance];
   const scored = pool
-    .map((food) => scoreOnly(food, answers, dna, ctx, favorites))
+    .map((food) =>
+      scoreOnly(food, answers, dna, ctx, favorites, noveltyWeight),
+    )
     .sort((a, b) => {
       if (b.score !== a.score) return b.score - a.score;
       return a.food.id.localeCompare(b.food.id);
@@ -357,6 +365,7 @@ export function nextAfterReject(
   currentId: string,
   dietary: DietaryPrefs = EMPTY_DIETARY,
   favoriteIds: ReadonlySet<string> | readonly string[] = [],
+  exploreBalance: ExploreBalance = DEFAULT_EXPLORE_BALANCE,
 ): ScoredFood | null {
   const withReject = {
     ...session,
@@ -364,7 +373,14 @@ export function nextAfterReject(
       ? session.rejectedIds
       : [...session.rejectedIds, currentId],
   };
-  const rec = rank(answers, dna, withReject, dietary, favoriteIds);
+  const rec = rank(
+    answers,
+    dna,
+    withReject,
+    dietary,
+    favoriteIds,
+    exploreBalance,
+  );
   if (rec.primary.food.id === currentId) {
     const alt = rec.alternates.find((s) => s.food.id !== currentId);
     return alt ?? null;

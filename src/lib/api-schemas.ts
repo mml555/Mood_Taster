@@ -28,6 +28,7 @@ export const matchBodySchema = z.object({
   dna: z.unknown().optional(),
   dietary: z.unknown().optional(),
   favoriteIds: z.unknown().optional(),
+  exploreBalance: z.enum(["comfort", "balanced", "explore"]).optional(),
   rejectedIds: sessionIdListSchema,
   servedIds: sessionIdListSchema,
 });
@@ -60,6 +61,13 @@ export const favoritesBodySchema = z.object({
   foodIds: z.array(z.string().trim().min(1).max(120)).max(200),
 });
 
+/**
+ * PUT /api/gamification body. Domain parse/normalize runs in parseGamification;
+ * Zod only gates the outer envelope so bad JSON fails fast.
+ */
+export const gamificationBodySchema = z.object({
+  state: z.unknown(),
+});
 const placeLabelSchema = z.enum(["best", "closest", "wildcard"]);
 
 /** Soft client/server shape for /api/places. Missing enrichments default to null. */

@@ -1,20 +1,20 @@
 import { SiteFooter } from "@/components/SiteFooter";
 import { SiteHeader } from "@/components/SiteHeader";
 import { ProductBottomNav } from "@/components/ProductBottomNav";
-import { HistoryList } from "@/components/HistoryList";
+import { ExploreDashboard } from "@/components/ExploreDashboard";
 
 export const metadata = {
-  title: "History",
+  title: "Explore",
 };
 
-export default function HistoryPage() {
+export default function ExplorePage() {
   return (
     <>
-      <SiteHeader current="history" />
+      <SiteHeader current="explore" />
       <main className="product-main product-main-with-nav">
-        <HistoryList />
+        <ExploreDashboard />
       </main>
-      <ProductBottomNav current="history" />
+      <ProductBottomNav current="explore" />
       <SiteFooter />
     </>
   );

@@ -5,6 +5,7 @@ import { parseDnaProfile } from "@/lib/auth-schema";
 import { parseDietary } from "@/lib/dietary";
 import { createNeutralDna } from "@/lib/dna";
 import { NoDietaryMatchError, rank } from "@/lib/engine";
+import { parseExploreBalance } from "@/lib/explore-balance";
 import { parseFavoriteIds } from "@/lib/favorites";
 import { emptySession } from "@/lib/session";
 import type { DnaProfile, SessionState } from "@/lib/taste-types";
@@ -44,6 +45,7 @@ export const POST = withRoute("match", RANK_FAILED, async (request) => {
       session,
       parseDietary(envelope.data.dietary),
       parseFavoriteIds(envelope.data.favoriteIds),
+      parseExploreBalance(envelope.data.exploreBalance),
     );
     return NextResponse.json({
       foodId: rec.primary.food.id,

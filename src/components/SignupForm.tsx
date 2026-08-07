@@ -7,6 +7,7 @@ import { ANALYTICS_EVENTS, track } from "@/lib/analytics";
 import { loadDnaForUser } from "@/lib/dna-sync";
 import { loadDietaryForUser } from "@/lib/dietary-sync";
 import { loadFavoritesForUser } from "@/lib/favorites-sync";
+import { loadGamificationForUser } from "@/lib/gamification-sync";
 import { loadHistoryForUser } from "@/lib/history-sync";
 import { createClient, isSupabaseConfigured } from "@/lib/supabase/client";
 import { signupSchema } from "@/lib/auth-schema";
@@ -92,6 +93,7 @@ export function SignupForm() {
         loadDietaryForUser(),
         loadFavoritesForUser(),
         loadHistoryForUser(),
+        loadGamificationForUser(),
       ]);
       track(ANALYTICS_EVENTS.signupCompleted, { confirmed: true });
       router.push("/account");

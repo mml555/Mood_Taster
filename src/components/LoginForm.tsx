@@ -9,6 +9,7 @@ import { isSupabaseConfigured } from "@/lib/supabase/client";
 import { loginSchema } from "@/lib/auth-schema";
 import { loadDietaryForUser } from "@/lib/dietary-sync";
 import { loadFavoritesForUser } from "@/lib/favorites-sync";
+import { loadGamificationForUser } from "@/lib/gamification-sync";
 
 export function LoginForm() {
   const router = useRouter();
@@ -68,6 +69,7 @@ export function LoginForm() {
         loadDietaryForUser(),
         loadFavoritesForUser(),
         loadHistoryForUser(),
+        loadGamificationForUser(),
       ]);
       router.push("/account");
       router.refresh();

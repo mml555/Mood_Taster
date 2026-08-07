@@ -85,7 +85,17 @@ export const POST = withRoute("adjust", "Could not adjust", async (request) => {
   // Re-validate against the same guards used for user input. The model is not
   // more trusted than the browser. Force original intent so adjust cannot flip
   // Eat out ↔ Cook.
-  const nextAnswers = parseAnswers({ ...parsed, intent: answers.intent });
+  //
+  // The current answers are the base, not an empty object. RULES only asks for
+  // four axes, so temperature, cookEffort, hunger, and vibe are absent from the
+  // reply, and parseAnswers reads a missing axis as "any" to tolerate legacy
+  // sessions. Spreading the reply alone would silently reset every axis the
+  // model was never asked about, which the ranker reads as "no preference".
+  const nextAnswers = parseAnswers({
+    ...answers,
+    ...parsed,
+    intent: answers.intent,
+  });
   if (!nextAnswers) {
     return NextResponse.json(UNCHANGED);
   }

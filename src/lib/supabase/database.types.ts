@@ -105,6 +105,24 @@ export type Database = {
         };
         Relationships: [];
       };
+      gamification: {
+        Row: {
+          user_id: string;
+          state: Json;
+          updated_at: string;
+        };
+        Insert: {
+          user_id: string;
+          state?: Json;
+          updated_at?: string;
+        };
+        Update: {
+          user_id?: string;
+          state?: Json;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
     };
     Views: Record<string, never>;
     Functions: {

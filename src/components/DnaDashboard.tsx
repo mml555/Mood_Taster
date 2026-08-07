@@ -14,9 +14,17 @@ import {
 } from "@/lib/dna";
 import { loadDnaForUser, resetDnaEverywhere } from "@/lib/dna-sync";
 import { DietaryPrefsEditor } from "@/components/DietaryPrefsEditor";
+import { ExploreBalanceControl } from "@/components/ExploreBalanceControl";
 import { ProfileNudge } from "@/components/ProfileNudge";
 import { DNA_DIMENSION_ICONS } from "@/lib/mood-icons";
 import { createClient, isSupabaseConfigured } from "@/lib/supabase/client";
+import { loadGamificationForUser } from "@/lib/gamification-sync";
+import {
+  dimensionLevelLabel,
+  overallTasteLabel,
+  type XpState,
+} from "@/lib/xp";
+import { formatStreak, type StreakState } from "@/lib/streak";
 import type { DnaDimension, DnaProfile } from "@/lib/taste-types";
 
 const FLAVOR_DIMS: DnaDimension[] = ["savory", "spicy", "sweet", "fresh"];
@@ -25,11 +33,18 @@ const TEXTURE_DIMS: DnaDimension[] = ["crunchy", "creamy", "juicy", "soft"];
 export function DnaDashboard() {
   const [dna, setDna] = useState<DnaProfile | null>(null);
   const [signedIn, setSignedIn] = useState(false);
+  const [xp, setXp] = useState<XpState | null>(null);
+  const [streak, setStreak] = useState<StreakState | null>(null);
 
   useEffect(() => {
     queueMicrotask(async () => {
-      const loaded = await loadDnaForUser();
+      const [loaded, progress] = await Promise.all([
+        loadDnaForUser(),
+        loadGamificationForUser(),
+      ]);
       setDna(loaded);
+      setXp(progress.xp);
+      setStreak(progress.streak);
 
       if (!isSupabaseConfigured()) {
         setSignedIn(false);
@@ -126,7 +141,16 @@ export function DnaDashboard() {
       </div>
       <p className="dna-discovery">
         <span className="dna-discovery-value">{discovery}%</span> discovered
+        {xp ? (
+          <>
+            {" "}
+            · <span className="dna-level">{overallTasteLabel(xp)}</span>
+          </>
+        ) : null}
       </p>
+      {streak && streak.count > 0 ? (
+        <p className="dna-streak">{formatStreak(streak)}</p>
+      ) : null}
       <p className="dna-lede">{lede}</p>
 
       {leadDevelop ? (
@@ -147,13 +171,42 @@ export function DnaDashboard() {
             </ul>
           ) : null}
           <div className="result-actions">
-            <Link className="cta-highlight" href="/taste">
+            <Link className="cta-highlight" href="/explore">
+              Start a Taste Quest
+            </Link>
+            <Link className="cta-secondary" href="/taste">
               Show me
               <Search size={20} strokeWidth={1.5} aria-hidden />
             </Link>
           </div>
         </aside>
       ) : null}
+
+      {xp && DNA_DIMENSIONS.some((d) => xp.byDimension[d] > 0) ? (
+        <div className="dna-block">
+          <h2 className="dna-heading">Flavor XP</h2>
+          <ul className="dna-list">
+            {DNA_DIMENSIONS.filter((d) => xp.byDimension[d] > 0)
+              .sort((a, b) => xp.byDimension[b] - xp.byDimension[a])
+              .slice(0, 5)
+              .map((dimension) => (
+                <li key={dimension}>
+                  <span className="dna-dim">
+                    {labelDimension(dimension)}
+                  </span>
+                  <span className="dna-meta">
+                    {dimensionLevelLabel(xp.byDimension[dimension])} ·{" "}
+                    {xp.byDimension[dimension]} XP
+                  </span>
+                </li>
+              ))}
+          </ul>
+        </div>
+      ) : null}
+
+      <section className="account-dietary" aria-labelledby="balance-title">
+        <ExploreBalanceControl />
+      </section>
 
       {flavors.length > 0 ? (
         <div className="dna-block">

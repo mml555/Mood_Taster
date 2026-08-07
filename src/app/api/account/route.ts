@@ -40,14 +40,15 @@ export const DELETE = withUser(
         "recommendation_history",
         admin.from("recommendation_history").delete().eq("user_id", userId),
       ],
+      ["gamification", admin.from("gamification").delete().eq("user_id", userId)],
       ["profiles", admin.from("profiles").delete().eq("id", userId)],
     ] as const;
 
     for (const [table, pending] of wipes) {
       const { error } = await pending;
-      // Soft-fail when recommendation_history is not applied yet in Supabase.
+      // Soft-fail when a table is not applied yet in Supabase.
       if (
-        table === "recommendation_history" &&
+        (table === "recommendation_history" || table === "gamification") &&
         error &&
         /does not exist|Could not find the table|schema cache/i.test(
           error.message,

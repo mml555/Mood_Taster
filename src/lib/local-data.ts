@@ -1,8 +1,13 @@
 import { clearDietary } from "./dietary";
 import { resetDna } from "./dna";
+import { clearExploreBalance } from "./explore-balance";
 import { clearFavoritesLocal } from "./favorites-sync";
 import { clearHistoryLocal } from "./history";
+import { clearPassport } from "./passport";
+import { clearQuests } from "./quests";
 import { clearSession } from "./session";
+import { clearStreak } from "./streak";
+import { clearXp } from "./xp";
 
 /**
  * Drop every piece of per-person state this browser holds.
@@ -20,4 +25,9 @@ export function clearLocalUserData(): void {
   clearHistoryLocal();
   clearDietary();
   clearSession();
+  clearXp();
+  clearPassport();
+  clearQuests();
+  clearStreak();
+  clearExploreBalance();
 }

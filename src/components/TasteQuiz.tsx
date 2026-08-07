@@ -7,6 +7,13 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ANALYTICS_EVENTS, track } from "@/lib/analytics";
 import { persistDna } from "@/lib/dna-sync";
 import { applyQuizPrefs, readDna } from "@/lib/dna";
+import {
+  fillAnswerDefaults,
+  sensoryAnswerCount,
+  shouldFinishQuizEarly,
+} from "@/lib/adaptive-quiz";
+import { ExploreBalanceControl } from "@/components/ExploreBalanceControl";
+import { readExploreBalance } from "@/lib/explore-balance";
 import { readFavorites } from "@/lib/favorites";
 import { loadFavoritesForUser } from "@/lib/favorites-sync";
 import { loadHistoryForUser } from "@/lib/history-sync";
@@ -418,6 +425,7 @@ export function TasteQuiz() {
               dna,
               dietary,
               favoriteIds,
+              exploreBalance: readExploreBalance(),
               rejectedIds: session.rejectedIds,
               servedIds: session.servedIds,
             }),
@@ -437,7 +445,14 @@ export function TasteQuiz() {
           /* local fallback below */
         }
         try {
-          const rec = rank(finalAnswers, dna, session, dietary, favoriteIds);
+          const rec = rank(
+            finalAnswers,
+            dna,
+            session,
+            dietary,
+            favoriteIds,
+            readExploreBalance(),
+          );
           go(rec.primary.food.id);
         } catch (err) {
           if (err instanceof NoDietaryMatchError) {
@@ -496,6 +511,20 @@ export function TasteQuiz() {
 
       setAnswers(next);
       writeDraft(next);
+
+      const intent =
+        (next.intent as Intent | undefined) ?? seededIntent ?? null;
+      const sensoryCount = sensoryAnswerCount(next);
+      if (
+        intent &&
+        shouldFinishQuizEarly(next, sensoryCount, intent)
+      ) {
+        const complete = fillAnswerDefaults(next, intent);
+        if (complete && isComplete(complete)) {
+          finish(complete);
+          return;
+        }
+      }
 
       if (step < totalSteps) {
         goStep(step + 1);
@@ -619,6 +648,10 @@ export function TasteQuiz() {
           );
         })}
       </ul>
+
+      {step === 1 && current.key !== "intent" ? (
+        <ExploreBalanceControl compact />
+      ) : null}
 
       {showBack ? (
         step === 1 && seededIntent ? (

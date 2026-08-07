@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 import { Candy, ChefHat, CircleHelp, MapPin } from "lucide-react";
 import { AnalyticsBeacon } from "@/components/AnalyticsBeacon";
 import { SiteFooter } from "@/components/SiteFooter";
@@ -8,56 +9,28 @@ import { TrackedLink } from "@/components/TrackedLink";
 import { ANALYTICS_EVENTS } from "@/lib/analytics";
 import { FLOW_ICONS } from "@/lib/mood-icons";
 
-const PEEK_DISHES = [
-  {
-    id: "crispy-hot-honey-chicken-sandwich",
-    name: "Hot honey chicken",
-    image: "/food/crispy-hot-honey-chicken-sandwich.jpg",
-    alt: "Crispy fried chicken sandwich with honey drizzle",
-  },
-  {
-    id: "mango-with-tajin",
-    name: "Mango with Tajin",
-    image: "/food/mango-with-tajin.jpg",
-    alt: "Fresh mango slices dusted with Tajin",
-  },
-  {
-    id: "birria-tacos",
-    name: "Birria tacos",
-    image: "/food/birria-tacos.jpg",
-    alt: "Crispy birria tacos with consomme",
-  },
-  {
-    id: "avocado-toast",
-    name: "Avocado toast",
-    image: "/food/avocado-toast.jpg",
-    alt: "Avocado toast on rustic bread",
-  },
-] as const;
-
-const PATH_INTENTS = [
+const ABOUT_INTENTS = [
   {
     intent: "restaurant",
     label: "Go out",
     href: "/taste?intent=restaurant&from=home",
     Icon: MapPin,
+    style: "primary" as const,
   },
   {
     intent: "recipe",
     label: "Make something",
     href: "/taste?intent=recipe&from=home",
     Icon: ChefHat,
+    style: "primary" as const,
   },
   {
     intent: "snack",
     label: "Grab a snack",
     href: "/taste?intent=snack&from=home",
     Icon: Candy,
+    style: "primary" as const,
   },
-] as const;
-
-const ABOUT_INTENTS = [
-  ...PATH_INTENTS.map((item) => ({ ...item, style: "primary" as const })),
   {
     intent: "clue",
     label: "I have no clue",
@@ -93,70 +66,42 @@ function IntentPicker({ id }: { id?: string }) {
   );
 }
 
-function HeroStart() {
-  return (
-    <div className="hero-start" role="group" aria-label="How do you want to eat">
-      <TrackedLink
-        className="cta-highlight hero-start-primary"
-        href="/taste?intent=clue&from=home"
-        event={ANALYTICS_EVENTS.intent}
-        eventProps={{ intent: "clue", source: "home" }}
-      >
-        Show me
-      </TrackedLink>
-      <p className="hero-start-hint">Four quick taps. No account needed.</p>
-      <p className="hero-start-divider">Or pick a path</p>
-      <div className="hero-paths">
-        {PATH_INTENTS.map(({ intent, label, href, Icon }) => (
-          <TrackedLink
-            key={intent}
-            className="cta-secondary hero-path"
-            href={href}
-            event={ANALYTICS_EVENTS.intent}
-            eventProps={{ intent, source: "home" }}
-          >
-            <Icon size={18} strokeWidth={1.5} aria-hidden />
-            {label}
-          </TrackedLink>
-        ))}
-      </div>
-    </div>
-  );
-}
-
 export default function HomePage() {
   return (
     <>
       <AnalyticsBeacon event={ANALYTICS_EVENTS.home} />
       <SiteHeader current="home" />
       <main id="top">
-        <section className="hero" aria-labelledby="brand">
-          <div className="hero-copy">
-            <p className="eyebrow">Mood Taster</p>
-            <h1 id="brand">Hungry?</h1>
+        <section className="hero" aria-labelledby="hero-brand brand">
+          <div className="hero-body">
+            <div className="hero-logo">
+              <Image
+                className="hero-mark"
+                src="/brand/mark-purple.png"
+                alt=""
+                width={64}
+                height={64}
+                priority
+              />
+              <p className="hero-brand" id="hero-brand">
+                mood taster
+              </p>
+            </div>
+
+            <h1 id="brand">
+              Hungry? Let&apos;s figure out what you actually want.
+            </h1>
             <p className="lede">
-              Let&apos;s figure out what you actually want.
+              Answer a few quick questions. Get one clear answer.
             </p>
-            <HeroStart />
           </div>
 
-          <ul className="hero-peek" aria-label="Dishes you might get">
-            {PEEK_DISHES.map((dish, index) => (
-              <li key={dish.id}>
-                <Image
-                  src={dish.image}
-                  alt={dish.alt}
-                  width={240}
-                  height={240}
-                  sizes="(max-width: 720px) 28vw, 140px"
-                  className="hero-peek-image"
-                  priority={index < 2}
-                  style={{ width: "100%", height: "auto" }}
-                />
-                <span className="hero-peek-name">{dish.name}</span>
-              </li>
-            ))}
-          </ul>
+          <div className="hero-start">
+            <Link className="cta hero-start-primary" href="/taste?from=home">
+              Taste my mood
+            </Link>
+            <p className="hero-start-hint">Takes less than 30 seconds.</p>
+          </div>
         </section>
 
         <section className="how" id="how" aria-labelledby="how-title">
