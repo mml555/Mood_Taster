@@ -260,7 +260,10 @@ export function ResultView({ food }: ResultViewProps) {
     return () => {
       abort.abort();
     };
-  }, [food]);
+    // rejectNote only ever changes alongside food: rejecting routes to a new
+    // food id carrying ?alt=1. Listed so the tracked alternate flag can never
+    // go stale against the food it describes.
+  }, [food, rejectNote]);
 
   // Places only for Go out. Cook shows the recipe. Snack and no-clue stay dish-first.
   useEffect(() => {
@@ -762,7 +765,7 @@ export function ResultView({ food }: ResultViewProps) {
 
   return (
     <section className="result">
-      <p className="eyebrow">
+      <p className="eyebrow result-eyebrow">
         {showDone
           ? "Your pick"
           : showFeedback
@@ -772,13 +775,7 @@ export function ResultView({ food }: ResultViewProps) {
             : (adjustNote ??
               (rejectNote
                 ? "Different one."
-                : intent === "recipe"
-                  ? "Cook this"
-                  : intent === "restaurant"
-                    ? "Go out"
-                    : intent === "snack"
-                      ? "Snack"
-                      : "Your match"))}
+                : "Your mood tastes like"))}
       </p>
 
       <div
@@ -829,16 +826,18 @@ export function ResultView({ food }: ResultViewProps) {
           )}
         </div>
 
-        <h1 className="result-title">{food.name}</h1>
-        <p className="result-desc">{food.description}</p>
+        <div className="result-card-body">
+          <h1 className="result-title">{food.name}</h1>
+          <p className="result-desc">{explanation}</p>
 
-        {attrs.length > 0 ? (
-          <ul className="result-attrs" aria-label="Matched attributes">
-            {attrs.map((a) => (
-              <li key={a}>{a}</li>
-            ))}
-          </ul>
-        ) : null}
+          {attrs.length > 0 ? (
+            <ul className="result-attrs" aria-label="Matched attributes">
+              {attrs.map((a) => (
+                <li key={a}>{a}</li>
+              ))}
+            </ul>
+          ) : null}
+        </div>
       </div>
 
       {riff ? <p className="result-riff">{riff}</p> : null}
@@ -989,11 +988,10 @@ export function ResultView({ food }: ResultViewProps) {
                   <span className="reaction-icon" aria-hidden>
                     ×
                   </span>
-                  <span className="reaction-label">Nope</span>
                 </button>
                 <button
                   type="button"
-                  className="reaction-btn"
+                  className="reaction-btn reaction-btn-again"
                   onClick={onTryAgain}
                   disabled={adjusting || rated}
                   aria-label="Try again"
@@ -1001,7 +999,6 @@ export function ResultView({ food }: ResultViewProps) {
                   <span className="reaction-icon" aria-hidden>
                     ↻
                   </span>
-                  <span className="reaction-label">Again</span>
                 </button>
                 <button
                   type="button"
@@ -1013,7 +1010,7 @@ export function ResultView({ food }: ResultViewProps) {
                   <span className="reaction-icon" aria-hidden>
                     ♡
                   </span>
-                  <span className="reaction-label">Like</span>
+                  <span className="reaction-label">I like it</span>
                 </button>
               </div>
 
@@ -1030,18 +1027,6 @@ export function ResultView({ food }: ResultViewProps) {
                   type="button"
                   className="text-link"
                   onClick={() => {
-                    setWhyOpen((v) => !v);
-                    setWhyPanelOpen(false);
-                  }}
-                  aria-expanded={whyOpen}
-                  disabled={adjusting || rated}
-                >
-                  Why this?
-                </button>
-                <button
-                  type="button"
-                  className="text-link"
-                  onClick={() => {
                     setWhyPanelOpen((v) => !v);
                     setWhyOpen(false);
                   }}
@@ -1053,12 +1038,6 @@ export function ResultView({ food }: ResultViewProps) {
               </div>
             </div>
           )}
-
-          {!showDone && !showFeedback && whyOpen ? (
-            <p className="result-why" id="result-why">
-              {explanation}
-            </p>
-          ) : null}
 
           {!showDone && !showFeedback && whyPanelOpen ? (
             <div className="reject-panel">

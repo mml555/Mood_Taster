@@ -42,7 +42,7 @@ type StepDef = {
   key: keyof Answers;
   question: string;
   reaction?: string;
-  options: { value: string; label: string }[];
+  options: { value: string; label: string; description?: string }[];
 };
 
 /** Cancels a deferred abandon when Strict Mode remounts the quiz. */
@@ -50,12 +50,28 @@ let pendingAbandonTimer: number | null = null;
 
 const INTENT_STEP: StepDef = {
   key: "intent",
-  question: "How do you want to eat?",
+  question: "What kind of hungry are you?",
   options: [
-    { value: "restaurant", label: "Go out" },
-    { value: "recipe", label: "Make something" },
-    { value: "snack", label: "Grab a snack" },
-    { value: "clue", label: "I have no clue" },
+    {
+      value: "restaurant",
+      label: "Go out",
+      description: "Find something worth leaving for.",
+    },
+    {
+      value: "recipe",
+      label: "Make something",
+      description: "Find something you can cook.",
+    },
+    {
+      value: "snack",
+      label: "Grab a snack",
+      description: "Find a quick bite.",
+    },
+    {
+      value: "clue",
+      label: "I have no clue",
+      description: "Answer broad pairs. We will pick.",
+    },
   ],
 };
 
@@ -334,11 +350,17 @@ export function TasteQuiz() {
   const stepLabel = String(step).padStart(2, "0");
   const totalLabel = String(totalSteps).padStart(2, "0");
 
-  abandonMetaRef.current = {
-    step,
-    intent: (answers.intent as Intent | undefined) ?? seededIntent,
-    question: current?.key ?? null,
-  };
+  // The abandon beacon below is mounted once and reads this at unmount, so it
+  // needs the latest render's values without re-registering its listener.
+  // Written in its own effect, declared first so the values are current before
+  // any later effect or cleanup reads them.
+  useEffect(() => {
+    abandonMetaRef.current = {
+      step,
+      intent: (answers.intent as Intent | undefined) ?? seededIntent,
+      question: current?.key ?? null,
+    };
+  });
 
   useEffect(() => {
     if (pendingAbandonTimer != null) {
@@ -549,19 +571,23 @@ export function TasteQuiz() {
 
   const selected = hydrated ? answers[current.key] : undefined;
   const StepIcon = QUIZ_STEP_ICONS[current.key];
-  const tileClass =
-    current.options.length <= 2
-      ? "quiz-options quiz-options-stack"
-      : "quiz-options quiz-options-grid";
+  const isIntentStep = current.key === "intent";
+  // Reference layout: full-width list cards. Stack always reads clearer than a
+  // 2-up tile grid for tap targets and short descriptions.
+  const tileClass = "quiz-options quiz-options-stack";
 
-  const showBack = step > 1 || Boolean(seededIntent);
+  const showBack = step > 1 || Boolean(seededIntent) || fromHome;
   const onBack = () => {
     if (step > 1) {
       goStep(step - 1);
       return;
     }
     if (seededIntent) {
-      router.push("/taste");
+      router.push(fromHome ? "/" : "/taste");
+      return;
+    }
+    if (fromHome) {
+      router.push("/");
     }
   };
 
@@ -593,35 +619,68 @@ export function TasteQuiz() {
 
   return (
     <section className="quiz" aria-labelledby="quiz-question">
-      <div className="quiz-progress" aria-live="polite">
-        <span className="visually-hidden">
-          Step {stepLabel} of {totalLabel}
-        </span>
-        <ol className="quiz-dots" aria-hidden>
-          {steps.map((s, i) => {
-            const n = i + 1;
-            const state =
-              n < step ? "is-done" : n === step ? "is-current" : "";
-            return (
-              <li
-                key={`${s.key}-${i}`}
-                className={state ? `quiz-dot ${state}` : "quiz-dot"}
-              />
-            );
-          })}
-        </ol>
+      <div className="quiz-top">
+        {showBack ? (
+          step === 1 && (seededIntent || fromHome) ? (
+            <Link
+              className="quiz-back"
+              href={fromHome ? "/" : "/taste"}
+              aria-label="Back"
+            >
+              <ArrowLeft size={20} strokeWidth={1.5} aria-hidden />
+              <span className="quiz-back-label">Back</span>
+            </Link>
+          ) : (
+            <button
+              type="button"
+              className="quiz-back"
+              onClick={onBack}
+              aria-label="Back"
+            >
+              <ArrowLeft size={20} strokeWidth={1.5} aria-hidden />
+              <span className="quiz-back-label">Back</span>
+            </button>
+          )
+        ) : (
+          <span className="quiz-top-spacer" aria-hidden />
+        )}
+
+        <div className="quiz-progress" aria-live="polite">
+          <span className="visually-hidden">
+            Step {stepLabel} of {totalLabel}
+          </span>
+          <ol className="quiz-dots" aria-hidden>
+            {steps.map((s, i) => {
+              const n = i + 1;
+              const state =
+                n < step ? "is-done" : n === step ? "is-current" : "";
+              return (
+                <li
+                  key={`${s.key}-${i}`}
+                  className={state ? `quiz-dot ${state}` : "quiz-dot"}
+                />
+              );
+            })}
+          </ol>
+        </div>
+
+        <span className="quiz-top-spacer" aria-hidden />
       </div>
 
       <div className="quiz-question-block">
-        <span className="quiz-question-icon" aria-hidden>
-          <StepIcon size={20} strokeWidth={1.5} />
-        </span>
-        <h1 id="quiz-question" className="quiz-question">
-          {current.question}
-        </h1>
-        {current.reaction ? (
-          <p className="quiz-reaction">{current.reaction}</p>
+        {!isIntentStep ? (
+          <span className="quiz-question-icon" aria-hidden>
+            <StepIcon size={20} strokeWidth={1.5} />
+          </span>
         ) : null}
+        <div className="quiz-question-copy">
+          <h1 id="quiz-question" className="quiz-question">
+            {current.question}
+          </h1>
+          {current.reaction ? (
+            <p className="quiz-reaction">{current.reaction}</p>
+          ) : null}
+        </div>
       </div>
 
       <ul className={tileClass} role="list">
@@ -639,10 +698,20 @@ export function TasteQuiz() {
               >
                 {Icon ? (
                   <span className="quiz-option-icon" aria-hidden>
-                    <Icon size={22} strokeWidth={1.5} />
+                    <Icon size={24} strokeWidth={1.5} />
                   </span>
                 ) : null}
-                <span className="quiz-option-label">{opt.label}</span>
+                <span className="quiz-option-text">
+                  <span className="quiz-option-label">{opt.label}</span>
+                  {opt.description ? (
+                    <span className="quiz-option-desc">{opt.description}</span>
+                  ) : null}
+                </span>
+                {isSelected ? (
+                  <span className="quiz-option-check" aria-hidden>
+                    ✓
+                  </span>
+                ) : null}
               </button>
             </li>
           );
@@ -651,20 +720,6 @@ export function TasteQuiz() {
 
       {step === 1 && current.key !== "intent" ? (
         <ExploreBalanceControl compact />
-      ) : null}
-
-      {showBack ? (
-        step === 1 && seededIntent ? (
-          <Link className="quiz-back" href={fromHome ? "/" : "/taste"}>
-            <ArrowLeft size={20} strokeWidth={1.5} aria-hidden />
-            Back
-          </Link>
-        ) : (
-          <button type="button" className="quiz-back" onClick={onBack}>
-            <ArrowLeft size={20} strokeWidth={1.5} aria-hidden />
-            Back
-          </button>
-        )
       ) : null}
     </section>
   );
