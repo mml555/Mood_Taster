@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Comfortaa } from "next/font/google";
+import { AuthSessionProvider } from "@/components/AuthSessionProvider";
 import { Grain } from "@/components/Grain";
 import "./globals.css";
 
@@ -35,7 +36,7 @@ export default function RootLayout({
     <html lang="en" className={comfortaa.variable}>
       <body>
         <Grain />
-        {children}
+        <AuthSessionProvider>{children}</AuthSessionProvider>
       </body>
     </html>
   );

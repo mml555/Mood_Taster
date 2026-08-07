@@ -13,7 +13,11 @@ import {
 } from "react";
 import {
   applyRating,
-  labelDimension,
+  formatDnaChangeLine,
+  HIT_TAGS,
+  MISS_TAGS,
+  parseHitTags,
+  parseMissTags,
   readDna,
   type DnaDelta,
 } from "@/lib/dna";
@@ -29,7 +33,6 @@ import {
 import type { NearbyPlace } from "@/app/api/places/route";
 import type {
   Answers,
-  DnaProfile,
   Food,
   Intent,
   Rating,
@@ -114,6 +117,8 @@ export function ResultView({ food }: ResultViewProps) {
   const [imgFailed, setImgFailed] = useState(false);
   const [deltas, setDeltas] = useState<DnaDelta[] | null>(null);
   const [lastRating, setLastRating] = useState<Rating | null>(null);
+  const [pendingRating, setPendingRating] = useState<Rating | null>(null);
+  const [feedbackTags, setFeedbackTags] = useState<string[]>([]);
   const [emptyAlts, setEmptyAlts] = useState(false);
 
   const [riff, setRiff] = useState<string | null>(null);

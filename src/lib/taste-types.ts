@@ -39,6 +39,17 @@ export type Food = {
   snack?: boolean;
 };
 
+/**
+ * Slim food used by the ranking engine. Ships in the client bundle without
+ * recipe bodies (those live in recipes.ts and attach on the server).
+ */
+export type RankFood = Omit<Food, "recipe"> & {
+  hasRecipe: boolean;
+};
+
+/** Ranking / DNA helpers accept full foods or slim rank foods. */
+export type FoodLike = Omit<Food, "recipe"> | RankFood;
+
 export type Answers = {
   intent: Intent;
   flavor: Flavor;
@@ -77,7 +88,7 @@ export type SessionState = {
 };
 
 export type ScoredFood = {
-  food: Food;
+  food: RankFood;
   score: number;
   matchedAttributes: string[];
   explanation: string;

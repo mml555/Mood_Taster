@@ -211,11 +211,11 @@ button {
   z-index: 1;
   display: grid;
   gap: var(--space-6);
-  align-content: center;
+  align-content: start;
   min-height: calc(100vh - 4.5rem);
   min-height: calc(100dvh - 4.5rem);
   max-width: 64rem;
-  padding: var(--space-6) var(--page-inset) var(--space-7);
+  padding: var(--space-5) var(--page-inset) var(--space-7);
 }
 
 .hero-copy {
@@ -376,7 +376,7 @@ button {
     align-items: center;
     gap: clamp(var(--space-5), 5vw, var(--space-8));
     max-width: 72rem;
-    padding-top: var(--space-7);
+    padding-top: clamp(var(--space-5), 6vh, var(--space-7));
     padding-bottom: var(--space-7);
   }
 
@@ -421,12 +421,6 @@ button {
   }
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .hero-peek li:nth-child(2),
-  .hero-peek li:nth-child(4) {
-    transform: none;
-  }
-}
 
 /* Primary: Indigo fill, light text. No border, no shadow. */
 .cta {

@@ -1,4 +1,4 @@
-import { CATALOG } from "./catalog";
+import { RANK_FOODS } from "./catalog-data";
 import { foodDimensions } from "./dna";
 import { buildExplanation, matchedAttributes } from "./explain";
 import type {
@@ -6,8 +6,8 @@ import type {
   Answers,
   DnaProfile,
   Flavor,
-  Food,
   Heaviness,
+  RankFood,
   Recommendation,
   ScoredFood,
   SessionState,
@@ -41,17 +41,23 @@ const ADVENTURE_TARGET: Record<Adventure, number> = {
   surprise: 4.5,
 };
 
+type ScoreContext = {
+  rejected: Set<string>;
+  servedCounts: Map<string, number>;
+  recent: Set<string>;
+};
+
 function clamp01(n: number): number {
   return Math.min(1, Math.max(0, n));
 }
 
-function flavorScore(answer: Flavor, food: Food): number {
+function flavorScore(answer: Flavor, food: RankFood): number {
   if (food.flavorTags.includes(answer)) return 1;
   if (food.flavorTags.some((t) => NEAR_FLAVOR[answer].includes(t))) return 0.5;
   return 0;
 }
 
-function textureScore(answer: Texture, food: Food): number {
+function textureScore(answer: Texture, food: RankFood): number {
   if (food.textureTags.includes(answer)) return 1;
   if (food.textureTags.some((t) => NEAR_TEXTURE[answer].includes(t)))
     return 0.5;
@@ -60,7 +66,7 @@ function textureScore(answer: Texture, food: Food): number {
 
 function heavinessScore(
   answer: Answers["heaviness"],
-  food: Food,
+  food: RankFood,
 ): number {
   if (answer === "any") return 0.5;
   return (
@@ -69,19 +75,19 @@ function heavinessScore(
   );
 }
 
-function adventureScore(answer: Adventure, food: Food): number {
+function adventureScore(answer: Adventure, food: RankFood): number {
   const target = ADVENTURE_TARGET[answer];
   return 1 - Math.abs(food.adventurousness - target) / 4;
 }
 
-function temperatureScore(answer: Temperature, food: Food): number {
+function temperatureScore(answer: Temperature, food: RankFood): number {
   if (answer === "any") return 0.5;
   if (food.temperature === answer) return 1;
   if (food.temperature === "room") return 0.55;
   return 0.2;
 }
 
-function quizMatch(answers: Answers, food: Food): number {
+function quizMatch(answers: Answers, food: RankFood): number {
   const caresAboutTemp = answers.temperature !== "any";
   if (caresAboutTemp) {
     return (
@@ -100,7 +106,7 @@ function quizMatch(answers: Answers, food: Food): number {
   );
 }
 
-function dnaMatch(dna: DnaProfile, food: Food): number {
+function dnaMatch(dna: DnaProfile, food: RankFood): number {
   const dims = foodDimensions(food);
   if (dims.length === 0) return 0.5;
 
@@ -117,52 +123,70 @@ function dnaMatch(dna: DnaProfile, food: Food): number {
   return clamp01(mean);
 }
 
-function noveltyScore(foodId: string, session: SessionState): number {
-  const timesServed = session.servedIds.filter((id) => id === foodId).length;
+function buildScoreContext(session: SessionState): ScoreContext {
+  const servedCounts = new Map<string, number>();
+  for (const id of session.servedIds) {
+    servedCounts.set(id, (servedCounts.get(id) ?? 0) + 1);
+  }
+  return {
+    rejected: new Set(session.rejectedIds),
+    servedCounts,
+    recent: new Set(session.servedIds.slice(-5)),
+  };
+}
+
+function noveltyScore(foodId: string, ctx: ScoreContext): number {
+  const timesServed = ctx.servedCounts.get(foodId) ?? 0;
   return 1 - Math.min(1, timesServed / 3);
 }
 
-function rejectionPenalty(foodId: string, session: SessionState): number {
-  return session.rejectedIds.includes(foodId) ? 0.5 : 0;
+function rejectionPenalty(foodId: string, ctx: ScoreContext): number {
+  return ctx.rejected.has(foodId) ? 0.5 : 0;
 }
 
-function recentPenalty(foodId: string, session: SessionState): number {
-  const recent = session.servedIds.slice(-5);
-  return recent.includes(foodId) ? 0.1 : 0;
+function recentPenalty(foodId: string, ctx: ScoreContext): number {
+  return ctx.recent.has(foodId) ? 0.1 : 0;
 }
 
-function scoreFood(
-  food: Food,
+function scoreOnly(
+  food: RankFood,
   answers: Answers,
   dna: DnaProfile,
-  session: SessionState,
-): ScoredFood {
+  ctx: ScoreContext,
+): { food: RankFood; score: number } {
   const q = quizMatch(answers, food);
   const d = dnaMatch(dna, food);
-  const n = noveltyScore(food.id, session);
+  const n = noveltyScore(food.id, ctx);
   const score =
     0.75 * q +
     0.2 * d +
     0.05 * n -
-    rejectionPenalty(food.id, session) -
-    recentPenalty(food.id, session);
+    rejectionPenalty(food.id, ctx) -
+    recentPenalty(food.id, ctx);
 
+  return { food, score };
+}
+
+function withExplanation(
+  scored: { food: RankFood; score: number },
+  answers: Answers,
+): ScoredFood {
   return {
-    food,
-    score,
-    matchedAttributes: matchedAttributes(answers, food),
-    explanation: buildExplanation(food, answers),
+    food: scored.food,
+    score: scored.score,
+    matchedAttributes: matchedAttributes(answers, scored.food),
+    explanation: buildExplanation(scored.food, answers),
   };
 }
 
-function candidatePool(answers: Answers): Food[] {
+function candidatePool(answers: Answers): RankFood[] {
   if (answers.intent === "recipe") {
-    return CATALOG.filter((food) => food.recipe != null);
+    return RANK_FOODS.filter((food) => food.hasRecipe);
   }
   if (answers.intent === "snack") {
-    return CATALOG.filter((food) => food.snack === true);
+    return RANK_FOODS.filter((food) => food.snack === true);
   }
-  return CATALOG;
+  return RANK_FOODS;
 }
 
 export function rank(
@@ -182,16 +206,28 @@ export function rank(
     );
   }
 
+  const ctx = buildScoreContext(session);
   const scored = pool
-    .map((food) => scoreFood(food, answers, dna, session))
+    .map((food) => scoreOnly(food, answers, dna, ctx))
     .sort((a, b) => {
       if (b.score !== a.score) return b.score - a.score;
       return a.food.id.localeCompare(b.food.id);
     });
 
+  // Explanations are only needed for the primary (and first alternate for
+  // reject-next UI). Building strings for every dish was pure waste.
   return {
-    primary: scored[0],
-    alternates: scored.slice(1),
+    primary: withExplanation(scored[0], answers),
+    alternates: scored.slice(1).map((s, i) =>
+      i === 0
+        ? withExplanation(s, answers)
+        : {
+            food: s.food,
+            score: s.score,
+            matchedAttributes: [],
+            explanation: "",
+          },
+    ),
   };
 }
 

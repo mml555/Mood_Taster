@@ -2,8 +2,7 @@
 
 import Link from "next/link";
 import { LogIn, Sparkles } from "lucide-react";
-import { useEffect, useState } from "react";
-import { createClient, isSupabaseConfigured } from "@/lib/supabase/client";
+import { useAuthSession } from "@/components/AuthSessionProvider";
 
 type ProfileNudgeProps = {
   /** Where the nudge sits: drives the one-line pitch. */
@@ -12,39 +11,12 @@ type ProfileNudgeProps = {
 
 /**
  * Soft prompt only. Never blocks the flow. Hidden when signed in or when
- * Supabase is not configured.
+ * auth is still loading / Supabase is not configured (provider reports guest).
  */
 export function ProfileNudge({ context = "dna" }: ProfileNudgeProps) {
-  const [show, setShow] = useState(false);
+  const state = useAuthSession();
 
-  useEffect(() => {
-    let cancelled = false;
-
-    queueMicrotask(() => {
-      if (!isSupabaseConfigured()) {
-        if (!cancelled) setShow(false);
-        return;
-      }
-
-      void (async () => {
-        try {
-          const supabase = createClient();
-          const {
-            data: { user },
-          } = await supabase.auth.getUser();
-          if (!cancelled) setShow(!user);
-        } catch {
-          if (!cancelled) setShow(false);
-        }
-      })();
-    });
-
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
-  if (!show) return null;
+  if (state.status !== "guest") return null;
 
   const copy =
     context === "result"

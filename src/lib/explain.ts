@@ -1,4 +1,4 @@
-import type { Answers, Food, Heaviness } from "./taste-types";
+import type { Answers, FoodLike, Heaviness } from "./taste-types";
 
 const FLAVOR_LABEL: Record<Answers["flavor"], string> = {
   savory: "savory",
@@ -21,7 +21,7 @@ const HEAVINESS_LABEL: Record<Heaviness | "any", string> = {
   any: "however you like",
 };
 
-export function buildExplanation(food: Food, answers: Answers): string {
+export function buildExplanation(food: FoodLike, answers: Answers): string {
   const flavor = FLAVOR_LABEL[answers.flavor];
   const texture = TEXTURE_LABEL[answers.texture];
   const heaviness = HEAVINESS_LABEL[answers.heaviness];
@@ -34,7 +34,7 @@ export function buildExplanation(food: Food, answers: Answers): string {
 
 export function matchedAttributes(
   answers: Answers,
-  food: Food,
+  food: FoodLike,
 ): string[] {
   const attrs: string[] = [];
 
