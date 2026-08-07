@@ -19,7 +19,7 @@ import { loadFavoritesForUser } from "@/lib/favorites-sync";
 import { loadHistoryForUser } from "@/lib/history-sync";
 import { loadDietaryForUser } from "@/lib/dietary-sync";
 import { NoDietaryMatchError, rank } from "@/lib/engine";
-import { QUIZ_OPTION_ICONS, QUIZ_STEP_ICONS } from "@/lib/mood-icons";
+import { QUIZ_OPTION_ICONS } from "@/lib/mood-icons";
 import {
   prefetchPlacesForFood,
   warmGeolocation,
@@ -55,12 +55,12 @@ const INTENT_STEP: StepDef = {
     {
       value: "restaurant",
       label: "Go out",
-      description: "Find something worth leaving for.",
+      description: "Find something worth leaving the house for.",
     },
     {
       value: "recipe",
       label: "Make something",
-      description: "Find something you can cook.",
+      description: "Find something you can make.",
     },
     {
       value: "snack",
@@ -73,6 +73,18 @@ const INTENT_STEP: StepDef = {
       description: "Answer broad pairs. We will pick.",
     },
   ],
+};
+
+const STEP_CATEGORY: Partial<Record<keyof Answers, string>> = {
+  intent: "Path",
+  flavor: "Flavor",
+  texture: "Texture",
+  heaviness: "Weight",
+  adventure: "Adventure",
+  cookEffort: "Effort",
+  hunger: "Hunger",
+  vibe: "Vibe",
+  temperature: "Temp",
 };
 
 const CRAVING_STEPS: StepDef[] = [
@@ -570,8 +582,6 @@ export function TasteQuiz() {
   if (!current) return null;
 
   const selected = hydrated ? answers[current.key] : undefined;
-  const StepIcon = QUIZ_STEP_ICONS[current.key];
-  const isIntentStep = current.key === "intent";
   // Reference layout: full-width list cards. Stack always reads clearer than a
   // 2-up tile grid for tap targets and short descriptions.
   const tileClass = "quiz-options quiz-options-stack";
@@ -646,10 +656,10 @@ export function TasteQuiz() {
         )}
 
         <div className="quiz-progress" aria-live="polite">
-          <span className="visually-hidden">
-            Step {stepLabel} of {totalLabel}
+          <span className="quiz-progress-count">
+            {stepLabel} of {totalLabel}
           </span>
-          <ol className="quiz-dots" aria-hidden>
+          <ol className="quiz-segments" aria-hidden>
             {steps.map((s, i) => {
               const n = i + 1;
               const state =
@@ -657,7 +667,7 @@ export function TasteQuiz() {
               return (
                 <li
                   key={`${s.key}-${i}`}
-                  className={state ? `quiz-dot ${state}` : "quiz-dot"}
+                  className={state ? `quiz-segment ${state}` : "quiz-segment"}
                 />
               );
             })}
@@ -668,12 +678,10 @@ export function TasteQuiz() {
       </div>
 
       <div className="quiz-question-block">
-        {!isIntentStep ? (
-          <span className="quiz-question-icon" aria-hidden>
-            <StepIcon size={20} strokeWidth={1.5} />
-          </span>
-        ) : null}
         <div className="quiz-question-copy">
+          {STEP_CATEGORY[current.key] ? (
+            <p className="quiz-category">{STEP_CATEGORY[current.key]}</p>
+          ) : null}
           <h1 id="quiz-question" className="quiz-question">
             {current.question}
           </h1>

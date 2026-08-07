@@ -19,6 +19,24 @@ function supabaseOrigin(): string {
 }
 
 /**
+ * PostHog ingest origin, when analytics is configured. track() posts straight
+ * to this host from the browser, so leaving it out of connect-src means the CSP
+ * silently drops every event in production while the product looks fine.
+ * Returns an empty string when unset, which keeps the directive unchanged.
+ */
+function analyticsOrigin(): string {
+  const key = process.env.NEXT_PUBLIC_POSTHOG_KEY?.trim();
+  if (!key) return "";
+
+  const raw = process.env.NEXT_PUBLIC_POSTHOG_HOST?.trim();
+  try {
+    return new URL(raw || "https://us.i.posthog.com").origin;
+  } catch {
+    return "https://us.i.posthog.com";
+  }
+}
+
+/**
  * script-src carries 'unsafe-inline' because the App Router streams the RSC
  * payload through inline script tags. Locking that down means nonce plumbing
  * through middleware, which is a larger change than this one. The directives
@@ -32,7 +50,7 @@ function contentSecurityPolicy(): string {
     "style-src 'self' 'unsafe-inline'",
     "img-src 'self' data: blob:",
     "font-src 'self'",
-    `connect-src 'self' ${supabaseOrigin()}`,
+    `connect-src ${["'self'", supabaseOrigin(), analyticsOrigin()].filter(Boolean).join(" ")}`,
     "frame-ancestors 'none'",
     "frame-src 'none'",
     "object-src 'none'",

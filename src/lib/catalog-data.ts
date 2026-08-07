@@ -555,6 +555,116 @@ export const RANK_FOODS: RankFood[] = [
       "{flavor} and {texture}, and it eats {heaviness}. Hot on cold.",
     recipeMinutes: 5,
     hasRecipe: true
+  },
+{
+    id: "butter-chicken",
+    name: "Butter chicken",
+    description: "Tender chicken in creamy tomato curry with rice and naan.",
+    flavorTags: ["savory", "spicy", "sweet"],
+    textureTags: ["creamy", "soft"],
+    heaviness: "filling",
+    temperature: "hot",
+    adventurousness: 3,
+    dietaryTags: ["contains-dairy", "gluten-free"],
+    image: "/food/butter-chicken.jpg",
+    imageAlt: "Butter chicken curry with rice and flatbread",
+    imageCredit: "Unsplash",
+    reasonTemplate:
+      "{flavor} with a {texture} sauce, and it eats {heaviness}.",
+    recipeMinutes: 45,
+    hasRecipe: true
+  },
+{
+    id: "vegetable-samosas",
+    name: "Vegetable samosas",
+    description: "Crispy pastry triangles filled with spiced potato and peas.",
+    flavorTags: ["savory", "spicy"],
+    textureTags: ["crunchy", "soft"],
+    heaviness: "medium",
+    temperature: "hot",
+    adventurousness: 3,
+    dietaryTags: ["vegetarian", "contains-gluten", "vegan"],
+    snack: true,
+    image: "/food/vegetable-samosas.jpg",
+    imageAlt: "Golden vegetable samosas with green chutney",
+    imageCredit: "Unsplash",
+    reasonTemplate:
+      "{flavor} and {texture}, and it eats {heaviness}.",
+    recipeMinutes: 50,
+    hasRecipe: true
+  },
+{
+    id: "chicken-souvlaki",
+    name: "Chicken souvlaki",
+    description: "Grilled chicken skewers with pita, fries, tomato, and tzatziki.",
+    flavorTags: ["savory", "fresh"],
+    textureTags: ["juicy", "crunchy"],
+    heaviness: "medium",
+    temperature: "hot",
+    adventurousness: 2,
+    dietaryTags: ["contains-gluten", "contains-dairy"],
+    image: "/food/chicken-souvlaki.jpg",
+    imageAlt: "Chicken souvlaki skewers with pita and fries",
+    imageCredit: "Unsplash",
+    reasonTemplate:
+      "{flavor} and {texture}, and it eats {heaviness}.",
+    recipeMinutes: 35,
+    hasRecipe: true
+  },
+{
+    id: "greek-salad",
+    name: "Greek salad",
+    description: "Tomato, cucumber, olives, red onion, and feta with olive oil.",
+    flavorTags: ["fresh", "savory"],
+    textureTags: ["juicy", "crunchy"],
+    heaviness: "light",
+    temperature: "cold",
+    adventurousness: 1,
+    dietaryTags: ["vegetarian", "gluten-free", "contains-dairy"],
+    snack: true,
+    image: "/food/greek-salad.jpg",
+    imageAlt: "Greek salad with feta, olives, and fresh vegetables",
+    imageCredit: "Unsplash",
+    reasonTemplate:
+      "{flavor} and {texture}, and it eats {heaviness}.",
+    recipeMinutes: 15,
+    hasRecipe: true
+  },
+{
+    id: "doro-wat",
+    name: "Doro wat",
+    description: "Spicy Ethiopian chicken stew with berbere, served on injera.",
+    flavorTags: ["spicy", "savory"],
+    textureTags: ["soft", "juicy"],
+    heaviness: "filling",
+    temperature: "hot",
+    adventurousness: 5,
+    dietaryTags: ["gluten-free", "contains-egg"],
+    image: "/food/doro-wat.jpg",
+    imageAlt: "Doro wat chicken stew served with injera",
+    imageCredit: "Edsel Little / Wikimedia Commons",
+    reasonTemplate:
+      "{flavor} and {texture}, and it eats {heaviness}. Berbere heat.",
+    recipeMinutes: 75,
+    hasRecipe: true
+  },
+{
+    id: "misir-wat",
+    name: "Misir wat",
+    description: "Red lentil stew simmered with berbere and onion, with injera.",
+    flavorTags: ["spicy", "savory"],
+    textureTags: ["creamy", "soft"],
+    heaviness: "medium",
+    temperature: "hot",
+    adventurousness: 4,
+    dietaryTags: ["vegan", "gluten-free"],
+    image: "/food/misir-wat.jpg",
+    imageAlt: "Misir wat red lentil stew in a pot",
+    imageCredit: "Omnipc / Wikimedia Commons",
+    reasonTemplate:
+      "{flavor} and {texture}, and it eats {heaviness}.",
+    recipeMinutes: 40,
+    hasRecipe: true
   }
 ];
 

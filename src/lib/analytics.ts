@@ -23,6 +23,7 @@ export const ANALYTICS_EVENTS = {
   signupShown: "signup_shown",
   signupCompleted: "signup_completed",
   dnaUpdate: "dna_updated",
+  error: "client_error",
 } as const;
 
 export type AnalyticsEventName =

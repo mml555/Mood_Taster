@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Comfortaa } from "next/font/google";
 import { Grain } from "@/components/Grain";
+import { siteOrigin } from "@/lib/site-url";
 import "./globals.css";
 
 const comfortaa = Comfortaa({
@@ -10,13 +11,32 @@ const comfortaa = Comfortaa({
   display: "swap",
 });
 
+const DESCRIPTION =
+  "Figure out what you actually want to eat in under 30 seconds. A few questions about your mood, then one specific pick. Not another endless menu.";
+
 export const metadata: Metadata = {
+  // Without metadataBase every relative og:image and canonical resolves against
+  // localhost at build time, so shared links render without a card.
+  metadataBase: new URL(siteOrigin()),
   title: {
     default: "Mood Taster",
     template: "%s · Mood Taster",
   },
-  description:
-    "Figure out what you actually want to eat in under 30 seconds. A few questions about your mood, then one specific pick. Not another endless menu.",
+  description: DESCRIPTION,
+  applicationName: "Mood Taster",
+  alternates: { canonical: "/" },
+  openGraph: {
+    type: "website",
+    siteName: "Mood Taster",
+    title: "Mood Taster",
+    description: DESCRIPTION,
+    url: "/",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Mood Taster",
+    description: DESCRIPTION,
+  },
 };
 
 export const viewport = {

@@ -1146,12 +1146,21 @@ button {
   margin: 0;
   flex: 1;
   display: flex;
-  justify-content: center;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+.quiz-progress-count {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--paper-muted);
 }
 
 .quiz-top {
   display: grid;
-  grid-template-columns: 2.75rem 1fr 2.75rem;
+  grid-template-columns: 2.75rem minmax(0, 1fr) 2.75rem;
   align-items: center;
   gap: var(--space-2);
   margin: 0 0 var(--space-5);
@@ -1160,6 +1169,30 @@ button {
 .quiz-top-spacer {
   width: 2.75rem;
   height: 2.75rem;
+}
+
+.quiz-segments {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  width: 100%;
+  max-width: 14rem;
+}
+
+.quiz-segment {
+  flex: 1 1 0;
+  height: 0.35rem;
+  border-radius: var(--radius-pill);
+  background: var(--ink-soft);
+  transition: background 0.2s ease;
+}
+
+.quiz-segment.is-done,
+.quiz-segment.is-current {
+  background: var(--ink);
 }
 
 .quiz-dots {
@@ -1191,14 +1224,21 @@ button {
 
 .quiz-question-block {
   display: flex;
-  flex-direction: row;
-  align-items: flex-start;
+  flex-direction: column;
   gap: var(--space-3);
 }
 
 .quiz-question-copy {
   min-width: 0;
-  flex: 1;
+}
+
+.quiz-category {
+  margin: 0 0 var(--space-2);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--paper-muted);
 }
 
 .quiz-question-icon {

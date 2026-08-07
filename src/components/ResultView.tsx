@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import dynamic from "next/dynamic";
 import { useRouter, useSearchParams } from "next/navigation";
-import { ArrowRight, ChefHat, Heart, MapPin, Search, Sparkles } from "lucide-react";
+import { ArrowRight, ChefHat, Heart, MapPin, Sparkles } from "lucide-react";
 import {
   useCallback,
   useEffect,
@@ -828,6 +828,23 @@ export function ResultView({ food }: ResultViewProps) {
 
         <div className="result-card-body">
           <h1 className="result-title">{food.name}</h1>
+
+          {intent === "recipe" && food.recipe ? (
+            <p className="result-venue">
+              <ChefHat size={18} strokeWidth={1.5} aria-hidden />
+              Home recipe
+            </p>
+          ) : intent === "restaurant" ? (
+            <p className="result-venue">
+              <MapPin size={18} strokeWidth={1.5} aria-hidden />
+              Nearby spot
+            </p>
+          ) : intent === "snack" ? (
+            <p className="result-venue">
+              Quick bite
+            </p>
+          ) : null}
+
           <p className="result-desc">{explanation}</p>
 
           {attrs.length > 0 ? (
@@ -836,6 +853,30 @@ export function ResultView({ food }: ResultViewProps) {
                 <li key={a}>{a}</li>
               ))}
             </ul>
+          ) : null}
+
+          {intent === "recipe" && food.recipe ? (
+            <div className="result-meta">
+              <div>
+                <span className="result-meta-label">Prep time</span>
+                <span className="result-meta-value">
+                  {food.recipe.timeMinutes} min
+                </span>
+              </div>
+              <div className="result-meta-end">
+                <span className="result-meta-label">Servings</span>
+                <span className="result-meta-value">
+                  {food.recipe.servings}
+                </span>
+              </div>
+            </div>
+          ) : intent === "snack" ? (
+            <div className="result-meta">
+              <div>
+                <span className="result-meta-label">Time</span>
+                <span className="result-meta-value">Ready now</span>
+              </div>
+            </div>
           ) : null}
         </div>
       </div>
@@ -856,25 +897,35 @@ export function ResultView({ food }: ResultViewProps) {
           {showDone ? (
             <div className="result-done" role="status" aria-live="polite">
               <p className="result-done-mark" aria-hidden>
-                {lastRating === "nailed" ? "♡" : "✓"}
+                ✓
               </p>
-              <h2 className="result-done-title">
-                {lastRating === "nailed" ? "Locked in" : "Close enough"}
-              </h2>
-              <p className="result-done-copy">
-                {deltas && deltas.length > 0
-                  ? formatDnaChangeLine(deltas)
-                  : "Got it. Your Taste DNA learned from this pick."}
-              </p>
-              {levelLabel ? (
-                <p className="result-done-level">{levelLabel}</p>
-              ) : null}
+              <h2 className="result-done-title">Decision made.</h2>
+              <p className="result-done-copy">Your only job now is to eat.</p>
+              <div className="result-done-pick">
+                <Image
+                  src={food.image}
+                  alt=""
+                  width={64}
+                  height={64}
+                  className="result-done-thumb"
+                />
+                <div className="result-done-pick-copy">
+                  <p className="result-done-pick-name">{food.name}</p>
+                  {levelLabel ? (
+                    <p className="result-done-level">{levelLabel}</p>
+                  ) : deltas && deltas.length > 0 ? (
+                    <p className="result-done-level">
+                      {formatDnaChangeLine(deltas)}
+                    </p>
+                  ) : null}
+                </div>
+              </div>
               <div className="result-done-actions">
                 {intent === "recipe" ? (
                   food.recipe ? (
                     <a className="cta" href="#recipe">
                       <ChefHat size={20} strokeWidth={1.5} aria-hidden />
-                      See recipe
+                      View recipe
                     </a>
                   ) : (
                     <Link className="cta" href="/taste">
@@ -890,17 +941,16 @@ export function ResultView({ food }: ResultViewProps) {
                     rel="noopener noreferrer"
                   >
                     <MapPin size={20} strokeWidth={1.5} aria-hidden />
-                    Find nearby
+                    Open directions
                   </a>
                 ) : (
                   <Link className="cta" href="/">
-                    New craving
+                    Enjoy
                     <ArrowRight size={20} strokeWidth={1.5} aria-hidden />
                   </Link>
                 )}
                 <Link className="cta-secondary" href="/">
-                  Start over
-                  <ArrowRight size={20} strokeWidth={1.5} aria-hidden />
+                  Taste another mood
                 </Link>
               </div>
               {intent === "recipe" ? (
@@ -1005,12 +1055,28 @@ export function ResultView({ food }: ResultViewProps) {
                   className="reaction-btn reaction-btn-like"
                   onClick={onLike}
                   disabled={rated || adjusting}
-                  aria-label="I like it"
+                  aria-label={
+                    intent === "restaurant"
+                      ? "Let's go"
+                      : intent === "recipe"
+                        ? "Make this"
+                        : intent === "snack"
+                          ? "That's the one"
+                          : "I like it"
+                  }
                 >
                   <span className="reaction-icon" aria-hidden>
                     ♡
                   </span>
-                  <span className="reaction-label">I like it</span>
+                  <span className="reaction-label">
+                    {intent === "restaurant"
+                      ? "Let's go"
+                      : intent === "recipe"
+                        ? "Make this"
+                        : intent === "snack"
+                          ? "That's the one"
+                          : "I like it"}
+                  </span>
                 </button>
               </div>
 
