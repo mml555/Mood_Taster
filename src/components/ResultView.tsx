@@ -37,12 +37,7 @@ import type { PlacesState } from "@/components/result/NearbySection";
 import { readDietary } from "@/lib/dietary";
 import { nextAfterReject, rank } from "@/lib/engine";
 import { readExploreBalance } from "@/lib/explore-balance";
-import {
-  isFavorite,
-  readFavorites,
-  toggleFavorite,
-} from "@/lib/favorites";
-import { persistFavorites } from "@/lib/favorites-sync";
+import { readFavorites } from "@/lib/favorites";
 import { persistGamification } from "@/lib/gamification-sync";
 import { writeDoneMeta } from "@/lib/done-meta";
 import {
@@ -93,6 +88,14 @@ const NearbySection = dynamic(
   { ssr: false, loading: () => <NearbySectionSkeleton /> },
 );
 
+/**
+ * How long after a dish paints the model may still rewrite its description.
+ * Roughly how long it takes to reach that line from the title and image. Past
+ * it the deterministic copy stands, and the model contributes only additive
+ * lines. Tuned for feel, not for a measurement.
+ */
+const SWAP_DEADLINE_MS = 2000;
+
 type ResultViewProps = {
   food: Food;
 };
@@ -131,7 +134,6 @@ export function ResultView({ food }: ResultViewProps) {
   const [emptyAlts, setEmptyAlts] = useState(false);
 
   const [riff, setRiff] = useState<string | null>(null);
-  const [cookTip, setCookTip] = useState<string | null>(null);
   /** Model copy landed after this dish painted, so dissolve it in rather than cut. */
   const [swappedWhy, setSwappedWhy] = useState(false);
   const [lateRiff, setLateRiff] = useState(false);
@@ -147,7 +149,6 @@ export function ResultView({ food }: ResultViewProps) {
   const [leaving, setLeaving] = useState(false);
 
   const [exitDir, setExitDir] = useState<"left" | "right" | null>(null);
-  const [saved, setSaved] = useState(false);
 
   // Identifies the current dish render, so a slow reply about a previous dish
   // cannot overwrite the copy for the one now on screen.
@@ -165,13 +166,11 @@ export function ResultView({ food }: ResultViewProps) {
       setLastRating(null);
       setEmptyAlts(false);
       setRiff(null);
-      setCookTip(null);
       setSwappedWhy(false);
       setLateRiff(false);
       setWhyPanelOpen(false);
       setRejectNoteText("");
       setExitDir(null);
-      setSaved(isFavorite(food.id));
       busyRef.current = false;
       setExplanation(food.description);
       setAttrs(
@@ -235,8 +234,8 @@ export function ResultView({ food }: ResultViewProps) {
      * through is worse than never rewriting it:
      *   cached        applied in the first paint, no transition needed
      *   under 2s      the line dissolves into the new one
-     *   after 2s      the why line is left alone; only the riff and cook tip
-     *                 apply, and those are additive rather than a rewrite
+     *   after 2s      the why line is left alone and only the riff applies,
+     *                 which is additive rather than a rewrite
      *
      * Never awaited by the caller, never throws, never aborts: the request is
      * shared with any prefetch still in flight, so cancelling it on unmount
@@ -259,7 +258,6 @@ export function ResultView({ food }: ResultViewProps) {
           setRiff(copy.riff);
           if (late) setLateRiff(true);
         }
-        if (copy.cookTip) setCookTip(copy.cookTip);
       };
 
       const { cached, pending } = loadCopyForFood(foodId, answers);
@@ -478,12 +476,6 @@ export function ResultView({ food }: ResultViewProps) {
     },
     [food.id, router],
   );
-
-  const onToggleSave = useCallback(() => {
-    const next = toggleFavorite(food.id);
-    setSaved(isFavorite(food.id, next));
-    void persistFavorites(next);
-  }, [food.id]);
 
   const onReject = useCallback(() => {
     if (busyRef.current) return;
@@ -822,7 +814,7 @@ export function ResultView({ food }: ResultViewProps) {
           </div>
 
           {riff ? (
-            <p className={polished ? "result-riff is-polished" : "result-riff"}>
+            <p className={lateRiff ? "result-riff is-polished" : "result-riff"}>
               {riff}
             </p>
           ) : null}
