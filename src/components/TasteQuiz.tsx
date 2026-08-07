@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Check } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ANALYTICS_EVENTS, track } from "@/lib/analytics";
 import { persistDna } from "@/lib/dna-sync";
@@ -728,7 +728,7 @@ export function TasteQuiz() {
                 </span>
                 {isSelected ? (
                   <span className="quiz-option-check" aria-hidden>
-                    ✓
+                    <Check size={16} strokeWidth={2} />
                   </span>
                 ) : null}
               </button>

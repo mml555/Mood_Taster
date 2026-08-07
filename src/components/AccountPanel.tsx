@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { LogOut, Search, Sparkles } from "lucide-react";
+import { LogOut, Sparkles, Utensils } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import { DietaryPrefsEditor } from "@/components/DietaryPrefsEditor";
@@ -127,7 +127,7 @@ export function AccountPanel() {
           Taste DNA
         </Link>
         <Link className="text-link" href="/taste">
-          <Search size={16} strokeWidth={1.5} aria-hidden />
+          <Utensils size={16} strokeWidth={1.5} aria-hidden />
           Start a quiz
         </Link>
         <button

@@ -14,7 +14,7 @@ export default function PassportPage() {
       <main className="product-main product-main-with-nav">
         <PassportView />
       </main>
-      <ProductBottomNav current="explore" />
+      <ProductBottomNav />
       <SiteFooter />
     </>
   );

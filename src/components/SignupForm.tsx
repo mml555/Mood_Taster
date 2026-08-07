@@ -11,7 +11,7 @@ import { loadDietaryForUser } from "@/lib/dietary-sync";
 import { loadFavoritesForUser } from "@/lib/favorites-sync";
 import { loadGamificationForUser } from "@/lib/gamification-sync";
 import { loadHistoryForUser } from "@/lib/history-sync";
-import { createClient, isSupabaseConfigured } from "@/lib/supabase/client";
+import { isSupabaseConfigured } from "@/lib/supabase/client";
 
 export function SignupForm() {
   const router = useRouter();
@@ -52,40 +52,26 @@ export function SignupForm() {
     }
 
     try {
-      const supabase = createClient();
-      const { data, error: signError } = await supabase.auth.signUp({
-        email: parsed.data.email,
-        password: parsed.data.password,
-        options: {
-          data: {
-            username: parsed.data.username,
-            display_name: parsed.data.username,
-          },
-        },
+      // Create + sign-in happen server side so Confirm email cannot strand the
+      // user. Cookies land on the response; the browser is signed in on OK.
+      const res = await fetch("/api/auth/signup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          username: parsed.data.username,
+          email: parsed.data.email,
+          password: parsed.data.password,
+        }),
       });
 
-      if (signError) {
-        setError(signError.message);
+      if (!res.ok) {
+        const body = (await res.json().catch(() => ({}))) as {
+          error?: string;
+        };
+        setError(body.error ?? "Could not create account");
         setPending(false);
         return;
       }
-
-      if (!data.session) {
-        track(ANALYTICS_EVENTS.signupCompleted, {
-          confirmed: false,
-        });
-        setError("Check your email to confirm your account, then sign in.");
-        setPending(false);
-        return;
-      }
-
-      // Ensure profile row exists even if trigger lagged
-      await supabase.from("profiles").upsert({
-        id: data.session.user.id,
-        username: parsed.data.username,
-        display_name: parsed.data.username,
-        updated_at: new Date().toISOString(),
-      });
 
       await Promise.all([
         loadDnaForUser(),

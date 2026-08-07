@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Heart, RotateCcw, Search, Sparkles } from "lucide-react";
+import { Heart, RotateCcw, Sparkles, Utensils, X } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import {
   DNA_DIMENSIONS,
@@ -96,7 +96,7 @@ export function DnaDashboard() {
     return (
       <section className="dna">
         <p className="eyebrow">
-          <Sparkles size={16} strokeWidth={1.5} aria-hidden /> Your Taste
+          <Sparkles size={16} strokeWidth={1.5} aria-hidden /> Your Stats
         </p>
         <h1 className="dna-title">Nothing yet</h1>
         <p className="dna-lede">
@@ -104,11 +104,11 @@ export function DnaDashboard() {
         </p>
         <div className="result-actions">
           <Link className="cta" href="/taste">
-            <Search size={20} strokeWidth={1.5} aria-hidden />
+            <Utensils size={20} strokeWidth={1.5} aria-hidden />
             Show me
           </Link>
           <Link className="cta-secondary" href="/favorites">
-            <Heart size={20} strokeWidth={1.5} aria-hidden />
+            <Heart size={18} strokeWidth={1.5} aria-hidden />
             Favorites
           </Link>
         </div>
@@ -128,7 +128,7 @@ export function DnaDashboard() {
   return (
     <section className="dna">
       <p className="eyebrow">
-        <Sparkles size={16} strokeWidth={1.5} aria-hidden /> Your Taste
+        <Sparkles size={16} strokeWidth={1.5} aria-hidden /> Your Stats
       </p>
       <h1 className="dna-title">Taste DNA</h1>
       <div className="dna-meter" aria-label={`${discovery}% discovered`}>
@@ -175,8 +175,8 @@ export function DnaDashboard() {
               Start a Taste Quest
             </Link>
             <Link className="cta-secondary" href="/taste">
+              <Utensils size={20} strokeWidth={1.5} aria-hidden />
               Show me
-              <Search size={20} strokeWidth={1.5} aria-hidden />
             </Link>
           </div>
         </aside>
@@ -294,7 +294,7 @@ export function DnaDashboard() {
 
       <div className="result-actions">
         <Link className="cta-secondary" href="/favorites">
-          <Heart size={20} strokeWidth={1.5} aria-hidden />
+          <Heart size={18} strokeWidth={1.5} aria-hidden />
           Favorites
         </Link>
       </div>
@@ -308,11 +308,11 @@ export function DnaDashboard() {
 
       <div className="result-actions">
         <Link className="cta" href="/taste">
-          <Search size={20} strokeWidth={1.5} aria-hidden />
+          <RotateCcw size={18} strokeWidth={1.5} aria-hidden />
           Try again
         </Link>
         <button type="button" className="reject-btn" onClick={onReset}>
-          <RotateCcw size={20} strokeWidth={1.5} aria-hidden />
+          <X size={16} strokeWidth={1.5} aria-hidden />
           Reset
         </button>
       </div>

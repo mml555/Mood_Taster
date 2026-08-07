@@ -26,7 +26,7 @@ Guests still work with no account (localStorage only). Accounts need Supabase en
 1. Create a project at [supabase.com](https://supabase.com)
 2. Copy URL, anon key, and service role key into `.env` (see `.env.example`)
 3. Run [`supabase/schema.sql`](supabase/schema.sql) in the SQL editor
-4. Auth → Email: enable. For local demos, turn off "Confirm email"
+4. Auth → Email: enable. Signup auto-confirms via the service role (no inbox step)
 5. Restart `npm run dev`
 
 Sign up with username, email, and password. Sign in with email or username + password.

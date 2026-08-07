@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { failOnDbError, HttpError, withUser } from "@/lib/api-route";
+import { reportServerError } from "@/lib/server-errors";
 import { createServiceClient } from "@/lib/supabase/admin";
 
 /**
@@ -17,7 +18,11 @@ export const DELETE = withUser(
   DELETE_FAILED,
   async ({ user }) => {
     if (!process.env.SUPABASE_SERVICE_ROLE_KEY?.trim()) {
-      console.error("[account] delete needs SUPABASE_SERVICE_ROLE_KEY");
+      reportServerError(
+        "account",
+        new Error("delete needs SUPABASE_SERVICE_ROLE_KEY"),
+        { kind: "config" },
+      );
       throw new HttpError(503, DELETE_FAILED);
     }
 
@@ -25,7 +30,7 @@ export const DELETE = withUser(
     try {
       admin = createServiceClient();
     } catch (err) {
-      console.error("[account] service client unavailable:", err);
+      reportServerError("account", err, { kind: "config" });
       throw new HttpError(503, DELETE_FAILED);
     }
 

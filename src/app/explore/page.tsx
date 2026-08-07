@@ -14,7 +14,7 @@ export default function ExplorePage() {
       <main className="product-main product-main-with-nav">
         <ExploreDashboard />
       </main>
-      <ProductBottomNav current="explore" />
+      <ProductBottomNav />
       <SiteFooter />
     </>
   );

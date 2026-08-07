@@ -1,6 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
-import { Clock, Compass, Heart, Search, Sparkles } from "lucide-react";
+import { Clock, Compass, Heart, Sparkles, Utensils } from "lucide-react";
 import { AuthNav } from "@/components/AuthNav";
 
 type SiteHeaderProps = {
@@ -45,14 +45,14 @@ export function SiteHeader({ current = "home" }: SiteHeaderProps) {
       <nav aria-label="Primary">
         {onHome ? (
           <>
-            <Link className="nav-primary nav-with-icon" href="/taste">
-              <Search size={16} strokeWidth={1.5} aria-hidden />
+            <Link className="nav-primary nav-with-icon nav-tab" href="/taste">
+              <Utensils size={16} strokeWidth={1.5} aria-hidden />
               Start
             </Link>
             <a className="nav-secondary" href="#how">
               How it works
             </a>
-            <Link className="nav-primary nav-with-icon" href="/dna">
+            <Link className="nav-primary nav-with-icon nav-tab" href="/dna">
               <Sparkles size={16} strokeWidth={1.5} aria-hidden />
               <span className="nav-dna-label">DNA</span>
             </Link>
@@ -60,7 +60,7 @@ export function SiteHeader({ current = "home" }: SiteHeaderProps) {
           </>
         ) : inLoop ? (
           <>
-            <Link className="nav-primary nav-with-icon" href="/dna">
+            <Link className="nav-primary nav-with-icon nav-tab" href="/dna">
               <Sparkles size={16} strokeWidth={1.5} aria-hidden />
               <span className="nav-dna-label">DNA</span>
             </Link>
@@ -68,12 +68,12 @@ export function SiteHeader({ current = "home" }: SiteHeaderProps) {
           </>
         ) : (
           <>
-            <Link className="nav-primary nav-with-icon" href="/taste">
-              <Search size={16} strokeWidth={1.5} aria-hidden />
+            <Link className="nav-primary nav-with-icon nav-tab" href="/taste">
+              <Utensils size={16} strokeWidth={1.5} aria-hidden />
               Quiz
             </Link>
             <Link
-              className="nav-primary nav-with-icon"
+              className="nav-primary nav-with-icon nav-tab"
               href="/explore"
               aria-current={current === "explore" ? "page" : undefined}
             >
@@ -81,7 +81,7 @@ export function SiteHeader({ current = "home" }: SiteHeaderProps) {
               <span className="nav-dna-label">Explore</span>
             </Link>
             <Link
-              className="nav-primary nav-with-icon"
+              className="nav-primary nav-with-icon nav-tab"
               href="/favorites"
               aria-current={current === "favorites" ? "page" : undefined}
             >
@@ -89,7 +89,7 @@ export function SiteHeader({ current = "home" }: SiteHeaderProps) {
               <span className="nav-dna-label">Saved</span>
             </Link>
             <Link
-              className="nav-primary nav-with-icon"
+              className="nav-primary nav-with-icon nav-tab"
               href="/history"
               aria-current={current === "history" ? "page" : undefined}
             >
@@ -97,7 +97,7 @@ export function SiteHeader({ current = "home" }: SiteHeaderProps) {
               <span className="nav-dna-label">History</span>
             </Link>
             <Link
-              className="nav-primary nav-with-icon"
+              className="nav-primary nav-with-icon nav-tab"
               href="/dna"
               aria-current={current === "dna" ? "page" : undefined}
             >

@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import type { User } from "@supabase/supabase-js";
+import { reportServerError } from "./server-errors";
 import { isSupabaseConfigured } from "./supabase/config";
 import { createClient } from "./supabase/server";
 
@@ -67,7 +68,10 @@ export function failOnDbError(
   publicMessage: string,
 ): void {
   if (!error) return;
-  console.error(`[${scope}] ${action} failed:`, error.message);
+  reportServerError(scope, new Error(`${action} failed: ${error.message}`), {
+    action,
+    kind: "database",
+  });
   throw new HttpError(500, publicMessage);
 }
 
@@ -88,7 +92,7 @@ export function withRoute(
       if (err instanceof HttpError) {
         return jsonError(err.publicMessage, err.status);
       }
-      console.error(`[${scope}] threw:`, err);
+      reportServerError(scope, err, { kind: "unhandled" });
       return jsonError(failMessage, 500);
     }
   };
@@ -126,7 +130,7 @@ export function withUser(
       if (err instanceof HttpError) {
         return jsonError(err.publicMessage, err.status);
       }
-      console.error(`[${scope}] threw:`, err);
+      reportServerError(scope, err, { kind: "unhandled" });
       return jsonError(failMessage, 500);
     }
   };

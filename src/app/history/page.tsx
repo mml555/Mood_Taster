@@ -14,7 +14,7 @@ export default function HistoryPage() {
       <main className="product-main product-main-with-nav">
         <HistoryList />
       </main>
-      <ProductBottomNav current="history" />
+      <ProductBottomNav />
       <SiteFooter />
     </>
   );

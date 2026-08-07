@@ -1,5 +1,6 @@
 import { SiteFooter } from "@/components/SiteFooter";
 import { SiteHeader } from "@/components/SiteHeader";
+import { ProductBottomNav } from "@/components/ProductBottomNav";
 import { AccountPanel } from "@/components/AccountPanel";
 
 export const metadata = {
@@ -10,9 +11,9 @@ export default function AccountPage() {
   return (
     <>
       <SiteHeader current="account" />
-      <main className="product-main">
+      <main className="product-main product-main-with-nav">
         <section className="auth" aria-labelledby="account-title">
-          <p className="eyebrow">Account</p>
+          <p className="eyebrow">Profile</p>
           <h1 id="account-title" className="dna-title">
             Your profile
           </h1>
@@ -23,6 +24,7 @@ export default function AccountPage() {
           <AccountPanel />
         </section>
       </main>
+      <ProductBottomNav current="profile" />
       <SiteFooter />
     </>
   );

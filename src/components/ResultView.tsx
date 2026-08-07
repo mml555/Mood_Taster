@@ -6,17 +6,13 @@ import dynamic from "next/dynamic";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
   ArrowRight,
-  ChefHat,
   Check,
-  Flag,
+  ChefHat,
   Heart,
-  Info,
   MapPin,
-  Meh,
+  Plus,
   RotateCcw,
-  Search,
-  SkipForward,
-  Sparkles,
+  Utensils,
   X,
 } from "lucide-react";
 import {
@@ -662,10 +658,6 @@ export function ResultView({ food }: ResultViewProps) {
     beginFeedback("nailed");
   }, [beginFeedback]);
 
-  const onNope = useCallback(() => {
-    beginFeedback("nope");
-  }, [beginFeedback]);
-
   const onTryAgain = useCallback(() => {
     if (busyRef.current || pendingRating) return;
     const current = readSession();
@@ -738,9 +730,9 @@ export function ResultView({ food }: ResultViewProps) {
         onLike();
         return;
       }
-      onNope();
+      onTryAgain();
     },
-    [onLike, onNope],
+    [onLike, onTryAgain],
   );
 
   const cardClass = [
@@ -769,7 +761,6 @@ export function ResultView({ food }: ResultViewProps) {
             Start over
           </Link>
           <Link className="text-link" href="/dna">
-            <Sparkles size={16} strokeWidth={1.5} aria-hidden />
             See Taste DNA
           </Link>
         </div>
@@ -808,10 +799,16 @@ export function ResultView({ food }: ResultViewProps) {
         }
       >
         <span className="result-card-hint result-card-hint-like" aria-hidden>
-          <span className="result-card-hint-mark">♡</span> Like
+          <span className="result-card-hint-mark">
+            <Heart size={18} strokeWidth={1.5} />
+          </span>{" "}
+          Like
         </span>
         <span className="result-card-hint result-card-hint-nope" aria-hidden>
-          <span className="result-card-hint-mark">×</span> Nope
+          <span className="result-card-hint-mark">
+            <X size={18} strokeWidth={1.5} />
+          </span>{" "}
+          Nope
         </span>
 
         <div className="result-media">
@@ -911,7 +908,7 @@ export function ResultView({ food }: ResultViewProps) {
           {showDone ? (
             <div className="result-done" role="status" aria-live="polite">
               <p className="result-done-mark" aria-hidden>
-                ✓
+                <Check size={28} strokeWidth={1.5} />
               </p>
               <h2 className="result-done-title">Decision made.</h2>
               <p className="result-done-copy">Your only job now is to eat.</p>
@@ -976,21 +973,17 @@ export function ResultView({ food }: ResultViewProps) {
                     onClick={onToggleSave}
                     aria-pressed={saved}
                   >
-                    <Heart
-                      size={16}
-                      strokeWidth={1.5}
-                      aria-hidden
-                      fill={saved ? "currentColor" : "none"}
-                    />
+                    {saved ? (
+                      <Heart size={16} strokeWidth={1.5} aria-hidden />
+                    ) : (
+                      <Plus size={16} strokeWidth={1.5} aria-hidden />
+                    )}
                     {saved ? "Saved" : "Save"}
                   </button>
                 </p>
               ) : null}
               <p className="result-done-dna">
-                <Link href="/dna">
-                  <Sparkles size={16} strokeWidth={1.5} aria-hidden />
-                  Your Taste DNA
-                </Link>
+                <Link href="/dna">Your Taste DNA</Link>
               </p>
             </div>
           ) : showFeedback && pendingRating ? (
@@ -1029,7 +1022,7 @@ export function ResultView({ food }: ResultViewProps) {
                   className="cta"
                   onClick={() => commitFeedback(feedbackTags)}
                 >
-                  <Check size={20} strokeWidth={1.5} aria-hidden />
+                  <Check size={18} strokeWidth={1.5} aria-hidden />
                   Save
                 </button>
                 <button
@@ -1037,7 +1030,6 @@ export function ResultView({ food }: ResultViewProps) {
                   className="text-link"
                   onClick={() => commitFeedback([])}
                 >
-                  <SkipForward size={16} strokeWidth={1.5} aria-hidden />
                   Skip
                 </button>
               </div>
@@ -1048,23 +1040,12 @@ export function ResultView({ food }: ResultViewProps) {
                 <button
                   type="button"
                   className="reaction-btn reaction-btn-nope"
-                  onClick={onNope}
-                  disabled={rated || adjusting}
+                  onClick={onTryAgain}
+                  disabled={adjusting || rated}
                   aria-label="Not for me"
                 >
                   <span className="reaction-icon" aria-hidden>
-                    <X size={22} strokeWidth={1.5} />
-                  </span>
-                </button>
-                <button
-                  type="button"
-                  className="reaction-btn reaction-btn-again"
-                  onClick={onTryAgain}
-                  disabled={adjusting || rated}
-                  aria-label="Try again"
-                >
-                  <span className="reaction-icon" aria-hidden>
-                    <RotateCcw size={22} strokeWidth={1.5} />
+                    <X size={28} strokeWidth={2} />
                   </span>
                 </button>
                 <button
@@ -1083,7 +1064,7 @@ export function ResultView({ food }: ResultViewProps) {
                   }
                 >
                   <span className="reaction-icon" aria-hidden>
-                    <Heart size={22} strokeWidth={1.5} />
+                    <Heart size={24} strokeWidth={2} />
                   </span>
                   <span className="reaction-label">
                     {intent === "restaurant"
@@ -1104,8 +1085,15 @@ export function ResultView({ food }: ResultViewProps) {
                   onClick={() => beginFeedback("kinda")}
                   disabled={rated || adjusting}
                 >
-                  <Meh size={16} strokeWidth={1.5} aria-hidden />
                   Kinda
+                </button>
+                <button
+                  type="button"
+                  className="text-link"
+                  onClick={() => beginFeedback("nope")}
+                  disabled={rated || adjusting}
+                >
+                  Not for me
                 </button>
                 <button
                   type="button"
@@ -1117,7 +1105,6 @@ export function ResultView({ food }: ResultViewProps) {
                   aria-expanded={whyOpen}
                   disabled={adjusting || rated}
                 >
-                  <Info size={16} strokeWidth={1.5} aria-hidden />
                   Why this?
                 </button>
                 <button
@@ -1130,7 +1117,6 @@ export function ResultView({ food }: ResultViewProps) {
                   aria-expanded={whyPanelOpen}
                   disabled={adjusting || rated}
                 >
-                  <Flag size={16} strokeWidth={1.5} aria-hidden />
                   Off?
                 </button>
               </div>
@@ -1171,7 +1157,7 @@ export function ResultView({ food }: ResultViewProps) {
                   onClick={() => void onRejectWithNote()}
                   disabled={adjusting}
                 >
-                  <RotateCcw size={20} strokeWidth={1.5} aria-hidden />
+                  <RotateCcw size={18} strokeWidth={1.5} aria-hidden />
                   {adjusting ? "Rethinking" : "Try again"}
                 </button>
                 <button
@@ -1180,7 +1166,6 @@ export function ResultView({ food }: ResultViewProps) {
                   onClick={onReject}
                   disabled={adjusting}
                 >
-                  <SkipForward size={16} strokeWidth={1.5} aria-hidden />
                   Skip
                 </button>
               </div>
@@ -1211,7 +1196,7 @@ export function ResultView({ food }: ResultViewProps) {
                     onClick={onTryAgain}
                     disabled={adjusting}
                   >
-                    <RotateCcw size={20} strokeWidth={1.5} aria-hidden />
+                    <RotateCcw size={18} strokeWidth={1.5} aria-hidden />
                     Try again
                   </button>
                 ) : null}
@@ -1235,7 +1220,7 @@ export function ResultView({ food }: ResultViewProps) {
             Take the quiz to find something that fits how you feel.
           </p>
           <Link className="cta" href="/">
-            <Search size={20} strokeWidth={1.5} aria-hidden />
+            <Utensils size={20} strokeWidth={1.5} aria-hidden />
             Hungry?
           </Link>
         </div>

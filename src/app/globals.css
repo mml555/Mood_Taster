@@ -36,9 +36,7 @@
      so their left and right edges line up at every width. Phone and desktop
      then differ only in how much paper sits outside the column, never in
      where the content starts. Widen this and the whole site widens together. */
-  --measure: 40rem;
-  /* Long-form reading only (PRD, Strategy). Still centered on --measure. */
-  --measure-doc: 44rem;
+  --measure: min(48rem, 100%);
 
   /* Shape language */
   --radius-sm: 12px;
@@ -141,6 +139,11 @@ button {
   align-items: center;
   justify-content: space-between;
   gap: var(--space-3);
+  /* Shares the content column. A nav that runs to the glass while the hero
+     sits in a 40rem column reads as two unrelated pages on a wide screen. */
+  width: 100%;
+  max-width: var(--measure);
+  margin-inline: auto;
   padding: var(--space-3) var(--page-inset);
   padding-top: max(var(--space-3), env(safe-area-inset-top));
   animation: rise 0.9s var(--ease) both;
@@ -232,13 +235,13 @@ button {
   flex-direction: column;
   align-items: center;
   justify-content: flex-start;
-  gap: var(--space-4);
+  gap: var(--space-3);
   /* Content-sized: no full-viewport void that floats the CTA in empty paper. */
   min-height: auto;
   width: 100%;
-  max-width: 40rem;
+  max-width: var(--measure);
   margin-inline: auto;
-  padding: var(--space-5) var(--page-inset) var(--space-4);
+  padding: var(--space-4) var(--page-inset) var(--space-3);
   text-align: center;
 }
 
@@ -327,7 +330,7 @@ button {
 }
 
 .cta-row {
-  margin-top: var(--space-4);
+  margin-top: var(--space-3);
   animation: rise 1s var(--ease) 0.4s both;
 }
 
@@ -458,7 +461,7 @@ button {
   width: 100%;
   max-width: var(--measure);
   margin-inline: auto;
-  padding: var(--space-6) var(--page-inset) 0;
+  padding: var(--space-5) var(--page-inset) 0;
 }
 
 .about {
@@ -467,10 +470,8 @@ button {
 
 /* Quiet home below-fold: one short column, no competing CTAs. */
 .how-quiet {
-  /* Inherits --measure from .how. A narrower cap here made the step cards
-     shrink as the viewport grew, which is what made desktop read as a
-     stretched phone. Prose inside stays short via its own caps. */
-  padding-top: var(--space-4);
+  /* Inherits --measure from .how. Prose inside stays short via its own caps. */
+  padding-top: var(--space-3);
   padding-bottom: var(--space-5);
   text-align: center;
 }
@@ -482,11 +483,18 @@ button {
 
 .flow-quiet {
   list-style: none;
-  margin: var(--space-4) 0 0;
+  margin: var(--space-3) 0 0;
   padding: 0;
   display: grid;
   gap: var(--space-2);
   text-align: left;
+}
+
+@media (min-width: 720px) {
+  .flow-quiet {
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--space-3);
+  }
 }
 
 .flow-quiet li {
@@ -703,7 +711,10 @@ button {
 .doc-page .doc {
   position: relative;
   z-index: 1;
-  max-width: 44rem;
+  /* Same frame as every other page, so the PRD and Strategy bodies line up
+     with the nav above them instead of sitting 32px inside it. */
+  width: 100%;
+  max-width: var(--measure);
   margin: 0 auto;
   padding: 0 var(--page-inset) var(--space-6);
 }
@@ -1164,7 +1175,7 @@ button {
   width: 100%;
   max-width: var(--measure);
   margin: 0 auto;
-  padding: var(--space-4) var(--page-inset) var(--space-5);
+  padding: var(--space-3) var(--page-inset) var(--space-5);
   min-height: auto;
 }
 
@@ -1189,7 +1200,7 @@ button {
   grid-template-columns: 2.75rem minmax(0, 1fr) 2.75rem;
   align-items: center;
   gap: var(--space-2);
-  margin: 0 0 var(--space-4);
+  margin: 0 0 var(--space-3);
 }
 
 .quiz-top-spacer {
@@ -1298,7 +1309,7 @@ button {
 
 .quiz-options {
   list-style: none;
-  margin: var(--space-4) 0 0;
+  margin: var(--space-3) 0 0;
   padding: 0;
   display: flex;
   flex-direction: column;
@@ -1310,6 +1321,20 @@ button {
   display: flex;
   flex-direction: column;
   gap: var(--space-2);
+}
+
+@media (min-width: 720px) {
+  .quiz-options-grid,
+  .quiz-options-stack {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-2);
+  }
+
+  /* Intent cards keep a single column so descriptions stay scannable. */
+  .quiz-options-stack:has(.quiz-option-desc) {
+    grid-template-columns: 1fr;
+  }
 }
 
 .quiz-option {
@@ -1382,9 +1407,9 @@ button {
 
 .quiz-option-check {
   flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
   color: var(--accent);
-  font-size: 1.25rem;
-  font-weight: 700;
   line-height: 1;
 }
 
@@ -1440,8 +1465,9 @@ button {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: var(--space-6);
-  min-height: min(70vh, 32rem);
+  gap: var(--space-4);
+  min-height: min(42vh, 18rem);
+  padding: var(--space-5) 0;
   text-align: center;
   animation: rise 0.7s var(--ease) both;
 }
@@ -1487,7 +1513,7 @@ button {
 
 .result-card {
   position: relative;
-  margin: var(--space-3) 0 0;
+  margin: var(--space-2) 0 0;
   padding: 0;
   overflow: hidden;
   background: var(--paper);
@@ -1538,6 +1564,9 @@ button {
   position: absolute;
   top: var(--space-4);
   z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
   padding: 0.4rem 0.85rem;
   border-radius: var(--radius-pill);
   font-size: 0.8rem;
@@ -1547,6 +1576,11 @@ button {
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.15s ease;
+}
+
+.result-card-hint-mark {
+  display: inline-flex;
+  align-items: center;
 }
 
 .result-card-hint-like {
@@ -1723,7 +1757,7 @@ button {
 }
 
 .reaction-dock {
-  margin-top: var(--space-4);
+  margin-top: var(--space-3);
 }
 
 .reaction-btn {
@@ -1732,12 +1766,12 @@ button {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 0.35rem;
-  width: 3.75rem;
-  height: 3.75rem;
-  min-width: 3.75rem;
-  min-height: 3.75rem;
-  padding: 0;
+  gap: 0.2rem;
+  width: 4.25rem;
+  height: 4.25rem;
+  min-width: 4.25rem;
+  min-height: 4.25rem;
+  padding: 0.35rem 0.25rem;
   background: var(--ink-soft);
   color: var(--ink);
   font-size: 0.7rem;
@@ -1770,8 +1804,8 @@ button {
   flex: 1 1 auto;
   width: auto;
   min-width: 0;
-  height: 3.75rem;
-  min-height: 3.75rem;
+  height: 4.25rem;
+  min-height: 4.25rem;
   flex-direction: row;
   gap: var(--space-2);
   padding-inline: var(--space-4);
@@ -1782,10 +1816,10 @@ button {
 }
 
 .reaction-btn-like .reaction-label {
-  display: inline;
   color: var(--paper);
-  font-size: 1rem;
+  font-size: 1.05rem;
   font-weight: 700;
+  letter-spacing: 0;
 }
 
 .reaction-btn-like:hover:not(:disabled),
@@ -1795,6 +1829,9 @@ button {
 }
 
 .reaction-btn-nope {
+  width: 4.25rem;
+  min-width: 4.25rem;
+  border-radius: var(--radius-btn);
   background: var(--ink-raised);
   color: var(--ink);
 }
@@ -1805,14 +1842,18 @@ button {
 }
 
 .reaction-icon {
-  font-size: 1.55rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   line-height: 1;
-  font-weight: 400;
 }
 
 .reaction-label {
-  display: none;
+  display: block;
   line-height: 1.1;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
 }
 
 .reaction-quiet {
@@ -2200,8 +2241,8 @@ button {
 }
 
 .dna-block {
-  margin-top: var(--space-4);
-  padding: var(--space-4);
+  margin-top: var(--space-3);
+  padding: var(--space-3) var(--space-4);
   background: var(--ink-raised);
   border-radius: var(--radius-card);
 }
@@ -2534,7 +2575,7 @@ button {
 }
 
 .favorites {
-  max-width: 36rem;
+  max-width: none;
 }
 
 .favorites-list {
@@ -2851,6 +2892,11 @@ button {
     display: none;
   }
 
+  /* Product destinations live in the bottom bar on phones. */
+  .top nav a.nav-tab {
+    display: none;
+  }
+
   .nav-save {
     display: inline-flex !important;
     align-items: center;
@@ -2874,8 +2920,8 @@ button {
 
   .hero {
     min-height: auto;
-    gap: var(--space-4);
-    padding: var(--space-4) var(--page-inset) var(--space-3);
+    gap: var(--space-3);
+    padding: var(--space-3) var(--page-inset) var(--space-3);
   }
 
   .hero-body {
@@ -2905,8 +2951,11 @@ button {
     margin-top: var(--space-4);
   }
 
+  /* Keeps the 22rem cap from the base rule. Releasing it here made the start
+     button 608px at 720px wide and 352px at 721px, so a one-pixel change in
+     viewport resized the main CTA by 42%. It is one button at one size now;
+     on a phone 22rem already fills the column. */
   .hero-start {
-    max-width: none;
     padding-bottom: var(--space-2);
   }
 
@@ -2928,6 +2977,15 @@ button {
     width: 100%;
     max-width: 20rem;
     touch-action: manipulation;
+  }
+
+  /* Sign in wears .cta for its fill, but it is a nav item, not a page action.
+     Blocking it to 20rem broke it onto its own row as a full-width purple bar
+     under the links, which is the one place phone and desktop still disagreed. */
+  .top nav a.cta {
+    width: auto;
+    max-width: none;
+    min-height: 2.5rem;
   }
 
   .hero .cta.hero-start-primary {
@@ -2986,8 +3044,10 @@ button {
     line-height: 1.7;
   }
 
+  /* Keeps --measure. Below 640px the column already fills the screen, and
+     between 640 and 720 releasing it pushed the quiz out past the header and
+     footer, which hold the measure at every width. */
   .product-main {
-    max-width: 100%;
     padding: var(--space-3) var(--page-inset) var(--space-5);
     padding-bottom: max(var(--space-5), calc(env(safe-area-inset-bottom) + var(--space-3)));
     min-height: auto;
@@ -3109,27 +3169,32 @@ button {
   }
 
   .reaction-btn {
-    width: 3.5rem;
-    height: 3.5rem;
-    min-width: 3.5rem;
-    min-height: 3.5rem;
-    padding: 0;
+    width: 4rem;
+    height: 4rem;
+    min-width: 4rem;
+    min-height: 4rem;
+    padding: 0.3rem 0.2rem;
   }
 
   .reaction-btn-like {
     flex: 1 1 auto;
     width: auto;
     min-width: 0;
-    height: 3.5rem;
-    min-height: 3.5rem;
+    height: 4rem;
+    min-height: 4rem;
   }
 
   .reaction-btn-like .reaction-label {
-    display: inline;
+    display: block;
   }
 
   .reaction-icon {
-    font-size: 1.4rem;
+    font-size: 1.35rem;
+  }
+
+  .reaction-label {
+    display: block;
+    font-size: 0.65rem;
   }
 
   .reaction-quiet {
@@ -3236,14 +3301,10 @@ button {
 
 /* --- Tablet -------------------------------------------------------------- */
 
-/* Between the phone rules and the full desktop grid the product surfaces are
-   still one column, so let them use the width instead of centering a narrow
-   measure in a sea of paper. */
-@media (min-width: 721px) and (max-width: 999px) {
-  .product-main {
-    max-width: 44rem;
-  }
-}
+/* No tablet-only measure. Widening the product column to 44rem here and
+   dropping it back to 40rem at 1000px meant the quiz got narrower as the
+   screen got wider, so a tablet and a laptop disagreed about the layout.
+   Every surface holds --measure from the smallest phone up. */
 
 /* --- Small phones ---------------------------------------------------------
    At 320px the lockup plus four nav items overrun the row, and because the
@@ -3321,22 +3382,26 @@ button {
 
   /* A pinned dock must not eat a third of a 390px-tall viewport. */
   .reaction-btn {
-    width: 3rem;
-    height: 3rem;
-    min-width: 3rem;
-    min-height: 3rem;
+    width: 3.5rem;
+    height: 3.5rem;
+    min-width: 3.5rem;
+    min-height: 3.5rem;
   }
 
   .reaction-btn-like {
     flex: 1 1 auto;
     width: auto;
     min-width: 0;
-    height: 3rem;
-    min-height: 3rem;
+    height: 3.5rem;
+    min-height: 3.5rem;
   }
 
   .reaction-icon {
     font-size: 1.15rem;
+  }
+
+  .reaction-label {
+    font-size: 0.6rem;
   }
 
   .doc-hero {
@@ -3346,18 +3411,18 @@ button {
 
 @media (min-width: 721px) {
   .reaction-btn {
-    width: 3.75rem;
-    height: 3.75rem;
-    min-width: 3.75rem;
-    min-height: 3.75rem;
+    width: 4.25rem;
+    height: 4.25rem;
+    min-width: 4.25rem;
+    min-height: 4.25rem;
   }
 
   .reaction-btn-like {
     flex: 1 1 auto;
     width: auto;
     min-width: 0;
-    height: 3.75rem;
-    min-height: 3.75rem;
+    height: 4.25rem;
+    min-height: 4.25rem;
   }
 
   .top nav {
@@ -3366,6 +3431,14 @@ button {
 
   .mark-lockup {
     height: 1.35rem;
+  }
+
+  .hero {
+    padding-top: var(--space-5);
+  }
+
+  .product-main {
+    padding-top: var(--space-4);
   }
 }
 
@@ -3517,8 +3590,8 @@ button {
     bottom: 0;
     z-index: 40;
     background: var(--paper);
-    padding: var(--space-2) var(--page-inset);
-    padding-bottom: max(var(--space-2), env(safe-area-inset-bottom));
+    padding: 0.4rem var(--page-inset) 0;
+    padding-bottom: max(0.5rem, env(safe-area-inset-bottom));
   }
 
   .product-bottom-nav-list {
@@ -3526,25 +3599,42 @@ button {
     margin: 0;
     padding: 0;
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: var(--space-2);
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.25rem;
   }
 
   .product-bottom-nav-link {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 0.2rem;
-    padding: 0.45rem 0.25rem;
+    justify-content: center;
+    gap: 0.15rem;
+    min-height: 3.5rem;
+    padding: 0.25rem 0.2rem;
     border-radius: var(--radius-btn);
     color: var(--paper-muted);
     text-decoration: none;
-    font-size: 0.72rem;
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .product-bottom-nav-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.35rem 0.65rem;
+    border-radius: var(--radius-btn);
+  }
+
+  .product-bottom-nav-icon.is-active {
+    background: var(--ink-raised);
   }
 
   .product-bottom-nav-link.is-active {
     color: var(--ink);
-    background: var(--ink-raised);
+    background: transparent;
   }
 
   .product-bottom-nav-link:focus-visible {
@@ -3553,6 +3643,6 @@ button {
   }
 
   .product-main-with-nav {
-    padding-bottom: max(5rem, calc(env(safe-area-inset-bottom) + 4rem));
+    padding-bottom: max(5.5rem, calc(env(safe-area-inset-bottom) + 4.5rem));
   }
 }

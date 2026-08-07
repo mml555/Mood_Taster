@@ -4,7 +4,7 @@ import { readJson, withRoute } from "@/lib/api-route";
 import { explainBodySchema } from "@/lib/api-schemas";
 import { CATALOG } from "@/lib/catalog";
 import { buildExplanation } from "@/lib/explain";
-import { clientRateKey, rateLimitAllow } from "@/lib/rate-limit";
+import { clientRateKey, enforceRateLimit } from "@/lib/rate-limit";
 import { parseAnswers } from "@/lib/validate";
 
 /**
@@ -52,7 +52,7 @@ export const POST = withRoute("explain", "Could not explain", async (request) =>
     return NextResponse.json(NO_COPY);
   }
 
-  if (!rateLimitAllow(clientRateKey(request, "explain"))) {
+  if (!(await enforceRateLimit(clientRateKey(request, "explain")))) {
     return NextResponse.json(NO_COPY);
   }
 

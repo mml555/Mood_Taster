@@ -1,36 +1,30 @@
 "use client";
 
 import Link from "next/link";
-import { Clock, Compass, Search, Sparkles } from "lucide-react";
-import { useAuthSession } from "@/lib/use-auth-session";
+import { LayoutDashboard, UserRound, Utensils } from "lucide-react";
 
-type ProductTab = "taste" | "dna" | "explore" | "history";
+type ProductTab = "taste" | "stats" | "profile";
 
 type ProductBottomNavProps = {
-  current: ProductTab;
+  current?: ProductTab;
 };
 
 const TABS: {
   id: ProductTab;
   href: string;
   label: string;
-  Icon: typeof Search;
+  Icon: typeof Utensils;
 }[] = [
-  { id: "taste", href: "/taste", label: "Taste", Icon: Search },
-  { id: "dna", href: "/dna", label: "DNA", Icon: Sparkles },
-  { id: "explore", href: "/explore", label: "Explore", Icon: Compass },
-  { id: "history", href: "/history", label: "History", Icon: Clock },
+  { id: "taste", href: "/taste", label: "Taste", Icon: Utensils },
+  { id: "stats", href: "/dna", label: "Stats", Icon: LayoutDashboard },
+  { id: "profile", href: "/account", label: "Profile", Icon: UserRound },
 ];
 
 /**
- * Persistent mobile nav for authenticated users (BACKLOG P2-1).
- * Taste · DNA · Explore · History.
+ * Mobile product nav (≤720px). Matches reference IA:
+ * Taste · Stats · Profile. Docs stay in the footer.
  */
 export function ProductBottomNav({ current }: ProductBottomNavProps) {
-  const auth = useAuthSession();
-
-  if (auth.status !== "user") return null;
-
   return (
     <nav className="product-bottom-nav" aria-label="Product">
       <ul className="product-bottom-nav-list">
@@ -47,7 +41,15 @@ export function ProductBottomNav({ current }: ProductBottomNavProps) {
                 }
                 aria-current={active ? "page" : undefined}
               >
-                <Icon size={20} strokeWidth={1.5} aria-hidden />
+                <span
+                  className={
+                    active
+                      ? "product-bottom-nav-icon is-active"
+                      : "product-bottom-nav-icon"
+                  }
+                >
+                  <Icon size={24} strokeWidth={active ? 2 : 1.5} aria-hidden />
+                </span>
                 <span>{label}</span>
               </Link>
             </li>

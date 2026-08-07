@@ -1,5 +1,10 @@
-import { beforeEach, describe, expect, it } from "vitest";
-import { clientRateKey, rateLimitAllow, resetRateLimits } from "./rate-limit";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import {
+  clientRateKey,
+  enforceRateLimit,
+  rateLimitAllow,
+  resetRateLimits,
+} from "./rate-limit";
 
 function req(headers: Record<string, string>) {
   return new Request("https://example.test/api/thing", {
@@ -70,5 +75,110 @@ describe("clientRateKey", () => {
     expect(clientRateKey(req(headers), "login")).not.toBe(
       clientRateKey(req(headers), "adjust"),
     );
+  });
+});
+
+describe("enforceRateLimit", () => {
+  afterEach(() => {
+    vi.unstubAllEnvs();
+    vi.unstubAllGlobals();
+  });
+
+  it("falls back to the in-memory bucket when no store is configured", async () => {
+    vi.stubEnv("UPSTASH_REDIS_REST_URL", "");
+    vi.stubEnv("UPSTASH_REDIS_REST_TOKEN", "");
+
+    const opts = { capacity: 2, refillPerMs: 2 / 60_000 };
+    expect(await enforceRateLimit("fallback", opts)).toBe(true);
+    expect(await enforceRateLimit("fallback", opts)).toBe(true);
+    expect(await enforceRateLimit("fallback", opts)).toBe(false);
+  });
+
+  it("uses the shared counter when one is configured", async () => {
+    vi.stubEnv("UPSTASH_REDIS_REST_URL", "https://redis.test/");
+    vi.stubEnv("UPSTASH_REDIS_REST_TOKEN", "token");
+
+    // Third call crosses a capacity of 2.
+    const counts = [1, 2, 3];
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () =>
+        Response.json([{ result: counts.shift() }, { result: 1 }]),
+      ),
+    );
+
+    const opts = { capacity: 2, refillPerMs: 2 / 60_000 };
+    expect(await enforceRateLimit("shared", opts)).toBe(true);
+    expect(await enforceRateLimit("shared", opts)).toBe(true);
+    expect(await enforceRateLimit("shared", opts)).toBe(false);
+  });
+
+  it("sets the TTL only on the first request in a window", async () => {
+    vi.stubEnv("UPSTASH_REDIS_REST_URL", "https://redis.test/");
+    vi.stubEnv("UPSTASH_REDIS_REST_TOKEN", "token");
+
+    const spy = vi.fn(async () =>
+      Response.json([{ result: 1 }, { result: 1 }]),
+    );
+    vi.stubGlobal("fetch", spy);
+
+    await enforceRateLimit("ttl", { capacity: 10, refillPerMs: 10 / 60_000 });
+
+    const body = JSON.parse(spy.mock.calls[0]![1]!.body as string);
+    // NX is what stops a steady stream of requests from pushing the expiry
+    // out forever and holding one window open indefinitely.
+    expect(body).toEqual([
+      ["INCR", "rl:ttl"],
+      ["EXPIRE", "rl:ttl", "60", "NX"],
+    ]);
+  });
+
+  it("degrades to the local bucket when the store is unreachable", async () => {
+    vi.stubEnv("UPSTASH_REDIS_REST_URL", "https://redis.test/");
+    vi.stubEnv("UPSTASH_REDIS_REST_TOKEN", "token");
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () => {
+        throw new Error("network down");
+      }),
+    );
+
+    // A Redis outage must not lock every caller out of sign-in.
+    const opts = { capacity: 2, refillPerMs: 2 / 60_000 };
+    expect(await enforceRateLimit("outage", opts)).toBe(true);
+    expect(await enforceRateLimit("outage", opts)).toBe(true);
+    expect(await enforceRateLimit("outage", opts)).toBe(false);
+  });
+
+  it("degrades to the local bucket on a non-OK response", async () => {
+    vi.stubEnv("UPSTASH_REDIS_REST_URL", "https://redis.test/");
+    vi.stubEnv("UPSTASH_REDIS_REST_TOKEN", "token");
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () => new Response("nope", { status: 500 })),
+    );
+
+    expect(
+      await enforceRateLimit("bad-status", {
+        capacity: 1,
+        refillPerMs: 1 / 60_000,
+      }),
+    ).toBe(true);
+  });
+
+  it("degrades to the local bucket when the pipeline reports an error", async () => {
+    vi.stubEnv("UPSTASH_REDIS_REST_URL", "https://redis.test/");
+    vi.stubEnv("UPSTASH_REDIS_REST_TOKEN", "token");
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () => Response.json([{ error: "WRONGTYPE" }])),
+    );
+
+    expect(
+      await enforceRateLimit("pipeline-error", {
+        capacity: 1,
+        refillPerMs: 1 / 60_000,
+      }),
+    ).toBe(true);
   });
 });

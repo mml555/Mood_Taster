@@ -249,3 +249,32 @@ drop policy if exists "Gamification deletable by owner" on public.gamification;
 create policy "Gamification deletable by owner"
   on public.gamification for delete
   using ((select auth.uid()) = user_id);
+
+
+-- =============================================================================
+-- Production readiness · Owner delete policies — APPEND ONLY
+-- Safe to re-run: drop/create policies only, no table or column changes.
+-- =============================================================================
+-- recommendation_history and gamification already let an owner delete their own
+-- rows. taste_dna and favorites did not, so a signed-in user could add and
+-- change that data but never clear it from the client. Account deletion still
+-- works either way because /api/account uses the service role, which bypasses
+-- RLS entirely, but "delete my saved foods" had no path that stopped short of
+-- deleting the whole account.
+
+drop policy if exists "Taste DNA deletable by owner" on public.taste_dna;
+create policy "Taste DNA deletable by owner"
+  on public.taste_dna for delete
+  using ((select auth.uid()) = user_id);
+
+drop policy if exists "Favorites deletable by owner" on public.favorites;
+create policy "Favorites deletable by owner"
+  on public.favorites for delete
+  using ((select auth.uid()) = user_id);
+
+-- public.profiles deliberately gets no delete policy. The row is created by the
+-- on_auth_user_created trigger and carries the username that sign-in resolves
+-- against, so a client-side delete would leave a live auth.users row that can
+-- no longer be signed into by username, with no way for the user to undo it.
+-- Removing a profile is part of deleting an account, which is a service-role
+-- path, not something a session token should be able to do on its own.

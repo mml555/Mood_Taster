@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Check, Compass, Search, Sparkles } from "lucide-react";
+import { Check, Compass, Sparkles, Utensils } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import {
   applyQuestExperience,
@@ -247,8 +247,8 @@ export function ExploreDashboard() {
                 </button>
               ) : null}
               <Link className="cta-highlight" href="/taste">
+                <Utensils size={20} strokeWidth={1.5} aria-hidden />
                 Find a dish
-                <Search size={20} strokeWidth={1.5} aria-hidden />
               </Link>
             </div>
           </>

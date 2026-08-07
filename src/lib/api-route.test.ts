@@ -57,9 +57,14 @@ describe("failOnDbError", () => {
       expect((err as HttpError).publicMessage).not.toContain("secret_table");
     }
 
-    expect(logged).toHaveBeenCalledWith(
-      "[dna] load failed:",
-      'relation "secret_table" does not exist',
+    // Routed through reportServerError now, which logs the scope tag and the
+    // error object. The raw Postgres message must still reach the log, since
+    // that is the only place it is available for debugging.
+    const [prefix, logging] = logged.mock.calls[0] as [string, Error];
+    expect(prefix).toBe("[dna]");
+    expect(logging).toBeInstanceOf(Error);
+    expect(logging.message).toBe(
+      'load failed: relation "secret_table" does not exist',
     );
   });
 });

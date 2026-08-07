@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { ChefHat, Heart, Search } from "lucide-react";
+import { ChefHat, Heart, Utensils, X } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { getRankFoodById } from "@/lib/catalog-data";
 import {
@@ -62,7 +62,7 @@ export function FavoritesList() {
     return (
       <section className="favorites">
         <p className="eyebrow">
-          <Heart size={16} strokeWidth={1.5} aria-hidden /> Saved
+          <Heart size={14} strokeWidth={1.5} aria-hidden /> Saved
         </p>
         <h1 className="dna-title">Nothing saved yet</h1>
         <p className="dna-lede">
@@ -70,7 +70,7 @@ export function FavoritesList() {
         </p>
         <div className="result-actions">
           <Link className="cta" href="/taste?intent=recipe">
-            <Search size={20} strokeWidth={1.5} aria-hidden />
+            <Utensils size={20} strokeWidth={1.5} aria-hidden />
             Show me
           </Link>
         </div>
@@ -81,7 +81,7 @@ export function FavoritesList() {
   return (
     <section className="favorites">
       <p className="eyebrow">
-        <Heart size={16} strokeWidth={1.5} aria-hidden /> Saved
+        <Heart size={14} strokeWidth={1.5} aria-hidden /> Saved
       </p>
       <h1 className="dna-title">Favorites</h1>
       <p className="dna-lede">
@@ -107,15 +107,15 @@ export function FavoritesList() {
               onClick={() => onUnsave(item.id)}
               aria-label={`Remove ${item.name}`}
             >
-              <Heart size={18} strokeWidth={1.5} aria-hidden fill="currentColor" />
-              Saved
+              <X size={16} strokeWidth={1.5} aria-hidden />
+              Remove
             </button>
           </li>
         ))}
       </ul>
       <div className="result-actions">
         <Link className="cta" href="/taste">
-          <Search size={20} strokeWidth={1.5} aria-hidden />
+          <Utensils size={20} strokeWidth={1.5} aria-hidden />
           New craving
         </Link>
       </div>

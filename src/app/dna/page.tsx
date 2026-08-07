@@ -14,7 +14,7 @@ export default function DnaPage() {
       <main className="product-main product-main-with-nav">
         <DnaDashboard />
       </main>
-      <ProductBottomNav current="dna" />
+      <ProductBottomNav current="stats" />
       <SiteFooter />
     </>
   );

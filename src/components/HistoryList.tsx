@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Clock, RotateCcw, Search } from "lucide-react";
+import { Clock, RotateCcw, Utensils } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { getRankFoodById } from "@/lib/catalog-data";
@@ -109,8 +109,8 @@ export function HistoryList() {
         </p>
         <div className="result-actions">
           <Link className="cta" href="/taste">
+            <Utensils size={20} strokeWidth={1.5} aria-hidden />
             Show me
-            <Search size={20} strokeWidth={1.5} aria-hidden />
           </Link>
         </div>
       </section>
@@ -172,7 +172,7 @@ export function HistoryList() {
                   onClick={() => onFindAgain(entry)}
                   aria-label={`Find ${name} again`}
                 >
-                  <RotateCcw size={18} strokeWidth={1.5} aria-hidden />
+                  <RotateCcw size={16} strokeWidth={1.5} aria-hidden />
                   Find again
                 </button>
               </li>
@@ -183,8 +183,8 @@ export function HistoryList() {
 
       <div className="result-actions">
         <Link className="cta" href="/taste">
+          <Utensils size={20} strokeWidth={1.5} aria-hidden />
           New craving
-          <Search size={20} strokeWidth={1.5} aria-hidden />
         </Link>
       </div>
     </section>

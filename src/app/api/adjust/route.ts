@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { ask, isAiConfigured, parseJsonObject, sanitizeLine } from "@/lib/ai";
 import { readJson, withRoute } from "@/lib/api-route";
 import { adjustBodySchema } from "@/lib/api-schemas";
-import { clientRateKey, rateLimitAllow } from "@/lib/rate-limit";
+import { clientRateKey, enforceRateLimit } from "@/lib/rate-limit";
 import {
   ADVENTURE,
   FLAVORS,
@@ -44,7 +44,7 @@ export const POST = withRoute("adjust", "Could not adjust", async (request) => {
     return NextResponse.json(UNCHANGED);
   }
 
-  if (!rateLimitAllow(clientRateKey(request, "adjust"))) {
+  if (!(await enforceRateLimit(clientRateKey(request, "adjust")))) {
     return NextResponse.json(UNCHANGED);
   }
 
