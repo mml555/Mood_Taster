@@ -30,11 +30,12 @@ import {
   readSession,
   writeSession,
 } from "@/lib/session";
-import type { NearbyPlace } from "@/app/api/places/route";
 import type {
   Answers,
+  DnaProfile,
   Food,
   Intent,
+  NearbyPlace,
   Rating,
   Recipe,
   SessionState,
@@ -45,50 +46,12 @@ type ResultViewProps = {
 };
 
 const SWIPE_THRESHOLD = 80;
-const GEO_CACHE_KEY = "mood-taster-geo";
-const GEO_CACHE_MS = 10 * 60 * 1000;
 
 /** Always available, needs no key and no permission. The floor under Places. */
 function mapsSearchUrl(food: Food): string {
   return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
     `${food.name} restaurant`,
   )}`;
-}
-
-function readCachedGeo(): { lat: number; lng: number } | null {
-  if (typeof window === "undefined") return null;
-  try {
-    const raw = sessionStorage.getItem(GEO_CACHE_KEY);
-    if (!raw) return null;
-    const parsed = JSON.parse(raw) as {
-      lat?: unknown;
-      lng?: unknown;
-      at?: unknown;
-    };
-    if (
-      typeof parsed.lat !== "number" ||
-      typeof parsed.lng !== "number" ||
-      typeof parsed.at !== "number"
-    ) {
-      return null;
-    }
-    if (Date.now() - parsed.at > GEO_CACHE_MS) return null;
-    return { lat: parsed.lat, lng: parsed.lng };
-  } catch {
-    return null;
-  }
-}
-
-function writeCachedGeo(lat: number, lng: number): void {
-  if (typeof window === "undefined") return;
-  try {
-    sessionStorage.setItem(
-      GEO_CACHE_KEY,
-      JSON.stringify({ lat, lng, at: Date.now() }),
-    );
-  } catch {
-    /* quota / private mode */
-  }
 }
 
 function prefersReducedMotion(): boolean {
@@ -253,6 +216,13 @@ export function ResultView({ food }: ResultViewProps) {
       setPlaces([]);
       setPlacesState("locating");
 
+      const prefetched = readPrefetchedPlaces(food.id);
+      if (prefetched && prefetched.length > 0) {
+        setPlaces(prefetched);
+        setPlacesState("ready");
+        return;
+      }
+
       const cached = readCachedGeo();
       if (cached) {
         setPlacesState("loading");
@@ -409,23 +379,6 @@ export function ResultView({ food }: ResultViewProps) {
     }
   }, [goToNext, rejectNoteText, router]);
 
-  const onRate = useCallback(
-    (rating: Rating) => {
-      const { dna: next, deltas: changes } = applyRating(
-        readDna(),
-        food,
-        rating,
-      );
-      void persistDna(next);
-      setDeltas(changes.filter((d) => d.direction !== "flat"));
-      setLastRating(rating);
-    },
-    [food],
-  );
-
-  const rated = lastRating !== null;
-  const showDone = lastRating === "nailed" || lastRating === "kinda";
-
   const animateExitThen = useCallback(
     (dir: "left" | "right", after: () => void) => {
       if (prefersReducedMotion()) {
@@ -438,29 +391,82 @@ export function ResultView({ food }: ResultViewProps) {
     [],
   );
 
+  const beginFeedback = useCallback(
+    (rating: Rating) => {
+      if (busyRef.current || lastRating !== null || pendingRating !== null) {
+        return;
+      }
+      setPendingRating(rating);
+      setFeedbackTags([]);
+      setWhyOpen(false);
+      setWhyPanelOpen(false);
+    },
+    [lastRating, pendingRating],
+  );
+
+  const commitFeedback = useCallback(
+    (tags: string[]) => {
+      const rating = pendingRating;
+      if (!rating) return;
+
+      const detail =
+        rating === "nailed"
+          ? { hit: parseHitTags(tags) }
+          : { miss: parseMissTags(tags) };
+
+      const { dna: next, deltas: changes } = applyRating(
+        readDna(),
+        food,
+        rating,
+        detail,
+      );
+      void persistDna(next);
+      setDeltas(changes.filter((d) => d.direction !== "flat"));
+      setLastRating(rating);
+      setPendingRating(null);
+      setFeedbackTags([]);
+
+      if (rating === "nope") {
+        const current = readSession();
+        if (!current) {
+          router.push("/taste");
+          return;
+        }
+        busyRef.current = true;
+        animateExitThen("left", () => {
+          goToNext(current, current.answers);
+        });
+      }
+    },
+    [animateExitThen, food, goToNext, pendingRating, router],
+  );
+
+  const rated = lastRating !== null || pendingRating !== null;
+  const showDone = lastRating === "nailed" || lastRating === "kinda";
+  const showFeedback = pendingRating !== null && lastRating === null;
+
+  const toggleFeedbackTag = useCallback((id: string) => {
+    setFeedbackTags((prev) => {
+      if (id === "everything") {
+        return prev.includes("everything") ? [] : ["everything"];
+      }
+      const withoutEverything = prev.filter((t) => t !== "everything");
+      return withoutEverything.includes(id)
+        ? withoutEverything.filter((t) => t !== id)
+        : [...withoutEverything, id];
+    });
+  }, []);
+
   const onLike = useCallback(() => {
-    if (busyRef.current || rated) return;
-    busyRef.current = true;
-    onRate("nailed");
-    busyRef.current = false;
-  }, [onRate, rated]);
+    beginFeedback("nailed");
+  }, [beginFeedback]);
 
   const onNope = useCallback(() => {
-    if (busyRef.current || rated) return;
-    const current = readSession();
-    if (!current) {
-      router.push("/taste");
-      return;
-    }
-    busyRef.current = true;
-    onRate("nope");
-    animateExitThen("left", () => {
-      goToNext(current, current.answers);
-    });
-  }, [animateExitThen, goToNext, onRate, rated, router]);
+    beginFeedback("nope");
+  }, [beginFeedback]);
 
   const onTryAgain = useCallback(() => {
-    if (busyRef.current) return;
+    if (busyRef.current || pendingRating) return;
     const current = readSession();
     if (!current) {
       router.push("/taste");
@@ -470,7 +476,7 @@ export function ResultView({ food }: ResultViewProps) {
     animateExitThen("left", () => {
       goToNext(current, current.answers);
     });
-  }, [animateExitThen, goToNext, router]);
+  }, [animateExitThen, goToNext, pendingRating, router]);
 
   const onPointerDown = useCallback(
     (e: ReactPointerEvent<HTMLDivElement>) => {
@@ -573,16 +579,20 @@ export function ResultView({ food }: ResultViewProps) {
       <p className="eyebrow">
         {showDone
           ? "Your pick"
-          : (adjustNote ??
-            (rejectNote
-              ? "Different one."
-              : intent === "recipe"
-                ? "Cook this"
-                : intent === "restaurant"
-                  ? "Go out"
-                  : intent === "snack"
-                    ? "Snack"
-                    : "Your match"))}
+          : showFeedback
+            ? pendingRating === "nailed"
+              ? "What hit?"
+              : "What was off?"
+            : (adjustNote ??
+              (rejectNote
+                ? "Different one."
+                : intent === "recipe"
+                  ? "Cook this"
+                  : intent === "restaurant"
+                    ? "Go out"
+                    : intent === "snack"
+                      ? "Snack"
+                      : "Your match"))}
       </p>
 
       <div
@@ -668,12 +678,7 @@ export function ResultView({ food }: ResultViewProps) {
               </h2>
               <p className="result-done-copy">
                 {deltas && deltas.length > 0
-                  ? `Taste DNA updated. ${deltas
-                      .map(
-                        (d) =>
-                          `${labelDimension(d.dimension)} ${d.direction === "up" ? "up" : "down"}`,
-                      )
-                      .join(", ")}.`
+                  ? formatDnaChangeLine(deltas)
                   : "Got it. Your Taste DNA learned from this pick."}
               </p>
               <div className="result-done-actions">
@@ -717,6 +722,53 @@ export function ResultView({ food }: ResultViewProps) {
                 </Link>
               </p>
             </div>
+          ) : showFeedback && pendingRating ? (
+            <div className="feedback-panel" role="group" aria-label="Feedback">
+              <p className="feedback-lead">
+                {pendingRating === "nailed"
+                  ? "What hit? Tap any that fit."
+                  : "What was off? Tap any that fit."}
+              </p>
+              <ul className="feedback-chips">
+                {(pendingRating === "nailed" ? HIT_TAGS : MISS_TAGS).map(
+                  (tag) => {
+                    const selected = feedbackTags.includes(tag.id);
+                    return (
+                      <li key={tag.id}>
+                        <button
+                          type="button"
+                          className={
+                            selected
+                              ? "feedback-chip is-selected"
+                              : "feedback-chip"
+                          }
+                          aria-pressed={selected}
+                          onClick={() => toggleFeedbackTag(tag.id)}
+                        >
+                          {tag.label}
+                        </button>
+                      </li>
+                    );
+                  },
+                )}
+              </ul>
+              <div className="feedback-actions">
+                <button
+                  type="button"
+                  className="cta"
+                  onClick={() => commitFeedback(feedbackTags)}
+                >
+                  Save
+                </button>
+                <button
+                  type="button"
+                  className="text-link"
+                  onClick={() => commitFeedback([])}
+                >
+                  Skip
+                </button>
+              </div>
+            </div>
           ) : (
             <div className="reaction-dock">
               <div className="reaction-bar" role="group" aria-label="Reactions">
@@ -736,7 +788,7 @@ export function ResultView({ food }: ResultViewProps) {
                   type="button"
                   className="reaction-btn"
                   onClick={onTryAgain}
-                  disabled={adjusting}
+                  disabled={adjusting || rated}
                   aria-label="Try again"
                 >
                   <span className="reaction-icon" aria-hidden>
@@ -762,7 +814,7 @@ export function ResultView({ food }: ResultViewProps) {
                 <button
                   type="button"
                   className="text-link"
-                  onClick={() => onRate("kinda")}
+                  onClick={() => beginFeedback("kinda")}
                   disabled={rated || adjusting}
                 >
                   Kinda
@@ -775,7 +827,7 @@ export function ResultView({ food }: ResultViewProps) {
                     setWhyPanelOpen(false);
                   }}
                   aria-expanded={whyOpen}
-                  disabled={adjusting}
+                  disabled={adjusting || rated}
                 >
                   Why this?
                 </button>
@@ -787,7 +839,7 @@ export function ResultView({ food }: ResultViewProps) {
                     setWhyOpen(false);
                   }}
                   aria-expanded={whyPanelOpen}
-                  disabled={adjusting}
+                  disabled={adjusting || rated}
                 >
                   Off?
                 </button>
@@ -795,13 +847,13 @@ export function ResultView({ food }: ResultViewProps) {
             </div>
           )}
 
-          {!showDone && whyOpen ? (
+          {!showDone && !showFeedback && whyOpen ? (
             <p className="result-why" id="result-why">
               {explanation}
             </p>
           ) : null}
 
-          {!showDone && whyPanelOpen ? (
+          {!showDone && !showFeedback && whyPanelOpen ? (
             <div className="reject-panel">
               <label className="reject-label" htmlFor="reject-note">
                 What&apos;s off?

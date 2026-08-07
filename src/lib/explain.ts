@@ -65,6 +65,8 @@ function capitalize(s: string): string {
   return s.charAt(0).toUpperCase() + s.slice(1);
 }
 
+export { capitalize };
+
 /** Sanitize optional AI-polished explanation; fall back to template on violation. */
 export function sanitizeExplanation(
   text: string,

@@ -1612,6 +1612,59 @@ button {
   max-width: 32rem;
 }
 
+.feedback-panel {
+  margin-top: var(--space-4);
+  max-width: 32rem;
+  animation: rise 0.45s var(--ease) both;
+}
+
+.feedback-lead {
+  margin: 0 0 var(--space-3);
+  color: var(--paper-muted);
+  font-size: 0.95rem;
+}
+
+.feedback-chips {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.feedback-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.55rem 0.9rem;
+  background: var(--ink-soft);
+  color: var(--ink);
+  font-size: 0.85rem;
+  font-weight: 600;
+  border: 0;
+  border-radius: var(--radius-pill);
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.feedback-chip:hover,
+.feedback-chip:focus-visible {
+  background: color-mix(in srgb, var(--ink) 18%, var(--paper));
+}
+
+.feedback-chip.is-selected {
+  background: var(--ink);
+  color: var(--paper);
+}
+
+.feedback-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+  margin-top: var(--space-4);
+}
+
 .feedback-btn {
   display: inline-flex;
   align-items: center;

@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { ask, isAiConfigured, parseJsonObject, sanitizeLine } from "@/lib/ai";
+import { explainBodySchema } from "@/lib/api-schemas";
 import { CATALOG } from "@/lib/catalog";
 import { buildExplanation } from "@/lib/explain";
 import { parseAnswers } from "@/lib/validate";
@@ -53,9 +54,16 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
   }
 
-  const src = body as Record<string, unknown>;
-  const food = CATALOG.find((f) => f.id === src.foodId);
-  const answers = parseAnswers(src.answers);
+  const envelope = explainBodySchema.safeParse(body);
+  if (!envelope.success) {
+    return NextResponse.json(
+      { error: "Unknown food id or invalid answers" },
+      { status: 400 },
+    );
+  }
+
+  const food = CATALOG.find((f) => f.id === envelope.data.foodId);
+  const answers = parseAnswers(envelope.data.answers);
 
   if (!food || !answers) {
     return NextResponse.json(

@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { ask, isAiConfigured, parseJsonObject, sanitizeLine } from "@/lib/ai";
+import { adjustBodySchema } from "@/lib/api-schemas";
 import {
   ADVENTURE,
   FLAVORS,
@@ -45,9 +46,16 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
   }
 
-  const src = body as Record<string, unknown>;
-  const answers = parseAnswers(src.answers);
-  const complaint = parseNote(src.note);
+  const envelope = adjustBodySchema.safeParse(body);
+  if (!envelope.success) {
+    return NextResponse.json(
+      { error: "Invalid answers or note" },
+      { status: 400 },
+    );
+  }
+
+  const answers = parseAnswers(envelope.data.answers);
+  const complaint = parseNote(envelope.data.note);
 
   if (!answers || !complaint) {
     return NextResponse.json(

@@ -8,6 +8,10 @@ import { loadDnaForUser } from "@/lib/dna-sync";
 import { readDna } from "@/lib/dna";
 import { rank } from "@/lib/engine";
 import { QUIZ_OPTION_ICONS, QUIZ_STEP_ICONS } from "@/lib/mood-icons";
+import {
+  prefetchPlacesForFood,
+  warmGeolocation,
+} from "@/lib/places-prefetch";
 import { emptySession, writeSession } from "@/lib/session";
 import type { Answers, Intent } from "@/lib/taste-types";
 import {
@@ -224,6 +228,7 @@ export function TasteQuiz() {
         };
         setAnswers(next);
         writeDraft(next);
+        if (seededIntent === "restaurant") warmGeolocation();
       } else {
         setAnswers(draft);
       }
@@ -249,13 +254,49 @@ export function TasteQuiz() {
       clearDraft();
       const session = emptySession(finalAnswers);
       const dna = readDna();
-      const rec = rank(finalAnswers, dna, session);
-      writeSession({
-        ...session,
-        servedIds: [rec.primary.food.id],
-      });
-      router.push(`/result/${rec.primary.food.id}`);
-      void loadDnaForUser();
+
+      if (finalAnswers.intent === "restaurant") {
+        warmGeolocation();
+      }
+
+      const go = (foodId: string) => {
+        writeSession({
+          ...session,
+          servedIds: [foodId],
+        });
+        if (finalAnswers.intent === "restaurant") {
+          prefetchPlacesForFood(foodId);
+        }
+        router.push(`/result/${foodId}`);
+        void loadDnaForUser();
+      };
+
+      // Prefer server match; fall back to local slim rank if the API is down.
+      void (async () => {
+        try {
+          const res = await fetch("/api/match", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              answers: finalAnswers,
+              dna,
+              rejectedIds: session.rejectedIds,
+              servedIds: session.servedIds,
+            }),
+          });
+          if (res.ok) {
+            const data = (await res.json()) as { foodId?: string };
+            if (typeof data.foodId === "string" && data.foodId) {
+              go(data.foodId);
+              return;
+            }
+          }
+        } catch {
+          /* local fallback below */
+        }
+        const rec = rank(finalAnswers, dna, session);
+        go(rec.primary.food.id);
+      })();
     },
     [router],
   );
@@ -275,6 +316,7 @@ export function TasteQuiz() {
 
       if (current.key === "intent") {
         const intent = value as Intent;
+        if (intent === "restaurant") warmGeolocation();
         goStep(1, intent);
         return;
       }

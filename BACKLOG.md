@@ -57,16 +57,14 @@ copy under each question.
 
 ---
 
-### P0-4 · Structured feedback follow-ups
+### P0-4 · Structured feedback follow-ups · done
 **Routes:** `/result/[id]`  
 **Modules:** `dna.ts`, `ResultView`  
 **PRD:** §31–34, §82  
 
-After Nailed it: optional "What hit?" multi-select.  
-After Kinda / Nope: "What was off?" multi-select.  
-Free text optional only. Gradual DNA updates; show a short "Taste DNA changed" toast with ↑/↓ dims.
-
-**Done when:** Feedback writes dimension-level evidence beyond the current three-button nudge, and the user sees what changed.
+After Like: optional "What hit?" chips. After Kinda / Nope: "What was off?"
+chips. Skip allowed. Tags nudge specific DNA dims on top of the base rating.
+Done screen shows `Your Taste DNA changed. Spicy ↑ …`.
 
 ---
 
