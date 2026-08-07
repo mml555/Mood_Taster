@@ -12,6 +12,7 @@ import {
 } from "@/lib/favorites";
 import { persistFavorites } from "@/lib/favorites-sync";
 import type { Recipe } from "@/lib/taste-types";
+import { ICON_MD, ICON_SM, ICON_STROKE } from "@/lib/ui-icons";
 
 function difficultyLabel(minutes: number): string {
   if (minutes <= 15) return "Easy";
@@ -81,12 +82,12 @@ export function RecipeSection({
   return (
     <div className="recipe" id="recipe">
       <p className="recipe-label">
-        <ChefHat size={16} strokeWidth={1.5} aria-hidden />
+        <ChefHat size={ICON_SM} strokeWidth={ICON_STROKE} aria-hidden />
         Recipe
       </p>
       <p className="recipe-meta">
         <span>
-          <Clock size={16} strokeWidth={1.5} aria-hidden />
+          <Clock size={ICON_SM} strokeWidth={ICON_STROKE} aria-hidden />
           {recipe.timeMinutes} min
         </span>
         <span>{difficultyLabel(recipe.timeMinutes)}</span>
@@ -100,9 +101,9 @@ export function RecipeSection({
           onClick={() => void onCopy()}
         >
           {copyStatus === "copied" ? (
-            <Check size={18} strokeWidth={1.5} aria-hidden />
+            <Check size={ICON_MD} strokeWidth={ICON_STROKE} aria-hidden />
           ) : (
-            <Copy size={18} strokeWidth={1.5} aria-hidden />
+            <Copy size={ICON_MD} strokeWidth={ICON_STROKE} aria-hidden />
           )}
           {copyStatus === "copied" ? "Copied" : "Copy"}
         </button>
@@ -113,8 +114,8 @@ export function RecipeSection({
           aria-pressed={saved}
         >
           <Bookmark
-            size={18}
-            strokeWidth={1.5}
+            size={ICON_MD}
+            strokeWidth={ICON_STROKE}
             fill={saved ? "currentColor" : "none"}
             aria-hidden
           />

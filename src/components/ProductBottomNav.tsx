@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { LayoutDashboard, UserRound, Utensils } from "lucide-react";
+import { ICON_LG, ICON_STROKE } from "@/lib/ui-icons";
 
 type ProductTab = "taste" | "stats" | "profile";
 
@@ -47,7 +48,7 @@ export function ProductBottomNav({ current }: ProductBottomNavProps) {
                       : "product-bottom-nav-icon"
                   }
                 >
-                  <Icon size={22} strokeWidth={active ? 2 : 1.75} aria-hidden />
+                  <Icon size={ICON_LG} strokeWidth={ICON_STROKE} aria-hidden />
                 </span>
                 <span>{label}</span>
               </Link>

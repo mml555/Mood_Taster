@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { ChefHat, Heart, Utensils, X } from "lucide-react";
+import { Bookmark, ChefHat, Utensils, X } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { getRankFoodById } from "@/lib/catalog-data";
 import {
@@ -12,6 +12,7 @@ import {
   loadFavoritesForUser,
   persistFavorites,
 } from "@/lib/favorites-sync";
+import { ICON_MD, ICON_SM, ICON_STROKE } from "@/lib/ui-icons";
 
 type FavItem = {
   id: string;
@@ -64,7 +65,7 @@ export function FavoritesList() {
     return (
       <section className="favorites">
         <p className="eyebrow">
-          <Heart size={14} strokeWidth={1.5} aria-hidden /> Saved
+          <Bookmark size={ICON_SM} strokeWidth={ICON_STROKE} aria-hidden /> Saved
         </p>
         <h1 className="dna-title">Nothing saved yet</h1>
         <p className="dna-lede">
@@ -72,7 +73,7 @@ export function FavoritesList() {
         </p>
         <div className="result-actions">
           <Link className="cta" href="/taste?intent=recipe">
-            <Utensils size={20} strokeWidth={1.5} aria-hidden />
+            <Utensils size={ICON_MD} strokeWidth={ICON_STROKE} aria-hidden />
             Show me
           </Link>
         </div>
@@ -83,7 +84,7 @@ export function FavoritesList() {
   return (
     <section className="favorites">
       <p className="eyebrow">
-        <Heart size={14} strokeWidth={1.5} aria-hidden /> Saved
+        <Bookmark size={ICON_SM} strokeWidth={ICON_STROKE} aria-hidden /> Saved
       </p>
       <h1 className="dna-title">Favorites</h1>
       <p className="dna-lede">
@@ -98,7 +99,7 @@ export function FavoritesList() {
               </Link>
               {item.hasRecipe ? (
                 <p className="favorites-item-meta">
-                  <ChefHat size={14} strokeWidth={1.5} aria-hidden />
+                  <ChefHat size={ICON_SM} strokeWidth={ICON_STROKE} aria-hidden />
                   Recipe
                 </p>
               ) : null}
@@ -109,7 +110,7 @@ export function FavoritesList() {
               onClick={() => onUnsave(item.id)}
               aria-label={`Remove ${item.name}`}
             >
-              <X size={16} strokeWidth={1.5} aria-hidden />
+              <X size={ICON_SM} strokeWidth={ICON_STROKE} aria-hidden />
               Remove
             </button>
           </li>
@@ -117,7 +118,7 @@ export function FavoritesList() {
       </ul>
       <div className="result-actions">
         <Link className="cta" href="/taste">
-          <Utensils size={20} strokeWidth={1.5} aria-hidden />
+          <Utensils size={ICON_MD} strokeWidth={ICON_STROKE} aria-hidden />
           New craving
         </Link>
       </div>

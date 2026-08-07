@@ -2,14 +2,14 @@
 
 import Link from "next/link";
 import {
-  Beef,
-  Cookie,
+  Bookmark,
   Flame,
-  Heart,
   Pizza,
   Sparkles,
   Star,
   Utensils,
+  Beef,
+  Cookie,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import {
@@ -30,6 +30,7 @@ import { createClient, isSupabaseConfigured } from "@/lib/supabase/client";
 import { overallTasteLabel, type XpState } from "@/lib/xp";
 import { formatStreak, type StreakState } from "@/lib/streak";
 import type { DnaDimension, DnaProfile } from "@/lib/taste-types";
+import { ICON_LG, ICON_MD, ICON_STROKE } from "@/lib/ui-icons";
 
 const CRAVING_DIMS: DnaDimension[] = [
   "savory",

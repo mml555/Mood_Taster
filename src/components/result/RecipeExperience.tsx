@@ -4,13 +4,22 @@ import Image from "next/image";
 import Link from "next/link";
 import {
   ArrowLeft,
+  Bookmark,
   Send,
   Share2,
   ShoppingCart,
 } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { PressButton } from "@/components/ui/PressButton";
+import {
+  FAVORITES_KEY,
+  isFavorite,
+  readFavorites,
+  toggleFavorite,
+} from "@/lib/favorites";
+import { persistFavorites } from "@/lib/favorites-sync";
 import type { Food, Recipe } from "@/lib/taste-types";
+import { ICON_MD, ICON_SM, ICON_STROKE } from "@/lib/ui-icons";
 
 type ChatMessage = { role: "user" | "model"; text: string };
 
@@ -29,6 +38,7 @@ export function RecipeExperience({
 }) {
   const [tab, setTab] = useState<"recipe" | "chat">("recipe");
   const [shoppingList, setShoppingList] = useState<string[] | null>(null);
+  const [saved, setSaved] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
       role: "model",
@@ -40,6 +50,19 @@ export function RecipeExperience({
   const chatEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    queueMicrotask(() => setSaved(isFavorite(food.id)));
+  }, [food.id]);
+
+  useEffect(() => {
+    function onStorage(e: StorageEvent) {
+      if (e.key !== FAVORITES_KEY) return;
+      setSaved(isFavorite(food.id, readFavorites()));
+    }
+    window.addEventListener("storage", onStorage);
+    return () => window.removeEventListener("storage", onStorage);
+  }, [food.id]);
+
+  useEffect(() => {
     if (tab !== "chat") return;
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, tab]);
@@ -47,6 +70,12 @@ export function RecipeExperience({
   const createShoppingList = useCallback(() => {
     setShoppingList([...recipe.ingredients]);
   }, [recipe.ingredients]);
+
+  const onToggleSave = useCallback(() => {
+    const next = toggleFavorite(food.id);
+    setSaved(isFavorite(food.id, next));
+    void persistFavorites(next);
+  }, [food.id]);
 
   const shareList = useCallback(async () => {
     if (!shoppingList?.length) return;
@@ -68,8 +97,7 @@ export function RecipeExperience({
     const trimmed = input.trim();
     if (!trimmed || loading) return;
     const userMsg: ChatMessage = { role: "user", text: trimmed };
-    const nextHistory = [...messages, userMsg];
-    setMessages(nextHistory);
+    setMessages((prev) => [...prev, userMsg]);
     setInput("");
     setLoading(true);
     try {
@@ -112,12 +140,29 @@ export function RecipeExperience({
           className="press-btn press-btn-icon"
           aria-label="Back"
         >
-          <ArrowLeft size={20} strokeWidth={2} aria-hidden />
+          <ArrowLeft size={ICON_MD} strokeWidth={ICON_STROKE} aria-hidden />
         </Link>
         <h1 id="recipe-exp-title" className="recipe-exp-title">
           {food.name}
         </h1>
-        <span style={{ width: "2.75rem" }} aria-hidden />
+        <button
+          type="button"
+          className={
+            saved
+              ? "press-btn press-btn-icon is-saved"
+              : "press-btn press-btn-icon"
+          }
+          onClick={onToggleSave}
+          aria-pressed={saved}
+          aria-label={saved ? "Saved" : "Save recipe"}
+        >
+          <Bookmark
+            size={ICON_MD}
+            strokeWidth={ICON_STROKE}
+            fill={saved ? "currentColor" : "none"}
+            aria-hidden
+          />
+        </button>
       </div>
 
       <div className="recipe-exp-tabs" role="tablist" aria-label="Recipe views">
@@ -146,7 +191,7 @@ export function RecipeExperience({
       </div>
 
       {tab === "recipe" ? (
-        <div>
+        <div className="recipe-exp-body">
           <Image
             src={food.image}
             alt={food.imageAlt}
@@ -155,26 +200,32 @@ export function RecipeExperience({
             className="recipe-exp-image"
             priority
           />
-          <div className="recipe-exp-meta" style={{ marginTop: "1.5rem" }}>
+          <div className="recipe-exp-meta">
             <div className="recipe-exp-meta-card">
               <span className="recipe-exp-meta-label">Prep Time</span>
-              <span style={{ fontWeight: 700 }}>{recipe.timeMinutes} min</span>
+              <span className="recipe-exp-meta-value">
+                {recipe.timeMinutes} min
+              </span>
             </div>
             <div className="recipe-exp-meta-card">
               <span className="recipe-exp-meta-label">Difficulty</span>
-              <span style={{ fontWeight: 700 }}>
+              <span className="recipe-exp-meta-value">
                 {difficultyLabel(recipe.timeMinutes)}
               </span>
             </div>
           </div>
 
-          <div style={{ marginTop: "1.5rem" }}>
+          <div className="recipe-exp-block">
             <h2 className="recipe-heading">Ingredients</h2>
             {shoppingList ? (
               <div className="recipe-shopping">
                 <div className="recipe-shopping-head">
-                  <span>
-                    <ShoppingCart size={18} strokeWidth={1.5} aria-hidden />{" "}
+                  <span className="recipe-shopping-title">
+                    <ShoppingCart
+                      size={ICON_MD}
+                      strokeWidth={ICON_STROKE}
+                      aria-hidden
+                    />
                     Shopping List
                   </span>
                   <button
@@ -183,7 +234,11 @@ export function RecipeExperience({
                     onClick={() => void shareList()}
                     aria-label="Share shopping list"
                   >
-                    <Share2 size={16} strokeWidth={2} aria-hidden />
+                    <Share2
+                      size={ICON_SM}
+                      strokeWidth={ICON_STROKE}
+                      aria-hidden
+                    />
                   </button>
                 </div>
                 {shoppingList.map((item) => (
@@ -203,8 +258,8 @@ export function RecipeExperience({
                 <PressButton
                   variant="secondary"
                   fullWidth
+                  className="recipe-exp-cta"
                   onClick={createShoppingList}
-                  style={{ marginTop: "1rem" }}
                 >
                   Create Shopping List
                 </PressButton>
@@ -212,7 +267,7 @@ export function RecipeExperience({
             )}
           </div>
 
-          <div style={{ marginTop: "1.5rem" }}>
+          <div className="recipe-exp-block">
             <h2 className="recipe-heading">Steps</h2>
             <ol className="recipe-steps">
               {recipe.steps.map((step) => (
@@ -258,16 +313,12 @@ export function RecipeExperience({
             />
             <PressButton
               variant="icon"
+              className="recipe-chat-send"
               onClick={() => void send()}
               disabled={loading || !input.trim()}
               aria-label="Send"
-              style={{
-                background: "var(--ink)",
-                color: "var(--paper)",
-                border: 0,
-              }}
             >
-              <Send size={18} strokeWidth={2} aria-hidden />
+              <Send size={ICON_MD} strokeWidth={ICON_STROKE} aria-hidden />
             </PressButton>
           </div>
         </div>

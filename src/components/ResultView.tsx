@@ -884,7 +884,7 @@ export function ResultView({ food }: ResultViewProps) {
                   aria-label="Not for me"
                 >
                   <span className="reaction-icon" aria-hidden>
-                    <X size={28} strokeWidth={2} />
+                    <X size={22} strokeWidth={1.75} />
                   </span>
                 </button>
                 <button
@@ -903,7 +903,7 @@ export function ResultView({ food }: ResultViewProps) {
                   }
                 >
                   <span className="reaction-icon" aria-hidden>
-                    <Heart size={26} strokeWidth={2} fill="currentColor" />
+                    <Heart size={22} strokeWidth={1.75} fill="currentColor" />
                   </span>
                   <span className="reaction-label">
                     {intent === "restaurant"

@@ -4,7 +4,7 @@ import Link from "next/link";
 import {
   Bell,
   ChevronRight,
-  Heart,
+  Leaf,
   LogOut,
   MapPin,
   Sun,
@@ -31,6 +31,7 @@ import { clearLocalUserData } from "@/lib/local-data";
 import { createClient, isSupabaseConfigured } from "@/lib/supabase/client";
 import { useAuthSession } from "@/lib/use-auth-session";
 import type { DnaDimension, DnaProfile } from "@/lib/taste-types";
+import { ICON_MD, ICON_STROKE } from "@/lib/ui-icons";
 
 const RADAR_DIMS: DnaDimension[] = [
   "savory",
