@@ -100,3 +100,12 @@ export type Recommendation = {
 };
 
 export type Rating = "nailed" | "kinda" | "nope";
+
+/** Nearby place from /api/places. Kept out of the route module so clients do not import it. */
+export type NearbyPlace = {
+  name: string;
+  address: string;
+  rating: number | null;
+  mapsUri: string | null;
+  miles: number | null;
+};

@@ -32,7 +32,10 @@ Sign up with username, email, and password. Sign in with email or username + pas
 
 ## How recommendations work
 
-`rank(answers, dna, session)` in `src/lib/engine.ts` is a pure function:
+`rank(answers, dna, session)` in `src/lib/engine.ts` is a pure function. It
+scores against the slim `RANK_FOODS` catalog in `src/lib/catalog-data.ts`
+(no recipe bodies in the client graph). Full recipes attach on the server via
+`src/lib/catalog.ts` + `src/lib/recipes.ts`.
 
 ```
 score = 0.75 * quizMatch
@@ -72,6 +75,7 @@ Open [http://localhost:3000](http://localhost:3000).
 ```bash
 npm run build
 npm run lint
+npm test
 ```
 
 Refresh food photos (Unsplash):

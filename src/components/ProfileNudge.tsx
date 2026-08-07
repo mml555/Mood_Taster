@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { LogIn, Sparkles } from "lucide-react";
-import { useAuthSession } from "@/components/AuthSessionProvider";
+import { useAuthSession } from "@/lib/use-auth-session";
 
 type ProfileNudgeProps = {
   /** Where the nudge sits: drives the one-line pitch. */
@@ -11,12 +11,12 @@ type ProfileNudgeProps = {
 
 /**
  * Soft prompt only. Never blocks the flow. Hidden when signed in or when
- * auth is still loading / Supabase is not configured (provider reports guest).
+ * Supabase is not configured.
  */
 export function ProfileNudge({ context = "dna" }: ProfileNudgeProps) {
-  const state = useAuthSession();
+  const auth = useAuthSession();
 
-  if (state.status !== "guest") return null;
+  if (auth.status !== "guest") return null;
 
   const copy =
     context === "result"

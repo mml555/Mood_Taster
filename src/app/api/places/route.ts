@@ -2,6 +2,7 @@ import { createHash } from "node:crypto";
 import { request as httpsRequest } from "node:https";
 import { NextResponse } from "next/server";
 import { CATALOG } from "@/lib/catalog";
+import type { NearbyPlace } from "@/lib/taste-types";
 import { parseCoordinate } from "@/lib/validate";
 
 /**
@@ -109,14 +110,6 @@ type PlacesResponse = {
   }>;
 };
 
-export type NearbyPlace = {
-  name: string;
-  address: string;
-  rating: number | null;
-  mapsUri: string | null;
-  miles: number | null;
-};
-
 function milesBetween(
   aLat: number,
   aLng: number,
@@ -208,7 +201,14 @@ export async function GET(request: Request) {
       .filter((p) => p.name.length > 0)
       .slice(0, 3);
 
-    return NextResponse.json({ places });
+    return NextResponse.json(
+      { places },
+      {
+        headers: {
+          "Cache-Control": "private, max-age=60",
+        },
+      },
+    );
   } catch (err) {
     console.warn("[places] request failed", err);
     return NextResponse.json({ places: [] });

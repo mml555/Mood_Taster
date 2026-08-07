@@ -1612,6 +1612,98 @@ button {
   max-width: 32rem;
 }
 
+.feedback-panel {
+  margin-top: var(--space-4);
+  max-width: 32rem;
+  animation: rise 0.45s var(--ease) both;
+}
+
+.feedback-lead {
+  margin: 0 0 var(--space-3);
+  color: var(--paper-muted);
+  font-size: 0.95rem;
+}
+
+.feedback-chips {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.feedback-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.55rem 0.9rem;
+  background: var(--ink-soft);
+  color: var(--ink);
+  font-size: 0.85rem;
+  font-weight: 600;
+  border: 0;
+  border-radius: var(--radius-pill);
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.feedback-chip:hover,
+.feedback-chip:focus-visible {
+  background: color-mix(in srgb, var(--ink) 18%, var(--paper));
+}
+
+.feedback-chip.is-selected {
+  background: var(--ink);
+  color: var(--paper);
+}
+
+.feedback-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+  margin-top: var(--space-4);
+}
+
+.dietary-prefs {
+  margin-top: var(--space-3);
+}
+
+.dietary-section-title {
+  margin: var(--space-5) 0 var(--space-2);
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.dietary-heading {
+  margin: var(--space-4) 0 var(--space-2);
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--paper-muted);
+}
+
+.dietary-note {
+  margin: 0;
+  color: var(--paper-muted);
+  font-size: 0.9rem;
+  max-width: 28rem;
+}
+
+.dietary-saved {
+  margin: var(--space-3) 0 0;
+  color: var(--ink);
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.account-dietary {
+  margin-top: var(--space-4);
+}
+
 .feedback-btn {
   display: inline-flex;
   align-items: center;
@@ -1704,6 +1796,16 @@ button {
 
 .result-done-dna {
   margin: var(--space-4) 0 0;
+}
+
+.result-done-save {
+  margin: var(--space-3) 0 0;
+}
+
+.result-done-save .text-link {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
 }
 
 .result-done-dna a {
@@ -2061,6 +2163,36 @@ button {
   gap: var(--space-2);
 }
 
+.recipe-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  margin: 0 0 var(--space-4);
+}
+
+.recipe-actions .cta-secondary {
+  padding: 0.65rem 1.15rem;
+  font-size: 0.9rem;
+}
+
+.recipe-actions .cta-secondary.is-saved {
+  background: color-mix(in srgb, var(--ink) 14%, var(--paper));
+}
+
+.recipe-action-status {
+  margin: calc(var(--space-2) * -1) 0 var(--space-3);
+  color: var(--paper-muted);
+  font-size: 0.9rem;
+}
+
+.recipe-tip {
+  margin: 0 0 var(--space-4);
+  max-width: 40ch;
+  color: var(--paper-muted);
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
 .recipe-heading {
   margin: 0 0 var(--space-2);
   color: var(--ink);
@@ -2086,6 +2218,63 @@ button {
   margin: 0 0 var(--space-3);
   color: var(--paper-quiet);
   font-size: 0.95rem;
+}
+
+.favorites {
+  max-width: 36rem;
+}
+
+.favorites-list {
+  list-style: none;
+  margin: var(--space-5) 0 0;
+  padding: 0;
+}
+
+.favorites-item {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-3) 0;
+}
+
+.favorites-item + .favorites-item {
+  border-top: 0;
+  margin-top: var(--space-2);
+  padding-top: var(--space-4);
+}
+
+.favorites-item-main {
+  min-width: 0;
+  flex: 1;
+}
+
+.favorites-item-link {
+  color: var(--ink);
+  font-size: 1.15rem;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.favorites-item-link:hover,
+.favorites-item-link:focus-visible {
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
+
+.favorites-item-meta {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin: var(--space-2) 0 0;
+  color: var(--paper-muted);
+  font-size: 0.9rem;
+}
+
+.favorites-unsave {
+  padding: 0.55rem 1rem;
+  font-size: 0.85rem;
 }
 
 .nearby-label {
@@ -2431,12 +2620,6 @@ button {
     line-height: 1.7;
   }
 
-  /* Eight links on one wrapped line need vertical room to be tappable. */
-  .foot-meta a {
-    display: inline-block;
-    padding: 0.3rem 0;
-  }
-
   .product-main {
     max-width: 100%;
     padding: var(--space-3) var(--page-inset) var(--space-6);
@@ -2664,16 +2847,35 @@ button {
   }
 }
 
-/* --- Tablet -------------------------------------------------------------- */
+/* --- Touch, at any width -------------------------------------------------- */
 
-/* The doc links are a desktop affordance. On a tablet in portrait they crowd
-   the product links off the row, so they stay hidden until there is real
-   width to spend. The footer carries them at every size. */
-@media (max-width: 999px) {
-  .nav-docs {
-    display: none;
+/* Tablets are touch devices that never match the phone width rules, so the
+   targets that a mouse can hit at 18px tall are sized here instead. */
+@media (pointer: coarse) {
+  /* The lockup is the way back home. Give it a row, not just its glyph. */
+  .mark {
+    min-height: 2.5rem;
+  }
+
+  .top nav a.nav-primary {
+    display: inline-flex;
+    align-items: center;
+    min-height: 2.5rem;
+  }
+
+  .quiz-back {
+    min-height: 2.75rem;
+    touch-action: manipulation;
+  }
+
+  /* Eight links on one wrapped line need vertical room to be tappable. */
+  .foot-meta a {
+    display: inline-block;
+    padding: 0.3rem 0;
   }
 }
+
+/* --- Tablet -------------------------------------------------------------- */
 
 /* Between the phone rules and the full desktop grid the product surfaces are
    still one column, so let them use the width instead of centering a narrow
@@ -2681,6 +2883,27 @@ button {
 @media (min-width: 721px) and (max-width: 999px) {
   .product-main {
     max-width: 44rem;
+  }
+}
+
+/* --- Small phones ---------------------------------------------------------
+   At 320px the lockup plus four nav items overrun the row, and because the
+   body clips horizontally the last one is silently unreachable rather than
+   merely ugly. Buy the width back from the lockup and the item padding. */
+
+@media (max-width: 360px) {
+  .mark-lockup {
+    max-width: 7rem;
+  }
+
+  .top nav {
+    gap: 0.1rem;
+  }
+
+  .top nav a.nav-primary,
+  .top nav a.nav-with-icon,
+  .nav-save {
+    padding: 0 0.25rem;
   }
 }
 

@@ -1,6 +1,9 @@
 import { RANK_FOODS } from "./catalog-data";
+import type { DietaryPrefs } from "./dietary";
+import { EMPTY_DIETARY, passesHardConstraints } from "./dietary";
 import { foodDimensions } from "./dna";
 import { buildExplanation, matchedAttributes } from "./explain";
+import { favoriteIdSet } from "./favorites";
 import type {
   Adventure,
   Answers,
@@ -14,6 +17,9 @@ import type {
   Temperature,
   Texture,
 } from "./taste-types";
+
+/** Soft nudge for saved foods. Matches novelty weight so quiz still leads. */
+export const FAVORITE_BOOST = 0.05;
 
 const NEAR_FLAVOR: Record<Flavor, Flavor[]> = {
   savory: ["spicy"],
@@ -153,6 +159,7 @@ function scoreOnly(
   answers: Answers,
   dna: DnaProfile,
   ctx: ScoreContext,
+  favorites: ReadonlySet<string>,
 ): { food: RankFood; score: number } {
   const q = quizMatch(answers, food);
   const d = dnaMatch(dna, food);
@@ -160,7 +167,8 @@ function scoreOnly(
   const score =
     0.75 * q +
     0.2 * d +
-    0.05 * n -
+    0.05 * n +
+    (favorites.has(food.id) ? FAVORITE_BOOST : 0) -
     rejectionPenalty(food.id, ctx) -
     recentPenalty(food.id, ctx);
 
@@ -179,43 +187,50 @@ function withExplanation(
   };
 }
 
-function candidatePool(answers: Answers): RankFood[] {
+function candidatePool(
+  answers: Answers,
+  dietary: DietaryPrefs = EMPTY_DIETARY,
+): RankFood[] {
+  let pool: RankFood[];
   if (answers.intent === "recipe") {
-    return RANK_FOODS.filter((food) => food.hasRecipe);
+    pool = RANK_FOODS.filter((food) => food.hasRecipe);
+  } else if (answers.intent === "snack") {
+    pool = RANK_FOODS.filter((food) => food.snack === true);
+  } else {
+    pool = RANK_FOODS;
   }
-  if (answers.intent === "snack") {
-    return RANK_FOODS.filter((food) => food.snack === true);
+  return pool.filter((food) => passesHardConstraints(food, dietary));
+}
+
+export class NoDietaryMatchError extends Error {
+  constructor() {
+    super("NO_DIETARY_MATCH");
+    this.name = "NoDietaryMatchError";
   }
-  return RANK_FOODS;
 }
 
 export function rank(
   answers: Answers,
   dna: DnaProfile,
   session: SessionState,
+  dietary: DietaryPrefs = EMPTY_DIETARY,
+  favoriteIds: ReadonlySet<string> | readonly string[] = [],
 ): Recommendation {
-  const pool = candidatePool(answers);
+  const pool = candidatePool(answers, dietary);
 
-  if (pool.length < 3) {
-    throw new Error(
-      answers.intent === "snack"
-        ? "Catalog must contain at least three snack foods"
-        : answers.intent === "recipe"
-          ? "Catalog must contain at least three foods with recipes"
-          : "Catalog must contain at least three foods",
-    );
+  if (pool.length === 0) {
+    throw new NoDietaryMatchError();
   }
 
+  const favorites = favoriteIdSet(favoriteIds);
   const ctx = buildScoreContext(session);
   const scored = pool
-    .map((food) => scoreOnly(food, answers, dna, ctx))
+    .map((food) => scoreOnly(food, answers, dna, ctx, favorites))
     .sort((a, b) => {
       if (b.score !== a.score) return b.score - a.score;
       return a.food.id.localeCompare(b.food.id);
     });
 
-  // Explanations are only needed for the primary (and first alternate for
-  // reject-next UI). Building strings for every dish was pure waste.
   return {
     primary: withExplanation(scored[0], answers),
     alternates: scored.slice(1).map((s, i) =>
@@ -236,6 +251,8 @@ export function nextAfterReject(
   dna: DnaProfile,
   session: SessionState,
   currentId: string,
+  dietary: DietaryPrefs = EMPTY_DIETARY,
+  favoriteIds: ReadonlySet<string> | readonly string[] = [],
 ): ScoredFood | null {
   const withReject = {
     ...session,
@@ -243,7 +260,7 @@ export function nextAfterReject(
       ? session.rejectedIds
       : [...session.rejectedIds, currentId],
   };
-  const rec = rank(answers, dna, withReject);
+  const rec = rank(answers, dna, withReject, dietary, favoriteIds);
   if (rec.primary.food.id === currentId) {
     const alt = rec.alternates.find((s) => s.food.id !== currentId);
     return alt ?? null;

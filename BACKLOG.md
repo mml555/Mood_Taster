@@ -16,10 +16,12 @@ Tickets are ordered **P0 → P2**. Each ticket names the **live route or module*
 | — | Quiz (Eat out / Cook + 4 axes) | `/taste` |
 | — | Result + reject + rate | `/result/[id]` |
 | — | Places nearby | `/api/places` + result Eat out |
-| — | Catalog recipes | `catalog.ts` + Cook result |
+| — | Catalog recipes | `catalog.ts` + `recipes.ts` + Cook result |
+| — | Slim rank catalog | `catalog-data.ts` + `engine.ts` |
 | — | Local Taste DNA | `/dna` + `dna.ts` |
 | — | Optional accounts + DNA sync | `/signup`, `/login`, `/account`, `/api/dna` |
 | — | Deterministic rank | `engine.ts` |
+| — | Unit tests (rank / DNA) | `npm test` (vitest) |
 
 ---
 
@@ -57,26 +59,23 @@ copy under each question.
 
 ---
 
-### P0-4 · Structured feedback follow-ups
+### P0-4 · Structured feedback follow-ups · done
 **Routes:** `/result/[id]`  
 **Modules:** `dna.ts`, `ResultView`  
 **PRD:** §31–34, §82  
 
-After Nailed it: optional "What hit?" multi-select.  
-After Kinda / Nope: "What was off?" multi-select.  
-Free text optional only. Gradual DNA updates; show a short "Taste DNA changed" toast with ↑/↓ dims.
-
-**Done when:** Feedback writes dimension-level evidence beyond the current three-button nudge, and the user sees what changed.
+After Like: optional "What hit?" chips. After Kinda / Nope: "What was off?"
+chips. Skip allowed. Tags nudge specific DNA dims on top of the base rating.
+Done screen shows `Your Taste DNA changed. Spicy ↑ …`.
 
 ---
 
-### P0-5 · Dietary hard constraints
-**Routes:** `/account` (or `/profile`), quiz, `engine.ts`  
+### P0-5 · Dietary hard constraints · done
+**Routes:** `/account`, `/dna`, quiz, `engine.ts`  
 **PRD:** §26, §56, §70  
 
-Distinguish preference vs safety. Hard constraints (allergies, vegan/vegetarian, etc.) never overridden by novelty. Apply in rank as hard filters. Clear copy that restaurant data cannot guarantee allergens.
-
-**Done when:** A configured allergen/restriction never appears in primary or alternate recommendations from the catalog.
+Local diet + allergen prefs. Hard-filtered in `rank()` / `/api/match`. Empty
+pool returns a recovery screen. Copy notes menus are not medical guarantees.
 
 ---
 
@@ -143,12 +142,12 @@ UI for dietary restrictions, disliked foods, default location. Clear history. De
 
 ---
 
-### P1-5 · Favorites (soft influence)
-**Routes:** `/result/[id]`, `/dna` or `/history`  
-**Modules:** `engine.ts`  
-**PRD:** §53  
+### P1-5 · Favorites (soft influence) — shipped (foods)
+**Routes:** `/result/[id]`, `/favorites`, `/dna`  
+**Modules:** `favorites.ts`, `favorites-sync.ts`, `engine.ts`, `/api/favorites`  
+**PRD:** §18, §53  
 
-Save food / place / recipe. Soft boost in rank; never dominate. Cap influence.
+Save food (incl. recipes) locally + cloud when authed. List at `/favorites`. Soft boost `+0.05` in `rank()` (novelty-sized). Copy recipe to clipboard on cook results. Place favorites still open.
 
 **Done when:** Favorite appears in a list and slightly affects rank without locking the catalog to that food.
 

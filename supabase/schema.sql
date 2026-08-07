@@ -60,6 +60,31 @@ create policy "Taste DNA updatable by owner"
   using ((select auth.uid()) = user_id)
   with check ((select auth.uid()) = user_id);
 
+-- Saved food favorites (catalog ids, newest first)
+create table if not exists public.favorites (
+  user_id uuid primary key references auth.users (id) on delete cascade,
+  food_ids jsonb not null default '[]'::jsonb,
+  updated_at timestamptz not null default now()
+);
+
+alter table public.favorites enable row level security;
+
+drop policy if exists "Favorites readable by owner" on public.favorites;
+create policy "Favorites readable by owner"
+  on public.favorites for select
+  using ((select auth.uid()) = user_id);
+
+drop policy if exists "Favorites insertable by owner" on public.favorites;
+create policy "Favorites insertable by owner"
+  on public.favorites for insert
+  with check ((select auth.uid()) = user_id);
+
+drop policy if exists "Favorites updatable by owner" on public.favorites;
+create policy "Favorites updatable by owner"
+  on public.favorites for update
+  using ((select auth.uid()) = user_id)
+  with check ((select auth.uid()) = user_id);
+
 -- Auto-create profile from signup metadata
 create or replace function public.handle_new_user()
 returns trigger

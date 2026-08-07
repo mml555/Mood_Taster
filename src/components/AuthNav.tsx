@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { LogIn, UserRound } from "lucide-react";
-import { useAuthSession } from "@/components/AuthSessionProvider";
+import { useAuthSession } from "@/lib/use-auth-session";
 
 export function AuthNav({
   current,

@@ -116,6 +116,7 @@ Crave → Taste → Eat → Rate → Learn → Explore → Crave
 | `/taste` | Craving quiz | Shipped | Adaptive questions; snack + no-clue flows |
 | `/result/[id]` | Recommendation | Shipped | Richer restaurant cards; structured feedback |
 | `/dna` | Taste dashboard | Shipped (basic) | Pref vs experience, XP, develop-your-taste |
+| `/favorites` | Saved foods | Shipped (foods) | Place favorites later |
 | `/explore` | Quests, Quick Bites, passport | Missing | V1 after baseline |
 | `/history` | Past recommendations | Missing | V1 |
 | `/profile` or `/account` | Account / prefs | Partial (`/account`) | Dietary hard constraints, delete, defaults |
@@ -263,7 +264,7 @@ Explore page sections: today’s quest, develop your taste, Quick Bite, unexplor
 
 **History (`/history`):** Past recommendations; filters Loved / Kinda / Nope / Restaurants / Recipes / Snacks; repeat / find again.
 
-**Favorites:** Soft influence only. Favoriting pizza must not dominate every session.
+**Favorites (`/favorites`):** Save foods (including recipes) from the result. Local first; cloud when signed in. Soft influence only: `+0.05` on score (same ballpark as novelty). Favoriting pizza must not dominate every session. Place favorites not yet shipped. Cook recipes also support Copy to clipboard.
 
 ---
 
@@ -273,7 +274,7 @@ Explore page sections: today’s quest, develop your taste, Quick Bite, unexplor
 
 **Conceptual weights (tune with data):** craving ~50%, DNA ~25%, context ~10%, past feedback ~10%, novelty ~5%.
 
-**Shipped weights:** ~75% quiz, ~20% DNA, ~5% novelty, minus rejection/recent penalties.
+**Shipped weights:** ~75% quiz, ~20% DNA, ~5% novelty, plus `+0.05` favorite soft boost when saved, minus rejection/recent penalties.
 
 **Hard constraints:** allergies, dietary rules, religious dietary where supported, availability, radius. Never overridden by exploration.
 

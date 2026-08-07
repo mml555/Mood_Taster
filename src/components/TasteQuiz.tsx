@@ -6,8 +6,15 @@ import { ArrowLeft } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { loadDnaForUser } from "@/lib/dna-sync";
 import { readDna } from "@/lib/dna";
-import { rank } from "@/lib/engine";
+import { readFavorites } from "@/lib/favorites";
+import { loadFavoritesForUser } from "@/lib/favorites-sync";
+import { readDietary } from "@/lib/dietary";
+import { NoDietaryMatchError, rank } from "@/lib/engine";
 import { QUIZ_OPTION_ICONS, QUIZ_STEP_ICONS } from "@/lib/mood-icons";
+import {
+  prefetchPlacesForFood,
+  warmGeolocation,
+} from "@/lib/places-prefetch";
 import { emptySession, writeSession } from "@/lib/session";
 import type { Answers, Intent } from "@/lib/taste-types";
 import {
@@ -208,6 +215,7 @@ export function TasteQuiz() {
   const step = parseStep(searchParams.get("step"), totalSteps);
   const [answers, setAnswers] = useState<PartialAnswers>({});
   const [hydrated, setHydrated] = useState(false);
+  const [dietError, setDietError] = useState(false);
 
   useEffect(() => {
     queueMicrotask(() => {
@@ -224,6 +232,7 @@ export function TasteQuiz() {
         };
         setAnswers(next);
         writeDraft(next);
+        if (seededIntent === "restaurant") warmGeolocation();
       } else {
         setAnswers(draft);
       }
@@ -247,15 +256,71 @@ export function TasteQuiz() {
   const finish = useCallback(
     (finalAnswers: Answers) => {
       clearDraft();
+      setDietError(false);
       const session = emptySession(finalAnswers);
       const dna = readDna();
-      const rec = rank(finalAnswers, dna, session);
-      writeSession({
-        ...session,
-        servedIds: [rec.primary.food.id],
-      });
-      router.push(`/result/${rec.primary.food.id}`);
-      void loadDnaForUser();
+      const dietary = readDietary();
+
+      if (finalAnswers.intent === "restaurant") {
+        warmGeolocation();
+      }
+
+      const go = (foodId: string) => {
+        writeSession({
+          ...session,
+          servedIds: [foodId],
+        });
+        if (finalAnswers.intent === "restaurant") {
+          prefetchPlacesForFood(foodId);
+        }
+        router.push(`/result/${foodId}`);
+        void loadDnaForUser();
+      };
+
+      void (async () => {
+        const favs = await loadFavoritesForUser();
+        const favoriteIds = favs.foodIds.length
+          ? favs.foodIds
+          : readFavorites().foodIds;
+
+        try {
+          const res = await fetch("/api/match", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              answers: finalAnswers,
+              dna,
+              dietary,
+              favoriteIds,
+              rejectedIds: session.rejectedIds,
+              servedIds: session.servedIds,
+            }),
+          });
+          if (res.status === 422) {
+            setDietError(true);
+            return;
+          }
+          if (res.ok) {
+            const data = (await res.json()) as { foodId?: string };
+            if (typeof data.foodId === "string" && data.foodId) {
+              go(data.foodId);
+              return;
+            }
+          }
+        } catch {
+          /* local fallback below */
+        }
+        try {
+          const rec = rank(finalAnswers, dna, session, dietary, favoriteIds);
+          go(rec.primary.food.id);
+        } catch (err) {
+          if (err instanceof NoDietaryMatchError) {
+            setDietError(true);
+            return;
+          }
+          throw err;
+        }
+      })();
     },
     [router],
   );
@@ -275,6 +340,7 @@ export function TasteQuiz() {
 
       if (current.key === "intent") {
         const intent = value as Intent;
+        if (intent === "restaurant") warmGeolocation();
         goStep(1, intent);
         return;
       }
@@ -314,6 +380,32 @@ export function TasteQuiz() {
       router.push("/taste");
     }
   };
+
+  if (dietError) {
+    return (
+      <section className="quiz" aria-labelledby="quiz-question">
+        <h1 id="quiz-question" className="quiz-question">
+          Nothing matches
+        </h1>
+        <p className="quiz-reaction">
+          Your diet settings left no foods in this catalog. Loosen a limit, then
+          try again.
+        </p>
+        <div className="result-actions">
+          <Link className="cta" href="/dna">
+            Edit diet
+          </Link>
+          <button
+            type="button"
+            className="cta-secondary"
+            onClick={() => setDietError(false)}
+          >
+            Back to quiz
+          </button>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section className="quiz" aria-labelledby="quiz-question">

@@ -2,8 +2,9 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import dynamic from "next/dynamic";
 import { useRouter, useSearchParams } from "next/navigation";
-import { ArrowRight, ChefHat, Clock, MapPin, Search, Sparkles } from "lucide-react";
+import { ArrowRight, ChefHat, Heart, MapPin, Search, Sparkles } from "lucide-react";
 import {
   useCallback,
   useEffect,
@@ -23,80 +24,67 @@ import {
 } from "@/lib/dna";
 import { persistDna } from "@/lib/dna-sync";
 import { ProfileNudge } from "@/components/ProfileNudge";
+import type { PlacesState } from "@/components/result/NearbySection";
+import { readDietary } from "@/lib/dietary";
 import { nextAfterReject, rank } from "@/lib/engine";
+import {
+  isFavorite,
+  readFavorites,
+  toggleFavorite,
+} from "@/lib/favorites";
+import { persistFavorites } from "@/lib/favorites-sync";
+import { capitalize } from "@/lib/explain";
+import {
+  mapsSearchUrl,
+  readCachedGeo,
+  readPrefetchedPlaces,
+  writeCachedGeo,
+  writePrefetchedPlaces,
+} from "@/lib/places-prefetch";
 import {
   markRejected,
   markServed,
   readSession,
   writeSession,
 } from "@/lib/session";
-import type { NearbyPlace } from "@/app/api/places/route";
 import type {
   Answers,
+  DnaProfile,
   Food,
   Intent,
+  NearbyPlace,
   Rating,
-  Recipe,
   SessionState,
 } from "@/lib/taste-types";
+
+const RecipeSection = dynamic(
+  () =>
+    import("@/components/result/RecipeSection").then((m) => m.RecipeSection),
+  { ssr: false },
+);
+
+const NearbySection = dynamic(
+  () =>
+    import("@/components/result/NearbySection").then((m) => m.NearbySection),
+  { ssr: false },
+);
 
 type ResultViewProps = {
   food: Food;
 };
 
 const SWIPE_THRESHOLD = 80;
-const GEO_CACHE_KEY = "mood-taster-geo";
-const GEO_CACHE_MS = 10 * 60 * 1000;
-
-/** Always available, needs no key and no permission. The floor under Places. */
-function mapsSearchUrl(food: Food): string {
-  return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
-    `${food.name} restaurant`,
-  )}`;
-}
-
-function readCachedGeo(): { lat: number; lng: number } | null {
-  if (typeof window === "undefined") return null;
-  try {
-    const raw = sessionStorage.getItem(GEO_CACHE_KEY);
-    if (!raw) return null;
-    const parsed = JSON.parse(raw) as {
-      lat?: unknown;
-      lng?: unknown;
-      at?: unknown;
-    };
-    if (
-      typeof parsed.lat !== "number" ||
-      typeof parsed.lng !== "number" ||
-      typeof parsed.at !== "number"
-    ) {
-      return null;
-    }
-    if (Date.now() - parsed.at > GEO_CACHE_MS) return null;
-    return { lat: parsed.lat, lng: parsed.lng };
-  } catch {
-    return null;
-  }
-}
-
-function writeCachedGeo(lat: number, lng: number): void {
-  if (typeof window === "undefined") return;
-  try {
-    sessionStorage.setItem(
-      GEO_CACHE_KEY,
-      JSON.stringify({ lat, lng, at: Date.now() }),
-    );
-  } catch {
-    /* quota / private mode */
-  }
-}
 
 function prefersReducedMotion(): boolean {
   if (typeof window === "undefined") return false;
   return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 }
 
-type PlacesState = "locating" | "loading" | "ready" | "fallback";
+/** Seed intent on first paint so places can start without waiting on effects. */
+function readIntentSync(): Intent | null {
+  if (typeof window === "undefined") return null;
+  return readSession()?.answers.intent ?? null;
+}
 
 export function ResultView({ food }: ResultViewProps) {
   const router = useRouter();
@@ -125,7 +113,7 @@ export function ResultView({ food }: ResultViewProps) {
   const [cookTip, setCookTip] = useState<string | null>(null);
   const [places, setPlaces] = useState<NearbyPlace[]>([]);
   const [placesState, setPlacesState] = useState<PlacesState>("locating");
-  const [intent, setIntent] = useState<Intent | null>(null);
+  const [intent, setIntent] = useState<Intent | null>(readIntentSync);
 
   const [whyPanelOpen, setWhyPanelOpen] = useState(false);
   const [rejectNoteText, setRejectNoteText] = useState("");
@@ -135,6 +123,7 @@ export function ResultView({ food }: ResultViewProps) {
   const [dragging, setDragging] = useState(false);
   const [exitDir, setExitDir] = useState<"left" | "right" | null>(null);
   const [swipeHint, setSwipeHint] = useState<"like" | "nope" | null>(null);
+  const [saved, setSaved] = useState(false);
 
   // Identifies the current dish render, so a slow reply about a previous dish
   // cannot overwrite the copy for the one now on screen.
@@ -163,6 +152,7 @@ export function ResultView({ food }: ResultViewProps) {
       setSwipeHint(null);
       setDragging(false);
       setExitDir(null);
+      setSaved(isFavorite(food.id));
       busyRef.current = false;
       dragXRef.current = 0;
       if (cardRef.current) cardRef.current.style.transform = "";
@@ -237,8 +227,6 @@ export function ResultView({ food }: ResultViewProps) {
   // Places only for Go out. Cook shows the recipe. Snack and no-clue stay dish-first.
   useEffect(() => {
     if (intent !== "restaurant") {
-      setPlaces([]);
-      setPlacesState("fallback");
       return;
     }
 
@@ -252,6 +240,13 @@ export function ResultView({ food }: ResultViewProps) {
     queueMicrotask(() => {
       setPlaces([]);
       setPlacesState("locating");
+
+      const prefetched = readPrefetchedPlaces(food.id);
+      if (prefetched && prefetched.length > 0) {
+        setPlaces(prefetched);
+        setPlacesState("ready");
+        return;
+      }
 
       const cached = readCachedGeo();
       if (cached) {
@@ -311,6 +306,7 @@ export function ResultView({ food }: ResultViewProps) {
           setPlacesState("fallback");
           return;
         }
+        writePrefetchedPlaces(food.id, found);
         setPlaces(found);
         setPlacesState("ready");
       } catch {
@@ -340,7 +336,14 @@ export function ResultView({ food }: ResultViewProps) {
 
   const goToNext = useCallback(
     (session: SessionState, answers: Answers) => {
-      const next = nextAfterReject(answers, readDna(), session, food.id);
+      const next = nextAfterReject(
+        answers,
+        readDna(),
+        session,
+        food.id,
+        readDietary(),
+        readFavorites().foodIds,
+      );
       if (!next) {
         setEmptyAlts(true);
         busyRef.current = false;
@@ -354,6 +357,12 @@ export function ResultView({ food }: ResultViewProps) {
     },
     [food.id, router],
   );
+
+  const onToggleSave = useCallback(() => {
+    const next = toggleFavorite(food.id);
+    setSaved(isFavorite(food.id, next));
+    void persistFavorites(next);
+  }, [food.id]);
 
   const onReject = useCallback(() => {
     if (busyRef.current) return;
@@ -409,23 +418,6 @@ export function ResultView({ food }: ResultViewProps) {
     }
   }, [goToNext, rejectNoteText, router]);
 
-  const onRate = useCallback(
-    (rating: Rating) => {
-      const { dna: next, deltas: changes } = applyRating(
-        readDna(),
-        food,
-        rating,
-      );
-      void persistDna(next);
-      setDeltas(changes.filter((d) => d.direction !== "flat"));
-      setLastRating(rating);
-    },
-    [food],
-  );
-
-  const rated = lastRating !== null;
-  const showDone = lastRating === "nailed" || lastRating === "kinda";
-
   const animateExitThen = useCallback(
     (dir: "left" | "right", after: () => void) => {
       if (prefersReducedMotion()) {
@@ -438,29 +430,82 @@ export function ResultView({ food }: ResultViewProps) {
     [],
   );
 
+  const beginFeedback = useCallback(
+    (rating: Rating) => {
+      if (busyRef.current || lastRating !== null || pendingRating !== null) {
+        return;
+      }
+      setPendingRating(rating);
+      setFeedbackTags([]);
+      setWhyOpen(false);
+      setWhyPanelOpen(false);
+    },
+    [lastRating, pendingRating],
+  );
+
+  const commitFeedback = useCallback(
+    (tags: string[]) => {
+      const rating = pendingRating;
+      if (!rating) return;
+
+      const detail =
+        rating === "nailed"
+          ? { hit: parseHitTags(tags) }
+          : { miss: parseMissTags(tags) };
+
+      const { dna: next, deltas: changes } = applyRating(
+        readDna(),
+        food,
+        rating,
+        detail,
+      );
+      void persistDna(next);
+      setDeltas(changes.filter((d) => d.direction !== "flat"));
+      setLastRating(rating);
+      setPendingRating(null);
+      setFeedbackTags([]);
+
+      if (rating === "nope") {
+        const current = readSession();
+        if (!current) {
+          router.push("/taste");
+          return;
+        }
+        busyRef.current = true;
+        animateExitThen("left", () => {
+          goToNext(current, current.answers);
+        });
+      }
+    },
+    [animateExitThen, food, goToNext, pendingRating, router],
+  );
+
+  const rated = lastRating !== null || pendingRating !== null;
+  const showDone = lastRating === "nailed" || lastRating === "kinda";
+  const showFeedback = pendingRating !== null && lastRating === null;
+
+  const toggleFeedbackTag = useCallback((id: string) => {
+    setFeedbackTags((prev) => {
+      if (id === "everything") {
+        return prev.includes("everything") ? [] : ["everything"];
+      }
+      const withoutEverything = prev.filter((t) => t !== "everything");
+      return withoutEverything.includes(id)
+        ? withoutEverything.filter((t) => t !== id)
+        : [...withoutEverything, id];
+    });
+  }, []);
+
   const onLike = useCallback(() => {
-    if (busyRef.current || rated) return;
-    busyRef.current = true;
-    onRate("nailed");
-    busyRef.current = false;
-  }, [onRate, rated]);
+    beginFeedback("nailed");
+  }, [beginFeedback]);
 
   const onNope = useCallback(() => {
-    if (busyRef.current || rated) return;
-    const current = readSession();
-    if (!current) {
-      router.push("/taste");
-      return;
-    }
-    busyRef.current = true;
-    onRate("nope");
-    animateExitThen("left", () => {
-      goToNext(current, current.answers);
-    });
-  }, [animateExitThen, goToNext, onRate, rated, router]);
+    beginFeedback("nope");
+  }, [beginFeedback]);
 
   const onTryAgain = useCallback(() => {
-    if (busyRef.current) return;
+    if (busyRef.current || pendingRating) return;
     const current = readSession();
     if (!current) {
       router.push("/taste");
@@ -470,7 +515,7 @@ export function ResultView({ food }: ResultViewProps) {
     animateExitThen("left", () => {
       goToNext(current, current.answers);
     });
-  }, [animateExitThen, goToNext, router]);
+  }, [animateExitThen, goToNext, pendingRating, router]);
 
   const onPointerDown = useCallback(
     (e: ReactPointerEvent<HTMLDivElement>) => {
@@ -573,16 +618,20 @@ export function ResultView({ food }: ResultViewProps) {
       <p className="eyebrow">
         {showDone
           ? "Your pick"
-          : (adjustNote ??
-            (rejectNote
-              ? "Different one."
-              : intent === "recipe"
-                ? "Cook this"
-                : intent === "restaurant"
-                  ? "Go out"
-                  : intent === "snack"
-                    ? "Snack"
-                    : "Your match"))}
+          : showFeedback
+            ? pendingRating === "nailed"
+              ? "What hit?"
+              : "What was off?"
+            : (adjustNote ??
+              (rejectNote
+                ? "Different one."
+                : intent === "recipe"
+                  ? "Cook this"
+                  : intent === "restaurant"
+                    ? "Go out"
+                    : intent === "snack"
+                      ? "Snack"
+                      : "Your match"))}
       </p>
 
       <div
@@ -668,12 +717,7 @@ export function ResultView({ food }: ResultViewProps) {
               </h2>
               <p className="result-done-copy">
                 {deltas && deltas.length > 0
-                  ? `Taste DNA updated. ${deltas
-                      .map(
-                        (d) =>
-                          `${labelDimension(d.dimension)} ${d.direction === "up" ? "up" : "down"}`,
-                      )
-                      .join(", ")}.`
+                  ? formatDnaChangeLine(deltas)
                   : "Got it. Your Taste DNA learned from this pick."}
               </p>
               <div className="result-done-actions">
@@ -710,12 +754,77 @@ export function ResultView({ food }: ResultViewProps) {
                   <ArrowRight size={20} strokeWidth={1.5} aria-hidden />
                 </Link>
               </div>
+              {intent === "recipe" ? (
+                <p className="result-done-save">
+                  <button
+                    type="button"
+                    className="text-link"
+                    onClick={onToggleSave}
+                    aria-pressed={saved}
+                  >
+                    <Heart
+                      size={16}
+                      strokeWidth={1.5}
+                      aria-hidden
+                      fill={saved ? "currentColor" : "none"}
+                    />
+                    {saved ? "Saved" : "Save"}
+                  </button>
+                </p>
+              ) : null}
               <p className="result-done-dna">
                 <Link href="/dna">
                   <Sparkles size={16} strokeWidth={1.5} aria-hidden />
                   Your Taste DNA
                 </Link>
               </p>
+            </div>
+          ) : showFeedback && pendingRating ? (
+            <div className="feedback-panel" role="group" aria-label="Feedback">
+              <p className="feedback-lead">
+                {pendingRating === "nailed"
+                  ? "What hit? Tap any that fit."
+                  : "What was off? Tap any that fit."}
+              </p>
+              <ul className="feedback-chips">
+                {(pendingRating === "nailed" ? HIT_TAGS : MISS_TAGS).map(
+                  (tag) => {
+                    const selected = feedbackTags.includes(tag.id);
+                    return (
+                      <li key={tag.id}>
+                        <button
+                          type="button"
+                          className={
+                            selected
+                              ? "feedback-chip is-selected"
+                              : "feedback-chip"
+                          }
+                          aria-pressed={selected}
+                          onClick={() => toggleFeedbackTag(tag.id)}
+                        >
+                          {tag.label}
+                        </button>
+                      </li>
+                    );
+                  },
+                )}
+              </ul>
+              <div className="feedback-actions">
+                <button
+                  type="button"
+                  className="cta"
+                  onClick={() => commitFeedback(feedbackTags)}
+                >
+                  Save
+                </button>
+                <button
+                  type="button"
+                  className="text-link"
+                  onClick={() => commitFeedback([])}
+                >
+                  Skip
+                </button>
+              </div>
             </div>
           ) : (
             <div className="reaction-dock">
@@ -736,7 +845,7 @@ export function ResultView({ food }: ResultViewProps) {
                   type="button"
                   className="reaction-btn"
                   onClick={onTryAgain}
-                  disabled={adjusting}
+                  disabled={adjusting || rated}
                   aria-label="Try again"
                 >
                   <span className="reaction-icon" aria-hidden>
@@ -762,7 +871,7 @@ export function ResultView({ food }: ResultViewProps) {
                 <button
                   type="button"
                   className="text-link"
-                  onClick={() => onRate("kinda")}
+                  onClick={() => beginFeedback("kinda")}
                   disabled={rated || adjusting}
                 >
                   Kinda
@@ -775,7 +884,7 @@ export function ResultView({ food }: ResultViewProps) {
                     setWhyPanelOpen(false);
                   }}
                   aria-expanded={whyOpen}
-                  disabled={adjusting}
+                  disabled={adjusting || rated}
                 >
                   Why this?
                 </button>
@@ -787,7 +896,7 @@ export function ResultView({ food }: ResultViewProps) {
                     setWhyOpen(false);
                   }}
                   aria-expanded={whyPanelOpen}
-                  disabled={adjusting}
+                  disabled={adjusting || rated}
                 >
                   Off?
                 </button>
@@ -795,13 +904,13 @@ export function ResultView({ food }: ResultViewProps) {
             </div>
           )}
 
-          {!showDone && whyOpen ? (
+          {!showDone && !showFeedback && whyOpen ? (
             <p className="result-why" id="result-why">
               {explanation}
             </p>
           ) : null}
 
-          {!showDone && whyPanelOpen ? (
+          {!showDone && !showFeedback && whyPanelOpen ? (
             <div className="reject-panel">
               <label className="reject-label" htmlFor="reject-note">
                 What&apos;s off?
@@ -845,7 +954,12 @@ export function ResultView({ food }: ResultViewProps) {
 
           {intent === "recipe" ? (
             food.recipe ? (
-              <RecipeSection recipe={food.recipe} cookTip={cookTip} />
+              <RecipeSection
+                foodId={food.id}
+                foodName={food.name}
+                recipe={food.recipe}
+                cookTip={cookTip}
+              />
             ) : (
               <div className="recipe" id="recipe">
                 <p className="recipe-label">
@@ -888,153 +1002,6 @@ export function ResultView({ food }: ResultViewProps) {
   );
 }
 
-function RecipeSection({
-  recipe,
-  cookTip,
-}: {
-  recipe: Recipe;
-  cookTip: string | null;
-}) {
-  return (
-    <div className="recipe" id="recipe">
-      <p className="recipe-label">
-        <ChefHat size={16} strokeWidth={1.5} aria-hidden />
-        Recipe
-      </p>
-      <p className="recipe-meta">
-        <span>
-          <Clock size={16} strokeWidth={1.5} aria-hidden />
-          {recipe.timeMinutes} min
-        </span>
-        <span>{recipe.servings} servings</span>
-      </p>
-
-      {cookTip ? <p className="recipe-tip">{cookTip}</p> : null}
-
-      <h2 className="recipe-heading">Ingredients</h2>
-      <ul className="recipe-ingredients">
-        {recipe.ingredients.map((item) => (
-          <li key={item}>{item}</li>
-        ))}
-      </ul>
-
-      <h2 className="recipe-heading">Steps</h2>
-      <ol className="recipe-steps">
-        {recipe.steps.map((step) => (
-          <li key={step}>{step}</li>
-        ))}
-      </ol>
-    </div>
-  );
-}
-
-function NearbySection({
-  food,
-  places,
-  state,
-}: {
-  food: Food;
-  places: NearbyPlace[];
-  state: PlacesState;
-}) {
-  if (state === "locating" || state === "loading") {
-    return (
-      <div className="nearby">
-        <p className="nearby-label">
-          <MapPin size={16} strokeWidth={1.5} aria-hidden />
-          Nearby
-        </p>
-        <p className="nearby-status" role="status">
-          {state === "locating" ? "Finding you" : "Looking nearby"}
-        </p>
-      </div>
-    );
-  }
-
-  // One slot, two outcomes. The fallback link is why a denied location or a
-  // quota error never leaves a dead region on the page.
-  if (state !== "ready" || places.length === 0) {
-    return (
-      <div className="nearby">
-        <p className="nearby-label">
-          <MapPin size={16} strokeWidth={1.5} aria-hidden />
-          Nearby
-        </p>
-        <a
-          className="nearby-link"
-          href={mapsSearchUrl(food)}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <MapPin size={20} strokeWidth={1.5} aria-hidden />
-          Search maps for {food.name}
-        </a>
-      </div>
-    );
-  }
-
-  return (
-    <div className="nearby">
-      <p className="nearby-label">
-        <MapPin size={16} strokeWidth={1.5} aria-hidden />
-        Nearby
-      </p>
-      <ul className="nearby-list">
-        {places.map((p) => (
-          <li key={`${p.name}-${p.address}`}>
-            {p.mapsUri ? (
-              <a
-                className="nearby-place"
-                href={p.mapsUri}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <span className="nearby-place-icon" aria-hidden>
-                  <MapPin size={20} strokeWidth={1.5} />
-                </span>
-                <span className="nearby-place-body">
-                  <span className="nearby-head">
-                    <span className="nearby-name">{p.name}</span>
-                    <span className="nearby-meta">
-                      {[
-                        p.miles !== null ? `${p.miles.toFixed(1)} mi` : null,
-                        p.rating !== null ? p.rating.toFixed(1) : null,
-                      ]
-                        .filter(Boolean)
-                        .join(" / ")}
-                    </span>
-                  </span>
-                  <span className="nearby-address">{p.address}</span>
-                </span>
-              </a>
-            ) : (
-              <span className="nearby-place is-static">
-                <span className="nearby-place-icon" aria-hidden>
-                  <MapPin size={20} strokeWidth={1.5} />
-                </span>
-                <span className="nearby-place-body">
-                  <span className="nearby-head">
-                    <span className="nearby-name">{p.name}</span>
-                    <span className="nearby-meta">
-                      {[
-                        p.miles !== null ? `${p.miles.toFixed(1)} mi` : null,
-                        p.rating !== null ? p.rating.toFixed(1) : null,
-                      ]
-                        .filter(Boolean)
-                        .join(" / ")}
-                    </span>
-                  </span>
-                  <span className="nearby-address">{p.address}</span>
-                </span>
-              </span>
-            )}
-          </li>
-        ))}
-      </ul>
-    </div>
-  );
-}
-
 function applySessionView(
   food: Food,
   session: SessionState,
@@ -1042,7 +1009,13 @@ function applySessionView(
   setExplanation: (s: string) => void,
   setAttrs: (a: string[]) => void,
 ) {
-  const rec = rank(session.answers, dna, session);
+  const rec = rank(
+    session.answers,
+    dna,
+    session,
+    readDietary(),
+    readFavorites().foodIds,
+  );
   const match =
     rec.primary.food.id === food.id
       ? rec.primary
@@ -1058,6 +1031,3 @@ function applySessionView(
   setAttrs(food.flavorTags.map(capitalize).slice(0, 3));
 }
 
-function capitalize(s: string): string {
-  return s.charAt(0).toUpperCase() + s.slice(1);
-}

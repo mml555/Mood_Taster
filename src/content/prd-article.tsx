@@ -135,6 +135,9 @@ export function PrdArticle() {
             <code>/dna</code> Taste dashboard (shipped basic; target: richer DNA)
           </li>
           <li>
+            <code>/favorites</code> Saved foods (shipped; place favorites later)
+          </li>
+          <li>
             <code>/explore</code> Quests, Quick Bites, passport (missing)
           </li>
           <li>
@@ -219,7 +222,8 @@ export function PrdArticle() {
         <p>
           Conceptual target weights: craving ~50%, DNA ~25%, context ~10%, past
           feedback ~10%, novelty ~5%. Shipped today: roughly 75% quiz, 20% DNA,
-          5% novelty, minus rejection penalties.
+          5% novelty, plus a +0.05 favorite soft boost when saved, minus
+          rejection penalties.
         </p>
         <p>
           Hard constraints (allergies, dietary rules, radius) never yield to
