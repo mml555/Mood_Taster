@@ -274,19 +274,19 @@ export function AccountPanel() {
         <div className="profile-settings-list">
           <button type="button" className="profile-setting" disabled>
             <span className="profile-setting-icon" aria-hidden>
-              <Bell size={20} />
+              <Bell size={ICON_MD} strokeWidth={ICON_STROKE} />
             </span>
             <span>Notifications</span>
             <span className="profile-setting-value">Soon</span>
-            <ChevronRight size={20} className="text-indigo/30" aria-hidden />
+            <ChevronRight size={ICON_MD} strokeWidth={ICON_STROKE} aria-hidden />
           </button>
           <Link href="/dna" className="profile-setting">
             <span className="profile-setting-icon" aria-hidden>
-              <MapPin size={20} />
+              <MapPin size={ICON_MD} strokeWidth={ICON_STROKE} />
             </span>
             <span>Location Preferences</span>
             <span className="profile-setting-value">Stats</span>
-            <ChevronRight size={20} aria-hidden />
+            <ChevronRight size={ICON_MD} strokeWidth={ICON_STROKE} aria-hidden />
           </Link>
           <button
             type="button"
@@ -295,13 +295,13 @@ export function AccountPanel() {
             aria-expanded={showDiet}
           >
             <span className="profile-setting-icon" aria-hidden>
-              <Heart size={20} />
+              <Leaf size={ICON_MD} strokeWidth={ICON_STROKE} />
             </span>
             <span>Dietary Needs</span>
             <span className="profile-setting-value">
               {showDiet ? "Open" : "Edit"}
             </span>
-            <ChevronRight size={20} aria-hidden />
+            <ChevronRight size={ICON_MD} strokeWidth={ICON_STROKE} aria-hidden />
           </button>
         </div>
         {showDiet ? (
@@ -319,7 +319,7 @@ export function AccountPanel() {
           onClick={() => void onSignOut()}
           disabled={pending}
         >
-          <LogOut size={18} strokeWidth={1.5} aria-hidden />
+          <LogOut size={ICON_MD} strokeWidth={ICON_STROKE} aria-hidden />
           Sign Out
         </button>
 

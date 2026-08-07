@@ -39,6 +39,7 @@ import {
   TEXTURES,
   VIBES,
 } from "@/lib/taste-types";
+import { ICON_LG, ICON_MD, ICON_SM, ICON_STROKE } from "@/lib/ui-icons";
 
 type StepDef = {
   key: keyof Answers;
@@ -662,7 +663,7 @@ export function TasteQuiz() {
               href={fromHome ? "/" : "/taste"}
               aria-label="Back"
             >
-              <ArrowLeft size={20} strokeWidth={1.5} aria-hidden />
+              <ArrowLeft size={ICON_MD} strokeWidth={ICON_STROKE} aria-hidden />
               <span className="quiz-back-label">Back</span>
             </Link>
           ) : (
@@ -672,7 +673,7 @@ export function TasteQuiz() {
               onClick={onBack}
               aria-label="Back"
             >
-              <ArrowLeft size={20} strokeWidth={1.5} aria-hidden />
+              <ArrowLeft size={ICON_MD} strokeWidth={ICON_STROKE} aria-hidden />
               <span className="quiz-back-label">Back</span>
             </button>
           )
@@ -708,7 +709,7 @@ export function TasteQuiz() {
             <p className="quiz-category">
               {StepIcon ? (
                 <span className="quiz-category-icon" aria-hidden>
-                  <StepIcon size={14} strokeWidth={1.5} />
+                  <StepIcon size={ICON_SM} strokeWidth={ICON_STROKE} />
                 </span>
               ) : null}
               {STEP_CATEGORY[current.key]}
@@ -738,7 +739,7 @@ export function TasteQuiz() {
               >
                 {Icon ? (
                   <span className="quiz-option-icon" aria-hidden>
-                    <Icon size={24} strokeWidth={1.5} />
+                    <Icon size={ICON_LG} strokeWidth={ICON_STROKE} />
                   </span>
                 ) : null}
                 <span className="quiz-option-text">
@@ -749,7 +750,7 @@ export function TasteQuiz() {
                 </span>
                 {isSelected ? (
                   <span className="quiz-option-check" aria-hidden>
-                    <Check size={16} strokeWidth={2} />
+                    <Check size={ICON_SM} strokeWidth={ICON_STROKE} />
                   </span>
                 ) : null}
               </button>

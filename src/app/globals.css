@@ -4744,3 +4744,113 @@ button {
   font-weight: 700;
   color: var(--ink);
 }
+
+/* Nav avatar + auth slot */
+.nav-avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: var(--radius-pill);
+  border: 2px solid var(--ink);
+  background: var(--ink-soft);
+  color: var(--ink);
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+
+.nav-auth-slot {
+  display: inline-block;
+  width: 5.5rem;
+  height: 2.5rem;
+  border-radius: var(--radius-btn);
+  background: var(--ink-raised);
+}
+
+.nav-auth-slot-compact {
+  width: 2.5rem;
+}
+
+.stats-card-glyph {
+  color: var(--accent);
+}
+
+.stats-card-ink .stats-card-glyph {
+  color: var(--accent);
+}
+
+.press-btn-icon.is-saved {
+  background: color-mix(in srgb, var(--accent) 35%, #fff);
+  color: var(--ink);
+}
+
+.recipe-exp-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.recipe-exp-block {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.recipe-exp-meta {
+  margin-top: 0;
+}
+
+.recipe-exp-meta-value {
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.recipe-exp-cta {
+  margin-top: var(--space-2);
+}
+
+.recipe-shopping-title {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-weight: 700;
+}
+
+.recipe-chat-send {
+  background: var(--ink) !important;
+  color: var(--paper) !important;
+  border: 0 !important;
+  border-bottom: var(--press-depth-sm) solid var(--ink-deep) !important;
+}
+
+.recipe-exp-tabs {
+  min-height: var(--control-h);
+}
+
+.recipe-exp-tab {
+  min-height: 2.75rem;
+  padding: 0.65rem 1rem;
+}
+
+.quiz-option-icon {
+  width: 2.75rem;
+  height: 2.75rem;
+}
+
+.quiz-back {
+  width: 2.75rem;
+  height: 2.75rem;
+}
+
+.product-bottom-nav-icon {
+  width: 2.75rem;
+  height: 2.75rem;
+  padding: 0;
+}
+
+.favorites-unsave {
+  min-height: 2.5rem;
+  padding: 0.45rem 0.85rem;
+  font-size: 0.85rem;
+}

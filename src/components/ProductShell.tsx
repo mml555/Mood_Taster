@@ -39,7 +39,6 @@ function showBottomNav(pathname: string): boolean {
 
 /**
  * Product chrome: content + Taste · Stats · Profile tab bar.
- * No site header. Tabs stay mounted across soft navigations.
  */
 export function ProductShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname() || "/";

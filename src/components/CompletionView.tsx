@@ -15,6 +15,7 @@ import { clearDoneMeta, readDoneMeta } from "@/lib/done-meta";
 import { mapsSearchUrl } from "@/lib/places-prefetch";
 import { readSession } from "@/lib/session";
 import type { Food, Intent } from "@/lib/taste-types";
+import { ICON_LG, ICON_MD, ICON_STROKE } from "@/lib/ui-icons";
 
 function intentSubtitle(intent: Intent | null, food: Food): string {
   if (intent === "recipe") return food.recipe ? "Home recipe" : "Cook path";
@@ -102,7 +103,7 @@ export function CompletionView({ food }: { food: Food }) {
     <section className="completion" aria-labelledby="completion-title">
       <div className="completion-body">
         <p className="completion-mark" aria-hidden>
-          <Check size={36} strokeWidth={2} />
+          <Check size={ICON_LG} strokeWidth={ICON_STROKE} />
         </p>
         <h1 id="completion-title" className="completion-title">
           Decision made.
@@ -137,12 +138,12 @@ export function CompletionView({ food }: { food: Food }) {
             target="_blank"
             rel="noopener noreferrer"
           >
-            <cta.Icon size={20} strokeWidth={1.5} aria-hidden />
+            <cta.Icon size={ICON_MD} strokeWidth={ICON_STROKE} aria-hidden />
             {cta.label}
           </a>
         ) : (
           <Link className="cta" href={cta.href}>
-            <cta.Icon size={20} strokeWidth={1.5} aria-hidden />
+            <cta.Icon size={ICON_MD} strokeWidth={ICON_STROKE} aria-hidden />
             {cta.label}
           </Link>
         )}
@@ -151,7 +152,7 @@ export function CompletionView({ food }: { food: Food }) {
             Taste another mood
           </Link>
           <button type="button" className="cta-secondary" onClick={onShare}>
-            <Share2 size={18} strokeWidth={1.5} aria-hidden />
+            <Share2 size={ICON_MD} strokeWidth={ICON_STROKE} aria-hidden />
             {shareNote ?? "Share"}
           </button>
         </div>

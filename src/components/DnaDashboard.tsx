@@ -115,11 +115,11 @@ export function DnaDashboard() {
         </div>
         <div className="result-actions">
           <Link className="cta" href="/taste">
-            <Utensils size={20} strokeWidth={1.5} aria-hidden />
+            <Utensils size={ICON_MD} strokeWidth={ICON_STROKE} aria-hidden />
             Show me
           </Link>
           <Link className="cta-secondary" href="/favorites">
-            <Heart size={18} strokeWidth={1.5} aria-hidden />
+            <Bookmark size={ICON_MD} strokeWidth={ICON_STROKE} aria-hidden />
             Favorites
           </Link>
         </div>
@@ -151,14 +151,14 @@ export function DnaDashboard() {
 
       <div className="stats-grid">
         <div className="stats-card">
-          <Flame size={28} style={{ color: "var(--accent)" }} aria-hidden />
+          <Flame size={ICON_LG} strokeWidth={ICON_STROKE} className="stats-card-glyph" aria-hidden />
           <span className="stats-card-value">{streakDays}</span>
           <span className="stats-card-label">
             {streak && streak.count > 0 ? formatStreak(streak) : "Week Streak"}
           </span>
         </div>
         <div className="stats-card stats-card-ink">
-          <Utensils size={28} style={{ color: "var(--accent)" }} aria-hidden />
+          <Utensils size={ICON_LG} strokeWidth={ICON_STROKE} className="stats-card-glyph" aria-hidden />
           <span className="stats-card-value">{moodsTasted || DNA_DIMENSIONS.filter((d) => dna.experience[d].samples > 0).length}</span>
           <span className="stats-card-label">Moods Tasted</span>
         </div>
@@ -175,7 +175,7 @@ export function DnaDashboard() {
             return (
               <div key={dimension} className="stats-craving-row">
                 <span className="stats-craving-icon" aria-hidden>
-                  <Icon size={20} strokeWidth={1.5} />
+                  <Icon size={ICON_MD} strokeWidth={ICON_STROKE} />
                 </span>
                 <div className="stats-craving-meta">
                   <div className="stats-craving-top">
