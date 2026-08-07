@@ -93,8 +93,44 @@ function temperatureScore(answer: Temperature, food: RankFood): number {
   return 0.2;
 }
 
+function effortScore(
+  effort: Answers["cookEffort"],
+  food: RankFood,
+): number {
+  if (effort === "any" || food.recipeMinutes == null) return 0.5;
+  const t = food.recipeMinutes;
+  if (effort === "barely") {
+    if (t <= 15) return 1;
+    if (t <= 25) return 0.55;
+    if (t <= 40) return 0.2;
+    return 0.05;
+  }
+  if (effort === "fifteen") {
+    if (t <= 20) return 1;
+    if (t <= 35) return 0.5;
+    if (t <= 50) return 0.2;
+    return 0.05;
+  }
+  // "cook": open to a real project
+  if (t >= 30) return 1;
+  if (t >= 15) return 0.7;
+  return 0.45;
+}
+
 function quizMatch(answers: Answers, food: RankFood): number {
   const caresAboutTemp = answers.temperature !== "any";
+  const caresAboutEffort = answers.cookEffort !== "any";
+
+  if (caresAboutEffort) {
+    return (
+      0.28 * flavorScore(answers.flavor, food) +
+      0.22 * textureScore(answers.texture, food) +
+      0.15 * heavinessScore(answers.heaviness, food) +
+      0.12 * adventureScore(answers.adventure, food) +
+      0.23 * effortScore(answers.cookEffort, food)
+    );
+  }
+
   if (caresAboutTemp) {
     return (
       0.28 * flavorScore(answers.flavor, food) +

@@ -19,6 +19,7 @@ import { emptySession, writeSession } from "@/lib/session";
 import type { Answers, Intent } from "@/lib/taste-types";
 import {
   ADVENTURE,
+  COOK_EFFORTS,
   FLAVORS,
   HEAVINESS,
   INTENTS,
@@ -85,6 +86,17 @@ const CRAVING_STEPS: StepDef[] = [
     ],
   },
 ];
+
+const COOK_EFFORT_STEP: StepDef = {
+  key: "cookEffort",
+  question: "How much effort?",
+  reaction: "Keep it real.",
+  options: [
+    { value: "barely", label: "Barely any" },
+    { value: "fifteen", label: "About 15 min" },
+    { value: "cook", label: "I can cook" },
+  ],
+};
 
 /** Signature no-clue mode: broad pairs that map into Answers. */
 const CLUE_STEPS: StepDef[] = [
@@ -170,6 +182,13 @@ function parseStep(raw: string | null, total: number): number {
 }
 
 function isComplete(answers: PartialAnswers): answers is Answers {
+  const effortOk =
+    answers.cookEffort === "any" ||
+    (answers.cookEffort != null &&
+      COOK_EFFORTS.includes(
+        answers.cookEffort as (typeof COOK_EFFORTS)[number],
+      ));
+
   return Boolean(
     answers.intent &&
       answers.flavor &&
@@ -177,6 +196,7 @@ function isComplete(answers: PartialAnswers): answers is Answers {
       answers.heaviness &&
       answers.adventure &&
       answers.temperature &&
+      effortOk &&
       INTENTS.includes(answers.intent) &&
       FLAVORS.includes(answers.flavor) &&
       TEXTURES.includes(answers.texture) &&
@@ -202,6 +222,7 @@ function tasteHref(
 function stepsForIntent(intent: Intent | null): StepDef[] {
   if (!intent) return [INTENT_STEP, ...CRAVING_STEPS];
   if (intent === "clue") return CLUE_STEPS;
+  if (intent === "recipe") return [COOK_EFFORT_STEP, ...CRAVING_STEPS];
   return CRAVING_STEPS;
 }
 
@@ -229,6 +250,10 @@ export function TasteQuiz() {
             seededIntent === "clue"
               ? draft.temperature
               : (draft.temperature ?? "any"),
+          cookEffort:
+            seededIntent === "recipe"
+              ? draft.cookEffort
+              : (draft.cookEffort ?? "any"),
         };
         setAnswers(next);
         writeDraft(next);
@@ -330,20 +355,29 @@ export function TasteQuiz() {
       if (!current) return;
       const next: PartialAnswers = { ...answers, [current.key]: value };
 
-      // Craving path always stores temperature any unless clue set it.
-      if (current.key !== "temperature" && !next.temperature) {
-        next.temperature = seededIntent === "clue" ? undefined : "any";
-      }
-
-      setAnswers(next);
-      writeDraft(next);
-
       if (current.key === "intent") {
         const intent = value as Intent;
+        const seeded: PartialAnswers = {
+          ...next,
+          cookEffort: intent === "recipe" ? undefined : "any",
+          temperature: intent === "clue" ? undefined : "any",
+        };
+        setAnswers(seeded);
+        writeDraft(seeded);
         if (intent === "restaurant") warmGeolocation();
         goStep(1, intent);
         return;
       }
+
+      if (current.key !== "temperature" && !next.temperature) {
+        next.temperature = seededIntent === "clue" ? undefined : "any";
+      }
+      if (current.key !== "cookEffort" && !next.cookEffort) {
+        next.cookEffort = seededIntent === "recipe" ? undefined : "any";
+      }
+
+      setAnswers(next);
+      writeDraft(next);
 
       if (step < totalSteps) {
         goStep(step + 1);
@@ -353,6 +387,7 @@ export function TasteQuiz() {
       const complete: PartialAnswers = {
         ...next,
         temperature: next.temperature ?? "any",
+        cookEffort: next.cookEffort ?? "any",
       };
       if (isComplete(complete)) {
         finish(complete);

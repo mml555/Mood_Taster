@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import { DietaryPrefsEditor } from "@/components/DietaryPrefsEditor";
+import { clearLocalUserData } from "@/lib/local-data";
 import { createClient, isSupabaseConfigured } from "@/lib/supabase/client";
 
 type ProfileState = {
@@ -53,6 +54,8 @@ export function AccountPanel() {
     setPending(true);
     const supabase = createClient();
     await supabase.auth.signOut();
+    // After the session is gone, so a failed sign-out never wipes live data.
+    clearLocalUserData();
     router.push("/");
     router.refresh();
   }, [router]);

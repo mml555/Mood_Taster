@@ -2295,6 +2295,25 @@ button {
   font-size: 0.95rem;
 }
 
+.nearby-manual {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  margin: var(--space-3) 0;
+  max-width: 22rem;
+}
+
+.nearby-error {
+  margin: var(--space-2) 0 0;
+  color: var(--ink);
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.nearby-change-place {
+  margin-top: var(--space-3);
+}
+
 .nearby-link {
   display: inline-flex;
   align-items: center;

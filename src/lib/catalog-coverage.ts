@@ -28,6 +28,7 @@ function baseAnswers(intent: Intent): Answers {
     heaviness: "any",
     adventure: "curious",
     temperature: intent === "clue" ? "hot" : "any",
+    cookEffort: intent === "recipe" ? "fifteen" : "any",
   };
 }
 

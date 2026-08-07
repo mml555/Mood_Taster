@@ -12,6 +12,12 @@ import {
 import { persistFavorites } from "@/lib/favorites-sync";
 import type { Recipe } from "@/lib/taste-types";
 
+function difficultyLabel(minutes: number): string {
+  if (minutes <= 15) return "Easy";
+  if (minutes <= 35) return "Doable";
+  return "Project";
+}
+
 export function RecipeSection({
   foodId,
   foodName,
@@ -77,6 +83,7 @@ export function RecipeSection({
           <Clock size={16} strokeWidth={1.5} aria-hidden />
           {recipe.timeMinutes} min
         </span>
+        <span>{difficultyLabel(recipe.timeMinutes)}</span>
         <span>{recipe.servings} servings</span>
       </p>
 

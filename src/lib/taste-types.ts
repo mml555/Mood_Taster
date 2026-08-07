@@ -4,6 +4,7 @@ export const TEXTURES = ["crunchy", "creamy", "juicy", "soft"] as const;
 export const HEAVINESS = ["light", "medium", "filling"] as const;
 export const ADVENTURE = ["safe", "curious", "surprise"] as const;
 export const TEMPERATURES = ["hot", "cold", "any"] as const;
+export const COOK_EFFORTS = ["barely", "fifteen", "cook"] as const;
 
 export type Intent = (typeof INTENTS)[number];
 export type Flavor = (typeof FLAVORS)[number];
@@ -11,6 +12,7 @@ export type Texture = (typeof TEXTURES)[number];
 export type Heaviness = (typeof HEAVINESS)[number];
 export type Adventure = (typeof ADVENTURE)[number];
 export type Temperature = (typeof TEMPERATURES)[number];
+export type CookEffort = (typeof COOK_EFFORTS)[number];
 
 export type Recipe = {
   servings: number;
@@ -45,6 +47,8 @@ export type Food = {
  */
 export type RankFood = Omit<Food, "recipe"> & {
   hasRecipe: boolean;
+  /** Minutes when hasRecipe; used for Cook effort ranking. */
+  recipeMinutes: number | null;
 };
 
 /** Ranking / DNA helpers accept full foods or slim rank foods. */
@@ -58,6 +62,8 @@ export type Answers = {
   adventure: Adventure;
   /** "any" for standard quiz; hot/cold from no-clue mode. */
   temperature: Temperature;
+  /** Cook path only; "any" for other intents. */
+  cookEffort: CookEffort | "any";
 };
 
 export type DnaDimension =

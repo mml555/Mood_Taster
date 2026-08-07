@@ -113,6 +113,7 @@ export function ResultView({ food }: ResultViewProps) {
   const [cookTip, setCookTip] = useState<string | null>(null);
   const [places, setPlaces] = useState<NearbyPlace[]>([]);
   const [placesState, setPlacesState] = useState<PlacesState>("locating");
+  const [locationError, setLocationError] = useState<string | null>(null);
   const [intent, setIntent] = useState<Intent | null>(readIntentSync);
 
   const [whyPanelOpen, setWhyPanelOpen] = useState(false);
@@ -240,6 +241,7 @@ export function ResultView({ food }: ResultViewProps) {
     queueMicrotask(() => {
       setPlaces([]);
       setPlacesState("locating");
+      setLocationError(null);
 
       const prefetched = readPrefetchedPlaces(food.id);
       if (prefetched && prefetched.length > 0) {
@@ -320,6 +322,63 @@ export function ResultView({ food }: ResultViewProps) {
       window.clearTimeout(fallbackTimer);
     };
   }, [food, intent]);
+
+  const onSearchLocation = useCallback(
+    async (query: string) => {
+      if (!query) {
+        setPlaces([]);
+        setPlacesState("fallback");
+        setLocationError(null);
+        return;
+      }
+
+      setLocationError(null);
+      setPlacesState("loading");
+
+      try {
+        const res = await fetch(
+          `/api/places?foodId=${encodeURIComponent(food.id)}&q=${encodeURIComponent(query)}`,
+        );
+        const data = (await res.json()) as {
+          places?: NearbyPlace[];
+          geoError?: boolean;
+          lat?: number;
+          lng?: number;
+        };
+
+        if (data.geoError) {
+          setPlaces([]);
+          setPlacesState("fallback");
+          setLocationError("Could not find that place. Try another city or ZIP.");
+          return;
+        }
+
+        const found = data.places ?? [];
+        if (
+          typeof data.lat === "number" &&
+          typeof data.lng === "number"
+        ) {
+          writeCachedGeo(data.lat, data.lng);
+        }
+
+        if (found.length === 0) {
+          setPlaces([]);
+          setPlacesState("fallback");
+          setLocationError("No spots found there. Try a nearby city.");
+          return;
+        }
+
+        writePrefetchedPlaces(food.id, found);
+        setPlaces(found);
+        setPlacesState("ready");
+      } catch {
+        setPlaces([]);
+        setPlacesState("fallback");
+        setLocationError("Search failed. Check your connection and try again.");
+      }
+    },
+    [food.id],
+  );
 
   // Surface the model's summary of what it changed, once, on the next dish.
   useEffect(() => {
@@ -982,7 +1041,13 @@ export function ResultView({ food }: ResultViewProps) {
               </div>
             )
           ) : intent === "restaurant" ? (
-            <NearbySection food={food} places={places} state={placesState} />
+            <NearbySection
+              food={food}
+              places={places}
+              state={placesState}
+              onSearchLocation={(q) => void onSearchLocation(q)}
+              locationError={locationError}
+            />
           ) : null}
 
           {showDone ? <ProfileNudge context="result" /> : null}

@@ -10,6 +10,7 @@ const baseAnswers: Answers = {
   heaviness: "filling",
   adventure: "curious",
   temperature: "any",
+  cookEffort: "any",
 };
 
 function emptySession(answers: Answers = baseAnswers): SessionState {

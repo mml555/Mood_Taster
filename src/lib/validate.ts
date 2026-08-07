@@ -1,5 +1,6 @@
 import {
   ADVENTURE,
+  COOK_EFFORTS,
   FLAVORS,
   HEAVINESS,
   INTENTS,
@@ -7,6 +8,7 @@ import {
   TEXTURES,
   type Adventure,
   type Answers,
+  type CookEffort,
   type Flavor,
   type Heaviness,
   type Intent,
@@ -49,18 +51,37 @@ export function parseAnswers(raw: unknown): Answers | null {
       ? ("any" as const)
       : oneOf<Temperature>(TEMPERATURES, src.temperature);
 
+  // Older sessions omit cookEffort; treat as any.
+  const cookEffort =
+    src.cookEffort === undefined ||
+    src.cookEffort === null ||
+    src.cookEffort === "any"
+      ? ("any" as const)
+      : oneOf<CookEffort>(COOK_EFFORTS, src.cookEffort);
+
   if (
     !intent ||
     !flavor ||
     !texture ||
     !adventure ||
     !heaviness ||
-    !temperature
+    !temperature ||
+    !cookEffort
   ) {
     return null;
   }
 
-  return { intent, flavor, texture, heaviness, adventure, temperature };
+  // Recipe sessions should carry a real effort when present; tolerate any for
+  // legacy drafts so old tabs still parse.
+  return {
+    intent,
+    flavor,
+    texture,
+    heaviness,
+    adventure,
+    temperature,
+    cookEffort,
+  };
 }
 
 /**
@@ -89,4 +110,16 @@ export function parseCoordinate(
   const n = Number(raw);
   if (!Number.isFinite(n) || Math.abs(n) > limit) return null;
   return n;
+}
+
+/** City, ZIP, or short place string for manual location. */
+export function parsePlaceQuery(raw: string | null, maxLength = 80): string | null {
+  if (raw === null) return null;
+  const text = raw
+    .replace(/[\u0000-\u001F\u007F]/g, " ")
+    .replace(/[<>{}]/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
+  if (!text || text.length > maxLength) return null;
+  return text;
 }

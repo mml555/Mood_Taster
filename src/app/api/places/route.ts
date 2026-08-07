@@ -3,32 +3,21 @@ import { request as httpsRequest } from "node:https";
 import { NextResponse } from "next/server";
 import { CATALOG } from "@/lib/catalog";
 import type { NearbyPlace } from "@/lib/taste-types";
-import { parseCoordinate } from "@/lib/validate";
+import { parseCoordinate, parsePlaceQuery } from "@/lib/validate";
 
 /**
  * Nearby places serving the recommended dish, via Google Places searchText.
  *
- * The key is server side only. The client sends coordinates, never the key.
+ * Accepts lat/lng or a manual `q` (city / ZIP). Manual queries are geocoded
+ * first, then biased the same way as browser geolocation.
  *
  * Every failure returns 200 with an empty list. The result screen renders a
- * maps deep link in the same slot when this comes back empty, so a denied
- * permission, a missing key, or a quota error all degrade to a working link
- * rather than a dead region on the page.
+ * maps deep link (and a city/ZIP form) when this comes back empty.
  */
 
-const ENDPOINT = "https://places.googleapis.com/v1/places:searchText";
+const PLACES_ENDPOINT = "https://places.googleapis.com/v1/places:searchText";
+const GEOCODE_ENDPOINT = "https://maps.googleapis.com/maps/api/geocode/json";
 
-/**
- * The key carries an HTTP referrer restriction, so it is scoped to the
- * production site. Google enforces that against the `Referer` header, and a
- * server side fetch sends none, which is why an unset referrer returns
- * 403 API_KEY_HTTP_REFERRER_BLOCKED even with a valid key.
- *
- * We control this request, so we state the referrer explicitly. It names our
- * own site and satisfies the restriction the key was configured with. Local
- * development will still be blocked unless PLACES_REFERRER matches an allowed
- * pattern, which is the restriction working as intended.
- */
 function placesReferrer(): string {
   const explicit = process.env.PLACES_REFERRER;
   if (explicit) return explicit;
@@ -37,15 +26,10 @@ function placesReferrer(): string {
   return vercel ? `https://${vercel}/` : "https://mood-taster.vercel.app/";
 }
 
-/**
- * A stable short hash of the key. Enough to tell two keys apart in a log line,
- * useless for reconstructing either.
- */
 function keyFingerprint(key: string): string {
   return createHash("sha256").update(key).digest("hex").slice(0, 8);
 }
 
-// Keeping the mask tight matters: Places bills by the fields requested.
 const FIELD_MASK = [
   "places.displayName",
   "places.formattedAddress",
@@ -55,14 +39,8 @@ const FIELD_MASK = [
 ].join(",");
 
 const SEARCH_RADIUS_METRES = 8000;
-
 const REQUEST_TIMEOUT_MS = 4000;
 
-/**
- * node:https rather than fetch, so the request goes out with exactly the
- * headers set here and nothing added or normalised on the way. The referrer is
- * what satisfies this key's restriction, so it has to survive verbatim.
- */
 function postJson(
   url: string,
   headers: Record<string, string>,
@@ -100,6 +78,34 @@ function postJson(
   });
 }
 
+function getText(url: string): Promise<{ status: number; body: string }> {
+  return new Promise((resolve, reject) => {
+    const target = new URL(url);
+    const req = httpsRequest(
+      {
+        hostname: target.hostname,
+        path: target.pathname + target.search,
+        method: "GET",
+      },
+      (res) => {
+        let body = "";
+        res.setEncoding("utf8");
+        res.on("data", (chunk: string) => {
+          body += chunk;
+        });
+        res.on("end", () =>
+          resolve({ status: res.statusCode ?? 0, body }),
+        );
+      },
+    );
+    req.setTimeout(REQUEST_TIMEOUT_MS, () => {
+      req.destroy(new Error("timeout"));
+    });
+    req.on("error", reject);
+    req.end();
+  });
+}
+
 type PlacesResponse = {
   places?: Array<{
     displayName?: { text?: string };
@@ -107,6 +113,13 @@ type PlacesResponse = {
     rating?: number;
     googleMapsUri?: string;
     location?: { latitude?: number; longitude?: number };
+  }>;
+};
+
+type GeocodeResponse = {
+  status?: string;
+  results?: Array<{
+    geometry?: { location?: { lat?: number; lng?: number } };
   }>;
 };
 
@@ -129,6 +142,26 @@ function milesBetween(
   return 2 * R * Math.asin(Math.sqrt(h));
 }
 
+async function geocodeQuery(
+  query: string,
+  apiKey: string,
+): Promise<{ lat: number; lng: number } | null> {
+  const url = `${GEOCODE_ENDPOINT}?address=${encodeURIComponent(query)}&key=${encodeURIComponent(apiKey)}`;
+  try {
+    const { status, body } = await getText(url);
+    if (status !== 200) return null;
+    const parsed = JSON.parse(body) as GeocodeResponse;
+    if (parsed.status !== "OK" || !parsed.results?.[0]) return null;
+    const loc = parsed.results[0].geometry?.location;
+    if (typeof loc?.lat !== "number" || typeof loc?.lng !== "number") {
+      return null;
+    }
+    return { lat: loc.lat, lng: loc.lng };
+  } catch {
+    return null;
+  }
+}
+
 export async function GET(request: Request) {
   const apiKey = process.env.GOOGLE_PLACES_API_KEY;
   const { searchParams } = new URL(request.url);
@@ -138,18 +171,30 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: "Unknown food id" }, { status: 400 });
   }
 
-  const lat = parseCoordinate(searchParams.get("lat"), 90);
-  const lng = parseCoordinate(searchParams.get("lng"), 180);
+  let lat = parseCoordinate(searchParams.get("lat"), 90);
+  let lng = parseCoordinate(searchParams.get("lng"), 180);
+  const placeQuery = parsePlaceQuery(searchParams.get("q"));
 
-  // No key or no location is a normal state, not an error. The client already
-  // knows how to render the fallback link.
-  if (!apiKey || lat === null || lng === null) {
+  if (!apiKey) {
+    return NextResponse.json({ places: [] });
+  }
+
+  if ((lat === null || lng === null) && placeQuery) {
+    const geo = await geocodeQuery(placeQuery, apiKey);
+    if (!geo) {
+      return NextResponse.json({ places: [], geoError: true });
+    }
+    lat = geo.lat;
+    lng = geo.lng;
+  }
+
+  if (lat === null || lng === null) {
     return NextResponse.json({ places: [] });
   }
 
   try {
     const { status, body: text } = await postJson(
-      ENDPOINT,
+      PLACES_ENDPOINT,
       {
         "Content-Type": "application/json",
         "X-Goog-Api-Key": apiKey,
@@ -169,9 +214,6 @@ export async function GET(request: Request) {
     );
 
     if (status !== 200) {
-      // 403 here is almost always the key, not the request. A fingerprint tells
-      // which key is loaded, so a shell-exported key shadowing .env is still
-      // visible, without writing key material into the log.
       console.warn(
         "[places] responded %d using key fingerprint %s (length %d)",
         status,
@@ -202,7 +244,7 @@ export async function GET(request: Request) {
       .slice(0, 3);
 
     return NextResponse.json(
-      { places },
+      { places, lat, lng },
       {
         headers: {
           "Cache-Control": "private, max-age=60",

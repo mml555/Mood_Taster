@@ -79,23 +79,21 @@ pool returns a recovery screen. Copy notes menus are not medical guarantees.
 
 ---
 
-### P0-6 · Make Something practicality inputs
+### P0-6 · Make Something practicality inputs · done
 **Routes:** `/taste` (Cook), `/result/[id]`  
 **PRD:** §17–18  
 
-Add effort/time taps (barely any / ~15 min / I can cook). Prefer catalog recipes that fit. Surface time + difficulty on result. Missing-ingredient / pantry matching can wait.
-
-**Done when:** Cook path asks at least time/effort and ranks with it; result shows time clearly.
+Cook path asks effort first (Barely any / About 15 min / I can cook). Rank
+weights `recipeMinutes`. Recipe meta shows time + Easy/Doable/Project.
 
 ---
 
-### P0-7 · Manual location fallback
+### P0-7 · Manual location fallback · done
 **Routes:** `/result/[id]` (Eat out), `/api/places`  
 **PRD:** §23, §72  
 
-When geolocation denied or fails: city / ZIP search. Keep Maps deep link. Error states with recovery CTAs.
-
-**Done when:** User can get nearby results without granting browser location.
+When geo fails: city/ZIP form geocodes server-side, then Places search. Maps
+deep link remains. Change place returns to the form.
 
 ---
 

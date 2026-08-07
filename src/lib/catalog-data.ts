@@ -19,6 +19,7 @@ export const RANK_FOODS: RankFood[] = [
     imageCredit: "Chad Montano / Unsplash",
     reasonTemplate:
       "{flavor} and {texture}, and it eats {heaviness}. Hot honey does the rest.",
+    recipeMinutes: 40,
     hasRecipe: true
   },
 {
@@ -36,6 +37,7 @@ export const RANK_FOODS: RankFood[] = [
     imageCredit: "Chad Montano / Unsplash",
     reasonTemplate:
       "{flavor} with a {texture} sauce, and it eats {heaviness}.",
+    recipeMinutes: 30,
     hasRecipe: true
   },
 {
@@ -53,6 +55,7 @@ export const RANK_FOODS: RankFood[] = [
     imageCredit: "Emilio Sanchez / Unsplash",
     reasonTemplate:
       "{flavor} and {texture}, dipped and {heaviness}. A little more adventurous than a standard taco.",
+    recipeMinutes: 180,
     hasRecipe: true
   },
 {
@@ -70,6 +73,7 @@ export const RANK_FOODS: RankFood[] = [
     imageCredit: "Louis Hansel / Unsplash",
     reasonTemplate:
       "{flavor} and {texture}, and it eats {heaviness}. Clean and cold.",
+    recipeMinutes: 35,
     hasRecipe: true
   },
 {
@@ -87,6 +91,7 @@ export const RANK_FOODS: RankFood[] = [
     imageCredit: "Calum Lewis / Unsplash",
     reasonTemplate:
       "{flavor} and {texture}, and it eats {heaviness}. Safe favorite energy.",
+    recipeMinutes: 25,
     hasRecipe: true
   },
 {
@@ -105,6 +110,7 @@ export const RANK_FOODS: RankFood[] = [
     imageCredit: "Sharon McCutcheon / Unsplash",
     reasonTemplate:
       "{flavor} with a {texture} chew, and it eats {heaviness}.",
+    recipeMinutes: 90,
     hasRecipe: true
   },
 {
@@ -123,6 +129,7 @@ export const RANK_FOODS: RankFood[] = [
     imageCredit: "Charles Deluvio / Unsplash",
     reasonTemplate:
       "{flavor} and {texture}, and it eats {heaviness}. Sweet heat, no commitment.",
+    recipeMinutes: 10,
     hasRecipe: true
   },
 {
@@ -140,6 +147,7 @@ export const RANK_FOODS: RankFood[] = [
     imageCredit: "Dan Gold / Unsplash",
     reasonTemplate:
       "{flavor} and {texture}, and it eats {heaviness}. Comfort without drama.",
+    recipeMinutes: 20,
     hasRecipe: true
   },
 {
@@ -157,6 +165,7 @@ export const RANK_FOODS: RankFood[] = [
     imageCredit: "Mae Mu / Unsplash",
     reasonTemplate:
       "{flavor} and {texture}, and it eats {heaviness}. Broth does the heavy lifting.",
+    recipeMinutes: 35,
     hasRecipe: true
   },
 {
@@ -175,6 +184,7 @@ export const RANK_FOODS: RankFood[] = [
     imageCredit: "Joseph Gonzalez / Unsplash",
     reasonTemplate:
       "{flavor} and {texture}, and it eats {heaviness}.",
+    recipeMinutes: 10,
     hasRecipe: true
   },
 {
@@ -192,6 +202,7 @@ export const RANK_FOODS: RankFood[] = [
     imageCredit: "Eiliv Aceron / Unsplash",
     reasonTemplate:
       "{flavor} and {texture}, and it eats {heaviness}. Sticky heat.",
+    recipeMinutes: 50,
     hasRecipe: true
   },
 {
@@ -210,6 +221,7 @@ export const RANK_FOODS: RankFood[] = [
     imageCredit: "Jennifer Pallian / Unsplash",
     reasonTemplate:
       "{flavor} and {texture}, and it eats {heaviness}.",
+    recipeMinutes: 10,
     hasRecipe: true
   },
 {
@@ -228,6 +240,7 @@ export const RANK_FOODS: RankFood[] = [
     imageCredit: "Alex Lvrs / Unsplash",
     reasonTemplate:
       "{flavor} and {texture}, and it eats {heaviness}.",
+    recipeMinutes: 30,
     hasRecipe: true
   },
 {
@@ -245,6 +258,7 @@ export const RANK_FOODS: RankFood[] = [
     imageCredit: "Farhad Ibrahimzade / Unsplash",
     reasonTemplate:
       "{flavor} and {texture}, and it eats {heaviness}. Bright and a little wild.",
+    recipeMinutes: 45,
     hasRecipe: true
   },
 {
@@ -262,6 +276,7 @@ export const RANK_FOODS: RankFood[] = [
     imageCredit: "Nathan Dumlao / Unsplash",
     reasonTemplate:
       "{flavor} and {texture}, and it eats {heaviness}. The safe call.",
+    recipeMinutes: 45,
     hasRecipe: true
   },
 {
@@ -279,6 +294,7 @@ export const RANK_FOODS: RankFood[] = [
     imageCredit: "Alan Hardman / Unsplash",
     reasonTemplate:
       "{flavor} and {texture}, and it eats {heaviness}.",
+    recipeMinutes: 40,
     hasRecipe: true
   },
 {
@@ -296,6 +312,7 @@ export const RANK_FOODS: RankFood[] = [
     imageCredit: "Marissa Grootes / Unsplash",
     reasonTemplate:
       "{flavor} and {texture}, and it eats {heaviness}. Coconut heat.",
+    recipeMinutes: 35,
     hasRecipe: true
   },
 {
@@ -314,6 +331,7 @@ export const RANK_FOODS: RankFood[] = [
     imageCredit: "Ian Dooley / Unsplash",
     reasonTemplate:
       "{flavor} and {texture}, and it eats {heaviness}.",
+    recipeMinutes: 15,
     hasRecipe: true
   },
 {
@@ -331,6 +349,7 @@ export const RANK_FOODS: RankFood[] = [
     imageCredit: "Toa Heftiba / Unsplash",
     reasonTemplate:
       "{flavor} and {texture}, and it eats {heaviness}.",
+    recipeMinutes: 30,
     hasRecipe: true
   },
 {
@@ -348,6 +367,7 @@ export const RANK_FOODS: RankFood[] = [
     imageCredit: "Charles Deluvio / Unsplash",
     reasonTemplate:
       "{flavor} and {texture}, and it eats {heaviness}.",
+    recipeMinutes: 90,
     hasRecipe: true
   },
 {
@@ -366,6 +386,7 @@ export const RANK_FOODS: RankFood[] = [
     imageCredit: "Louis Hansel / Unsplash",
     reasonTemplate:
       "{flavor} and {texture}, and it eats {heaviness}.",
+    recipeMinutes: 15,
     hasRecipe: true
   },
 {
@@ -384,6 +405,7 @@ export const RANK_FOODS: RankFood[] = [
     imageCredit: "Amirali Mirhashemian / Unsplash",
     reasonTemplate:
       "{flavor} and {texture}, and it eats {heaviness}.",
+    recipeMinutes: 20,
     hasRecipe: true
   },
 {
@@ -402,6 +424,7 @@ export const RANK_FOODS: RankFood[] = [
     imageCredit: "Ash Edmonds / Unsplash",
     reasonTemplate:
       "{flavor} and {texture}, and it eats {heaviness}. A sip, not a meal.",
+    recipeMinutes: 5,
     hasRecipe: true
   },
 {
@@ -419,6 +442,7 @@ export const RANK_FOODS: RankFood[] = [
     imageCredit: "Anh Nguyen / Unsplash",
     reasonTemplate:
       "{flavor} and {texture}, and it eats {heaviness}.",
+    recipeMinutes: 50,
     hasRecipe: true
   },
 {
@@ -437,6 +461,7 @@ export const RANK_FOODS: RankFood[] = [
     imageCredit: "Fernando Andrade / Unsplash",
     reasonTemplate:
       "{flavor} and {texture}, and it eats {heaviness}.",
+    recipeMinutes: 35,
     hasRecipe: true
   },
 {
@@ -454,6 +479,7 @@ export const RANK_FOODS: RankFood[] = [
     imageCredit: "Zyanya Citrón / Unsplash",
     reasonTemplate:
       "{flavor} and {texture}, and it eats {heaviness}. Clean and precise.",
+    recipeMinutes: 15,
     hasRecipe: true
   },
 {
@@ -471,6 +497,7 @@ export const RANK_FOODS: RankFood[] = [
     imageCredit: "Chad Montano / Unsplash",
     reasonTemplate:
       "{flavor} and {texture}, and it eats {heaviness}.",
+    recipeMinutes: 40,
     hasRecipe: true
   },
 {
@@ -489,6 +516,7 @@ export const RANK_FOODS: RankFood[] = [
     imageCredit: "Alex Lvrs / Unsplash",
     reasonTemplate:
       "{flavor} and {texture}, and it eats {heaviness}.",
+    recipeMinutes: 20,
     hasRecipe: true
   },
 {
@@ -506,6 +534,7 @@ export const RANK_FOODS: RankFood[] = [
     imageCredit: "Marissa Grootes / Unsplash",
     reasonTemplate:
       "{flavor} and {texture}, and it eats {heaviness}.",
+    recipeMinutes: 30,
     hasRecipe: true
   },
 {
@@ -524,6 +553,7 @@ export const RANK_FOODS: RankFood[] = [
     imageCredit: "Nathan Dumlao / Unsplash",
     reasonTemplate:
       "{flavor} and {texture}, and it eats {heaviness}. Hot on cold.",
+    recipeMinutes: 5,
     hasRecipe: true
   }
 ];
