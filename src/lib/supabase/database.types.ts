@@ -14,6 +14,7 @@ export type Database = {
           id: string;
           username: string;
           display_name: string | null;
+          dietary: Json;
           created_at: string;
           updated_at: string;
         };
@@ -21,6 +22,7 @@ export type Database = {
           id: string;
           username: string;
           display_name?: string | null;
+          dietary?: Json;
           created_at?: string;
           updated_at?: string;
         };
@@ -28,6 +30,7 @@ export type Database = {
           id?: string;
           username?: string;
           display_name?: string | null;
+          dietary?: Json;
           created_at?: string;
           updated_at?: string;
         };
@@ -66,6 +69,39 @@ export type Database = {
           user_id?: string;
           food_ids?: Json;
           updated_at?: string;
+        };
+        Relationships: [];
+      };
+      recommendation_history: {
+        Row: {
+          id: string;
+          user_id: string;
+          food_id: string;
+          intent: string;
+          rating: string | null;
+          answers: Json | null;
+          place: Json | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          food_id: string;
+          intent: string;
+          rating?: string | null;
+          answers?: Json | null;
+          place?: Json | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          food_id?: string;
+          intent?: string;
+          rating?: string | null;
+          answers?: Json | null;
+          place?: Json | null;
+          created_at?: string;
         };
         Relationships: [];
       };

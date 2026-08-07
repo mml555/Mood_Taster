@@ -2,21 +2,26 @@ import { createHash } from "node:crypto";
 import { request as httpsRequest } from "node:https";
 import { NextResponse } from "next/server";
 import { CATALOG } from "@/lib/catalog";
-import type { NearbyPlace } from "@/lib/taste-types";
+import { geocodePlaceQuery } from "@/lib/geocode";
+import {
+  openNowFromHours,
+  priceFromLevel,
+  selectLabeledPlaces,
+  type PlaceCandidate,
+} from "@/lib/places-rank";
 import { parseCoordinate, parsePlaceQuery } from "@/lib/validate";
 
 /**
  * Nearby places serving the recommended dish, via Google Places searchText.
  *
- * Accepts lat/lng or a manual `q` (city / ZIP). Manual queries are geocoded
- * first, then biased the same way as browser geolocation.
+ * Accepts lat/lng or a manual `q` / `location` (city / ZIP). Manual queries
+ * are geocoded first, then biased the same way as browser geolocation.
  *
  * Every failure returns 200 with an empty list. The result screen renders a
  * maps deep link (and a city/ZIP form) when this comes back empty.
  */
 
 const PLACES_ENDPOINT = "https://places.googleapis.com/v1/places:searchText";
-const GEOCODE_ENDPOINT = "https://maps.googleapis.com/maps/api/geocode/json";
 
 function placesReferrer(): string {
   const explicit = process.env.PLACES_REFERRER;
@@ -36,10 +41,14 @@ const FIELD_MASK = [
   "places.rating",
   "places.googleMapsUri",
   "places.location",
+  "places.priceLevel",
+  "places.currentOpeningHours.openNow",
 ].join(",");
 
 const SEARCH_RADIUS_METRES = 8000;
 const REQUEST_TIMEOUT_MS = 4000;
+/** Fetch a wider pool, then label up to 3 (Best / Closest / Wildcard). */
+const SEARCH_POOL_SIZE = 10;
 
 function postJson(
   url: string,
@@ -78,34 +87,6 @@ function postJson(
   });
 }
 
-function getText(url: string): Promise<{ status: number; body: string }> {
-  return new Promise((resolve, reject) => {
-    const target = new URL(url);
-    const req = httpsRequest(
-      {
-        hostname: target.hostname,
-        path: target.pathname + target.search,
-        method: "GET",
-      },
-      (res) => {
-        let body = "";
-        res.setEncoding("utf8");
-        res.on("data", (chunk: string) => {
-          body += chunk;
-        });
-        res.on("end", () =>
-          resolve({ status: res.statusCode ?? 0, body }),
-        );
-      },
-    );
-    req.setTimeout(REQUEST_TIMEOUT_MS, () => {
-      req.destroy(new Error("timeout"));
-    });
-    req.on("error", reject);
-    req.end();
-  });
-}
-
 type PlacesResponse = {
   places?: Array<{
     displayName?: { text?: string };
@@ -113,13 +94,8 @@ type PlacesResponse = {
     rating?: number;
     googleMapsUri?: string;
     location?: { latitude?: number; longitude?: number };
-  }>;
-};
-
-type GeocodeResponse = {
-  status?: string;
-  results?: Array<{
-    geometry?: { location?: { lat?: number; lng?: number } };
+    priceLevel?: string;
+    currentOpeningHours?: { openNow?: boolean };
   }>;
 };
 
@@ -142,26 +118,6 @@ function milesBetween(
   return 2 * R * Math.asin(Math.sqrt(h));
 }
 
-async function geocodeQuery(
-  query: string,
-  apiKey: string,
-): Promise<{ lat: number; lng: number } | null> {
-  const url = `${GEOCODE_ENDPOINT}?address=${encodeURIComponent(query)}&key=${encodeURIComponent(apiKey)}`;
-  try {
-    const { status, body } = await getText(url);
-    if (status !== 200) return null;
-    const parsed = JSON.parse(body) as GeocodeResponse;
-    if (parsed.status !== "OK" || !parsed.results?.[0]) return null;
-    const loc = parsed.results[0].geometry?.location;
-    if (typeof loc?.lat !== "number" || typeof loc?.lng !== "number") {
-      return null;
-    }
-    return { lat: loc.lat, lng: loc.lng };
-  } catch {
-    return null;
-  }
-}
-
 export async function GET(request: Request) {
   const apiKey = process.env.GOOGLE_PLACES_API_KEY;
   const { searchParams } = new URL(request.url);
@@ -171,16 +127,20 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: "Unknown food id" }, { status: 400 });
   }
 
+  // Location resolution (lat/lng or city/ZIP). Keep this block at the top so
+  // fieldMask / place mapping changes elsewhere can merge cleanly.
   let lat = parseCoordinate(searchParams.get("lat"), 90);
   let lng = parseCoordinate(searchParams.get("lng"), 180);
-  const placeQuery = parsePlaceQuery(searchParams.get("q"));
+  const placeQuery =
+    parsePlaceQuery(searchParams.get("q")) ??
+    parsePlaceQuery(searchParams.get("location"));
 
   if (!apiKey) {
     return NextResponse.json({ places: [] });
   }
 
   if ((lat === null || lng === null) && placeQuery) {
-    const geo = await geocodeQuery(placeQuery, apiKey);
+    const geo = await geocodePlaceQuery(placeQuery, apiKey);
     if (!geo) {
       return NextResponse.json({ places: [], geoError: true });
     }
@@ -209,7 +169,7 @@ export async function GET(request: Request) {
             radius: SEARCH_RADIUS_METRES,
           },
         },
-        maxResultCount: 3,
+        maxResultCount: SEARCH_POOL_SIZE,
       },
     );
 
@@ -225,23 +185,24 @@ export async function GET(request: Request) {
 
     const body = JSON.parse(text) as PlacesResponse;
 
-    const places: NearbyPlace[] = (body.places ?? [])
-      .map((p) => {
-        const pLat = p.location?.latitude;
-        const pLng = p.location?.longitude;
-        return {
-          name: p.displayName?.text ?? "",
-          address: p.formattedAddress ?? "",
-          rating: typeof p.rating === "number" ? p.rating : null,
-          mapsUri: p.googleMapsUri ?? null,
-          miles:
-            typeof pLat === "number" && typeof pLng === "number"
-              ? milesBetween(lat, lng, pLat, pLng)
-              : null,
-        };
-      })
-      .filter((p) => p.name.length > 0)
-      .slice(0, 3);
+    const candidates: PlaceCandidate[] = (body.places ?? []).map((p) => {
+      const pLat = p.location?.latitude;
+      const pLng = p.location?.longitude;
+      return {
+        name: p.displayName?.text ?? "",
+        address: p.formattedAddress ?? "",
+        rating: typeof p.rating === "number" ? p.rating : null,
+        mapsUri: p.googleMapsUri ?? null,
+        miles:
+          typeof pLat === "number" && typeof pLng === "number"
+            ? milesBetween(lat, lng, pLat, pLng)
+            : null,
+        price: priceFromLevel(p.priceLevel),
+        openNow: openNowFromHours(p.currentOpeningHours),
+      };
+    });
+
+    const places = selectLabeledPlaces(candidates);
 
     return NextResponse.json(
       { places, lat, lng },

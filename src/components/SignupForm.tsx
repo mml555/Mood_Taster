@@ -3,9 +3,11 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { FormEvent, useState } from "react";
-import { signupSchema } from "@/lib/auth-schema";
-import { createClient, isSupabaseConfigured } from "@/lib/supabase/client";
 import { loadDnaForUser } from "@/lib/dna-sync";
+import { loadDietaryForUser } from "@/lib/dietary-sync";
+import { loadFavoritesForUser } from "@/lib/favorites-sync";
+import { createClient, isSupabaseConfigured } from "@/lib/supabase/client";
+import { signupSchema } from "@/lib/auth-schema";
 
 export function SignupForm() {
   const router = useRouter();
@@ -76,7 +78,11 @@ export function SignupForm() {
         updated_at: new Date().toISOString(),
       });
 
-      await loadDnaForUser();
+      await Promise.all([
+        loadDnaForUser(),
+        loadDietaryForUser(),
+        loadFavoritesForUser(),
+      ]);
       router.push("/account");
       router.refresh();
     } catch (err) {

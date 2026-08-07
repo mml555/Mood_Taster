@@ -3,9 +3,12 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { FormEvent, useState } from "react";
-import { loginSchema } from "@/lib/auth-schema";
-import { isSupabaseConfigured } from "@/lib/supabase/client";
 import { loadDnaForUser } from "@/lib/dna-sync";
+import { loadHistoryForUser } from "@/lib/history-sync";
+import { isSupabaseConfigured } from "@/lib/supabase/client";
+import { loginSchema } from "@/lib/auth-schema";
+import { loadDietaryForUser } from "@/lib/dietary-sync";
+import { loadFavoritesForUser } from "@/lib/favorites-sync";
 
 export function LoginForm() {
   const router = useRouter();
@@ -60,7 +63,11 @@ export function LoginForm() {
         return;
       }
 
-      await loadDnaForUser();
+      await Promise.all([
+        loadDnaForUser(),
+        loadDietaryForUser(),
+        loadFavoritesForUser(),
+      ]);
       router.push("/account");
       router.refresh();
     } catch (err) {

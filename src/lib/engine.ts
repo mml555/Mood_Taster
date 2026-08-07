@@ -1,7 +1,7 @@
 import { RANK_FOODS } from "./catalog-data";
 import type { DietaryPrefs } from "./dietary";
 import { EMPTY_DIETARY, passesHardConstraints } from "./dietary";
-import { foodDimensions } from "./dna";
+import { effectiveEntry, foodDimensions } from "./dna";
 import { buildExplanation, matchedAttributes } from "./explain";
 import { favoriteIdSet } from "./favorites";
 import type {
@@ -152,12 +152,15 @@ function dnaMatch(dna: DnaProfile, food: RankFood): number {
   const dims = foodDimensions(food);
   if (dims.length === 0) return 0.5;
 
-  const withSamples = dims.filter((d) => dna[d].samples > 0);
+  const withSamples = dims.filter((d) => {
+    const entry = effectiveEntry(dna, d);
+    return entry.samples > 0;
+  });
   if (withSamples.length === 0) return 0.5;
 
   const mean =
     withSamples.reduce((sum, d) => {
-      const entry = dna[d];
+      const entry = effectiveEntry(dna, d);
       const effective = 0.5 + (entry.score - 0.5) * entry.confidence;
       return sum + effective;
     }, 0) / withSamples.length;

@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { parseDnaProfile } from "@/lib/auth-schema";
-import { createNeutralDna } from "@/lib/dna";
+import { createNeutralDna, normalizeDna } from "@/lib/dna";
 import { isSupabaseConfigured } from "@/lib/supabase/client";
 import { createClient } from "@/lib/supabase/server";
 
@@ -45,10 +45,11 @@ export async function GET() {
       return NextResponse.json({ empty: true, profile: createNeutralDna() });
     }
 
+    // parseDnaProfile upgrades flat v1 JSONB to prefs/experience v2.
     const profile = parseDnaProfile(data.profile) ?? createNeutralDna();
     return NextResponse.json({
       empty: false,
-      profile,
+      profile: normalizeDna(profile),
       updatedAt: data.updated_at,
     });
   } catch (err) {
@@ -76,13 +77,16 @@ export async function PUT(request: Request) {
     }
 
     const body = (await request.json()) as { profile?: unknown };
-    const profile = parseDnaProfile(body.profile);
-    if (!profile) {
+    const parsed = parseDnaProfile(body.profile);
+    if (!parsed) {
       return NextResponse.json(
         { error: "Invalid Taste DNA payload" },
         { status: 400 },
       );
     }
+
+    // Always persist v2 so cloud rows upgrade on next save.
+    const profile = normalizeDna(parsed);
 
     const { error } = await supabase.from("taste_dna").upsert(
       {

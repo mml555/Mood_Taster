@@ -85,7 +85,24 @@ export type DnaEntry = {
   samples: number;
 };
 
-export type DnaProfile = Record<DnaDimension, DnaEntry>;
+/** One score axis across all sensory dimensions. */
+export type DnaBucket = Record<DnaDimension, DnaEntry>;
+
+/**
+ * Taste DNA v2: stated preference vs lived experience.
+ * Prefer reading via dna helpers (`normalizeDna`, `effectiveEntry`).
+ * Legacy flat `Record<DnaDimension, DnaEntry>` still loads via migration.
+ */
+export type DnaProfile = {
+  version: 2;
+  /** Stated taste from quiz answers. */
+  prefs: DnaBucket;
+  /** Lived taste from ratings and repeats. */
+  experience: DnaBucket;
+};
+
+/** Pre-v2 localStorage / cloud shape (ratings mixed into one score). */
+export type DnaProfileV1 = Record<DnaDimension, DnaEntry>;
 
 export type SessionState = {
   answers: Answers;
@@ -107,6 +124,9 @@ export type Recommendation = {
 
 export type Rating = "nailed" | "kinda" | "nope";
 
+/** Role on a labeled restaurant card (Best match / Closest / Wildcard). */
+export type PlaceLabel = "best" | "closest" | "wildcard";
+
 /** Nearby place from /api/places. Kept out of the route module so clients do not import it. */
 export type NearbyPlace = {
   name: string;
@@ -114,4 +134,10 @@ export type NearbyPlace = {
   rating: number | null;
   mapsUri: string | null;
   miles: number | null;
+  /** Display price: $, $$, $$$, $$$$, or Free when API provides priceLevel. */
+  price: string | null;
+  /** Whether open now when currentOpeningHours is present; null if unknown. */
+  openNow: boolean | null;
+  /** Selection role; null for legacy/cached payloads without labels. */
+  label: PlaceLabel | null;
 };

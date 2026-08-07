@@ -1704,6 +1704,27 @@ button {
   margin-top: var(--space-4);
 }
 
+.account-delete {
+  margin-top: var(--space-6);
+  padding-top: var(--space-5);
+}
+
+.account-delete-confirm {
+  margin-top: var(--space-3);
+}
+
+.account-delete-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+  margin-top: var(--space-3);
+}
+
+.account-delete-actions .reject-btn {
+  margin-top: 0;
+}
+
 .feedback-btn {
   display: inline-flex;
   align-items: center;
@@ -2367,6 +2388,20 @@ button {
   flex: 1;
 }
 
+.nearby-role {
+  display: block;
+  margin: 0 0 var(--space-1);
+  color: var(--paper-muted);
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.nearby-role.is-best {
+  color: var(--ink);
+}
+
 .nearby-head {
   display: flex;
   align-items: baseline;
@@ -2398,6 +2433,16 @@ button {
   margin-top: var(--space-1);
   color: var(--paper-quiet);
   font-size: 0.9rem;
+}
+
+.nearby-directions {
+  display: block;
+  margin-top: var(--space-2);
+  color: var(--ink);
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
 }
 
 .reject-panel {

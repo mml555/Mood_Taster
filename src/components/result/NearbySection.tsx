@@ -2,10 +2,67 @@
 
 import { MapPin } from "lucide-react";
 import { useState, type FormEvent } from "react";
+import { PLACE_LABEL_COPY } from "@/lib/places-rank";
 import { mapsSearchUrl } from "@/lib/places-prefetch";
 import type { Food, NearbyPlace } from "@/lib/taste-types";
 
 export type PlacesState = "locating" | "loading" | "ready" | "fallback";
+
+function placeMeta(p: NearbyPlace): string {
+  return [
+    p.miles !== null ? `${p.miles.toFixed(1)} mi` : null,
+    p.rating !== null ? p.rating.toFixed(1) : null,
+    p.price,
+    p.openNow === true ? "Open" : p.openNow === false ? "Closed" : null,
+  ]
+    .filter(Boolean)
+    .join(" · ");
+}
+
+function PlaceCard({ place }: { place: NearbyPlace }) {
+  const label = place.label ? PLACE_LABEL_COPY[place.label] : null;
+  const meta = placeMeta(place);
+
+  const body = (
+    <>
+      <span className="nearby-place-icon" aria-hidden>
+        <MapPin size={20} strokeWidth={1.5} />
+      </span>
+      <span className="nearby-place-body">
+        {label ? (
+          <span
+            className={`nearby-role${place.label === "best" ? " is-best" : ""}`}
+          >
+            {label}
+          </span>
+        ) : null}
+        <span className="nearby-head">
+          <span className="nearby-name">{place.name}</span>
+          {meta ? <span className="nearby-meta">{meta}</span> : null}
+        </span>
+        <span className="nearby-address">{place.address}</span>
+        {place.mapsUri ? (
+          <span className="nearby-directions">Directions</span>
+        ) : null}
+      </span>
+    </>
+  );
+
+  if (place.mapsUri) {
+    return (
+      <a
+        className="nearby-place"
+        href={place.mapsUri}
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        {body}
+      </a>
+    );
+  }
+
+  return <span className="nearby-place is-static">{body}</span>;
+}
 
 export function NearbySection({
   food,
@@ -101,52 +158,7 @@ export function NearbySection({
       <ul className="nearby-list">
         {places.map((p) => (
           <li key={`${p.name}-${p.address}`}>
-            {p.mapsUri ? (
-              <a
-                className="nearby-place"
-                href={p.mapsUri}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <span className="nearby-place-icon" aria-hidden>
-                  <MapPin size={20} strokeWidth={1.5} />
-                </span>
-                <span className="nearby-place-body">
-                  <span className="nearby-head">
-                    <span className="nearby-name">{p.name}</span>
-                    <span className="nearby-meta">
-                      {[
-                        p.miles !== null ? `${p.miles.toFixed(1)} mi` : null,
-                        p.rating !== null ? p.rating.toFixed(1) : null,
-                      ]
-                        .filter(Boolean)
-                        .join(" / ")}
-                    </span>
-                  </span>
-                  <span className="nearby-address">{p.address}</span>
-                </span>
-              </a>
-            ) : (
-              <span className="nearby-place is-static">
-                <span className="nearby-place-icon" aria-hidden>
-                  <MapPin size={20} strokeWidth={1.5} />
-                </span>
-                <span className="nearby-place-body">
-                  <span className="nearby-head">
-                    <span className="nearby-name">{p.name}</span>
-                    <span className="nearby-meta">
-                      {[
-                        p.miles !== null ? `${p.miles.toFixed(1)} mi` : null,
-                        p.rating !== null ? p.rating.toFixed(1) : null,
-                      ]
-                        .filter(Boolean)
-                        .join(" / ")}
-                    </span>
-                  </span>
-                  <span className="nearby-address">{p.address}</span>
-                </span>
-              </span>
-            )}
+            <PlaceCard place={p} />
           </li>
         ))}
       </ul>

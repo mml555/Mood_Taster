@@ -4,11 +4,12 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { loadDnaForUser } from "@/lib/dna-sync";
-import { readDna } from "@/lib/dna";
+import { loadDnaForUser, persistDna } from "@/lib/dna-sync";
+import { applyQuizPrefs, readDna } from "@/lib/dna";
 import { readFavorites } from "@/lib/favorites";
 import { loadFavoritesForUser } from "@/lib/favorites-sync";
 import { readDietary } from "@/lib/dietary";
+import { loadDietaryForUser } from "@/lib/dietary-sync";
 import { NoDietaryMatchError, rank } from "@/lib/engine";
 import { QUIZ_OPTION_ICONS, QUIZ_STEP_ICONS } from "@/lib/mood-icons";
 import {
@@ -300,6 +301,7 @@ export function TasteQuiz() {
         }
         router.push(`/result/${foodId}`);
         void loadDnaForUser();
+        void loadHistoryForUser();
       };
 
       void (async () => {

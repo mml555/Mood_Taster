@@ -109,7 +109,7 @@ Persist sessions (local first; cloud when authed). List food, date, match/intent
 
 ---
 
-### P1-2 · Richer restaurant cards
+### P1-2 · Richer restaurant cards — done
 **Routes:** `/result/[id]`, `/api/places`  
 **PRD:** §22  
 

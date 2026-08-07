@@ -33,6 +33,10 @@ import {
   toggleFavorite,
 } from "@/lib/favorites";
 import { persistFavorites } from "@/lib/favorites-sync";
+import {
+  recordRecommendationRating,
+  recordRecommendationShown,
+} from "@/lib/history-sync";
 import { capitalize } from "@/lib/explain";
 import {
   mapsSearchUrl,
@@ -134,6 +138,8 @@ export function ResultView({ food }: ResultViewProps) {
   const dragXRef = useRef(0);
   const busyRef = useRef(false);
   const cardRef = useRef<HTMLDivElement>(null);
+  /** User opted into city/ZIP; ignore late browser geolocation results. */
+  const placesManualRef = useRef(false);
 
   useEffect(() => {
     renderId.current += 1;
@@ -184,6 +190,12 @@ export function ResultView({ food }: ResultViewProps) {
       setIntent(active.answers.intent);
       setHasSession(true);
       setSessionReady(true);
+
+      void recordRecommendationShown({
+        foodId: food.id,
+        intent: active.answers.intent,
+        answers: active.answers,
+      });
 
       // Enhancement only. The explanation above is already correct and shown.
       void polish(food.id, active.answers, token, abort.signal);
@@ -239,6 +251,7 @@ export function ResultView({ food }: ResultViewProps) {
     }, 2500);
 
     queueMicrotask(() => {
+      placesManualRef.current = false;
       setPlaces([]);
       setPlacesState("locating");
       setLocationError(null);
@@ -266,13 +279,15 @@ export function ResultView({ food }: ResultViewProps) {
 
       navigator.geolocation.getCurrentPosition(
         (pos) => {
-          if (cancelled) return;
+          if (cancelled || placesManualRef.current) return;
           writeCachedGeo(pos.coords.latitude, pos.coords.longitude);
           setPlacesState("loading");
           void load(pos.coords.latitude, pos.coords.longitude);
         },
         () => {
-          if (!cancelled) setPlacesState("fallback");
+          if (!cancelled && !placesManualRef.current) {
+            setPlacesState("fallback");
+          }
         },
         { timeout: 5000, maximumAge: 300_000 },
       );
@@ -297,7 +312,12 @@ export function ResultView({ food }: ResultViewProps) {
           `/api/places?foodId=${encodeURIComponent(food.id)}&lat=${lat}&lng=${lng}`,
           { signal: abort.signal },
         );
-        if (cancelled || token !== renderId.current || abort.signal.aborted) {
+        if (
+          cancelled ||
+          placesManualRef.current ||
+          token !== renderId.current ||
+          abort.signal.aborted
+        ) {
           return;
         }
 
@@ -312,7 +332,13 @@ export function ResultView({ food }: ResultViewProps) {
         setPlaces(found);
         setPlacesState("ready");
       } catch {
-        if (!cancelled && !abort.signal.aborted) setPlacesState("fallback");
+        if (
+          !cancelled &&
+          !placesManualRef.current &&
+          !abort.signal.aborted
+        ) {
+          setPlacesState("fallback");
+        }
       }
     }
 
@@ -325,6 +351,8 @@ export function ResultView({ food }: ResultViewProps) {
 
   const onSearchLocation = useCallback(
     async (query: string) => {
+      placesManualRef.current = true;
+
       if (!query) {
         setPlaces([]);
         setPlacesState("fallback");
@@ -519,6 +547,7 @@ export function ResultView({ food }: ResultViewProps) {
         detail,
       );
       void persistDna(next);
+      void recordRecommendationRating(food.id, rating);
       setDeltas(changes.filter((d) => d.direction !== "flat"));
       setLastRating(rating);
       setPendingRating(null);

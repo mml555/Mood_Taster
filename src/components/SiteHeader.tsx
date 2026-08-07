@@ -1,6 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
-import { Heart, Sparkles } from "lucide-react";
+import { Clock, Heart, Sparkles } from "lucide-react";
 import { AuthNav } from "@/components/AuthNav";
 
 type SiteHeaderProps = {
@@ -10,6 +10,7 @@ type SiteHeaderProps = {
     | "result"
     | "dna"
     | "favorites"
+    | "history"
     | "account"
     | "prd"
     | "strategy"
@@ -67,6 +68,14 @@ export function SiteHeader({ current = "home" }: SiteHeaderProps) {
             >
               <Heart size={16} strokeWidth={1.5} aria-hidden />
               <span className="nav-dna-label">Saved</span>
+            </Link>
+            <Link
+              className="nav-primary nav-with-icon"
+              href="/history"
+              aria-current={current === "history" ? "page" : undefined}
+            >
+              <Clock size={16} strokeWidth={1.5} aria-hidden />
+              <span className="nav-dna-label">History</span>
             </Link>
             <Link
               className="nav-primary nav-with-icon"

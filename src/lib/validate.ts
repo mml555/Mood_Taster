@@ -112,14 +112,21 @@ export function parseCoordinate(
   return n;
 }
 
-/** City, ZIP, or short place string for manual location. */
-export function parsePlaceQuery(raw: string | null, maxLength = 80): string | null {
+/**
+ * City, ZIP, or short place string for manual location.
+ * Letters (any script), digits, spaces, and common place punctuation only.
+ */
+export function parsePlaceQuery(
+  raw: string | null,
+  maxLength = 80,
+): string | null {
   if (raw === null) return null;
   const text = raw
     .replace(/[\u0000-\u001F\u007F]/g, " ")
-    .replace(/[<>{}]/g, "")
     .replace(/\s+/g, " ")
     .trim();
   if (!text || text.length > maxLength) return null;
+  // Reject anything outside letters, numbers, and place punctuation.
+  if (!/^[\p{L}\p{N}\s,.'#/\-]+$/u.test(text)) return null;
   return text;
 }

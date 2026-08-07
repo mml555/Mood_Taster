@@ -25,6 +25,8 @@ export function SiteFooter() {
         {" · "}
         <Link href="/favorites">Favorites</Link>
         {" · "}
+        <Link href="/history">History</Link>
+        {" · "}
         <Link href="/privacy">Privacy</Link>
         {" · "}
         <Link href="/terms">Terms</Link>
