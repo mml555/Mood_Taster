@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { loadDnaForUser } from "@/lib/dna-sync";
+import { readDna } from "@/lib/dna";
 import { rank } from "@/lib/engine";
 import { QUIZ_OPTION_ICONS, QUIZ_STEP_ICONS } from "@/lib/mood-icons";
 import { emptySession, writeSession } from "@/lib/session";
@@ -14,11 +15,19 @@ import {
   FLAVORS,
   HEAVINESS,
   INTENTS,
+  TEMPERATURES,
   TEXTURES,
 } from "@/lib/taste-types";
 
-const INTENT_STEP = {
-  key: "intent" as const,
+type StepDef = {
+  key: keyof Answers;
+  question: string;
+  reaction?: string;
+  options: { value: string; label: string }[];
+};
+
+const INTENT_STEP: StepDef = {
+  key: "intent",
   question: "How do you want to eat?",
   options: [
     { value: "restaurant", label: "Go out" },
@@ -28,9 +37,9 @@ const INTENT_STEP = {
   ],
 };
 
-const CRAVING_STEPS = [
+const CRAVING_STEPS: StepDef[] = [
   {
-    key: "flavor" as const,
+    key: "flavor",
     question: "What flavor?",
     options: [
       { value: "savory", label: "Savory" },
@@ -40,7 +49,7 @@ const CRAVING_STEPS = [
     ],
   },
   {
-    key: "texture" as const,
+    key: "texture",
     question: "What texture?",
     options: [
       { value: "crunchy", label: "Crunchy" },
@@ -50,7 +59,7 @@ const CRAVING_STEPS = [
     ],
   },
   {
-    key: "heaviness" as const,
+    key: "heaviness",
     question: "How heavy?",
     options: [
       { value: "light", label: "Light" },
@@ -60,7 +69,7 @@ const CRAVING_STEPS = [
     ],
   },
   {
-    key: "adventure" as const,
+    key: "adventure",
     question: "How wild?",
     options: [
       { value: "safe", label: "Safe" },
@@ -68,7 +77,56 @@ const CRAVING_STEPS = [
       { value: "surprise", label: "Surprise me" },
     ],
   },
-] as const;
+];
+
+/** Signature no-clue mode: broad pairs that map into Answers. */
+const CLUE_STEPS: StepDef[] = [
+  {
+    key: "temperature",
+    question: "Hot or cold?",
+    reaction: "Start broad.",
+    options: [
+      { value: "hot", label: "Hot" },
+      { value: "cold", label: "Cold" },
+    ],
+  },
+  {
+    key: "heaviness",
+    question: "Light or filling?",
+    reaction: "That changes things.",
+    options: [
+      { value: "light", label: "Light" },
+      { value: "filling", label: "Filling" },
+    ],
+  },
+  {
+    key: "texture",
+    question: "Crunchy or soft?",
+    reaction: "We're close.",
+    options: [
+      { value: "crunchy", label: "Crunchy" },
+      { value: "soft", label: "Soft" },
+    ],
+  },
+  {
+    key: "flavor",
+    question: "Sweet or savory?",
+    reaction: "Almost there.",
+    options: [
+      { value: "sweet", label: "Sweet" },
+      { value: "savory", label: "Savory" },
+    ],
+  },
+  {
+    key: "adventure",
+    question: "Safe or adventurous?",
+    reaction: "Got it.",
+    options: [
+      { value: "safe", label: "Safe" },
+      { value: "surprise", label: "Adventurous" },
+    ],
+  },
+];
 
 type PartialAnswers = Partial<Answers>;
 
@@ -111,12 +169,14 @@ function isComplete(answers: PartialAnswers): answers is Answers {
       answers.texture &&
       answers.heaviness &&
       answers.adventure &&
+      answers.temperature &&
       INTENTS.includes(answers.intent) &&
       FLAVORS.includes(answers.flavor) &&
       TEXTURES.includes(answers.texture) &&
       (HEAVINESS.includes(answers.heaviness as (typeof HEAVINESS)[number]) ||
         answers.heaviness === "any") &&
-      ADVENTURE.includes(answers.adventure),
+      ADVENTURE.includes(answers.adventure) &&
+      TEMPERATURES.includes(answers.temperature),
   );
 }
 
@@ -132,15 +192,18 @@ function tasteHref(
   return `/taste?${params.toString()}`;
 }
 
+function stepsForIntent(intent: Intent | null): StepDef[] {
+  if (!intent) return [INTENT_STEP, ...CRAVING_STEPS];
+  if (intent === "clue") return CLUE_STEPS;
+  return CRAVING_STEPS;
+}
+
 export function TasteQuiz() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const seededIntent = parseIntent(searchParams.get("intent"));
   const fromHome = searchParams.get("from") === "home";
-  const steps = useMemo(
-    () => (seededIntent ? [...CRAVING_STEPS] : [INTENT_STEP, ...CRAVING_STEPS]),
-    [seededIntent],
-  );
+  const steps = useMemo(() => stepsForIntent(seededIntent), [seededIntent]);
   const totalSteps = steps.length;
   const step = parseStep(searchParams.get("step"), totalSteps);
   const [answers, setAnswers] = useState<PartialAnswers>({});
@@ -150,7 +213,15 @@ export function TasteQuiz() {
     queueMicrotask(() => {
       const draft = readDraft();
       if (seededIntent) {
-        const next = { ...draft, intent: seededIntent };
+        const next: PartialAnswers = {
+          ...draft,
+          intent: seededIntent,
+          // Standard quiz ignores temperature; clue sets it via steps.
+          temperature:
+            seededIntent === "clue"
+              ? draft.temperature
+              : (draft.temperature ?? "any"),
+        };
         setAnswers(next);
         writeDraft(next);
       } else {
@@ -174,16 +245,17 @@ export function TasteQuiz() {
   );
 
   const finish = useCallback(
-    async (finalAnswers: Answers) => {
+    (finalAnswers: Answers) => {
       clearDraft();
       const session = emptySession(finalAnswers);
-      const dna = await loadDnaForUser();
+      const dna = readDna();
       const rec = rank(finalAnswers, dna, session);
       writeSession({
         ...session,
         servedIds: [rec.primary.food.id],
       });
       router.push(`/result/${rec.primary.food.id}`);
+      void loadDnaForUser();
     },
     [router],
   );
@@ -191,7 +263,13 @@ export function TasteQuiz() {
   const onChoose = useCallback(
     (value: string) => {
       if (!current) return;
-      const next = { ...answers, [current.key]: value };
+      const next: PartialAnswers = { ...answers, [current.key]: value };
+
+      // Craving path always stores temperature any unless clue set it.
+      if (current.key !== "temperature" && !next.temperature) {
+        next.temperature = seededIntent === "clue" ? undefined : "any";
+      }
+
       setAnswers(next);
       writeDraft(next);
 
@@ -206,11 +284,15 @@ export function TasteQuiz() {
         return;
       }
 
-      if (isComplete(next)) {
-        void finish(next);
+      const complete: PartialAnswers = {
+        ...next,
+        temperature: next.temperature ?? "any",
+      };
+      if (isComplete(complete)) {
+        finish(complete);
       }
     },
-    [answers, current, finish, goStep, step, totalSteps],
+    [answers, current, finish, goStep, seededIntent, step, totalSteps],
   );
 
   if (!current) return null;
@@ -246,7 +328,7 @@ export function TasteQuiz() {
               n < step ? "is-done" : n === step ? "is-current" : "";
             return (
               <li
-                key={s.key}
+                key={`${s.key}-${i}`}
                 className={state ? `quiz-dot ${state}` : "quiz-dot"}
               />
             );
@@ -261,6 +343,9 @@ export function TasteQuiz() {
         <h1 id="quiz-question" className="quiz-question">
           {current.question}
         </h1>
+        {current.reaction ? (
+          <p className="quiz-reaction">{current.reaction}</p>
+        ) : null}
       </div>
 
       <ul className={tileClass} role="list">

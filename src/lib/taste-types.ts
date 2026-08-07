@@ -3,12 +3,14 @@ export const FLAVORS = ["savory", "spicy", "sweet", "fresh"] as const;
 export const TEXTURES = ["crunchy", "creamy", "juicy", "soft"] as const;
 export const HEAVINESS = ["light", "medium", "filling"] as const;
 export const ADVENTURE = ["safe", "curious", "surprise"] as const;
+export const TEMPERATURES = ["hot", "cold", "any"] as const;
 
 export type Intent = (typeof INTENTS)[number];
 export type Flavor = (typeof FLAVORS)[number];
 export type Texture = (typeof TEXTURES)[number];
 export type Heaviness = (typeof HEAVINESS)[number];
 export type Adventure = (typeof ADVENTURE)[number];
+export type Temperature = (typeof TEMPERATURES)[number];
 
 export type Recipe = {
   servings: number;
@@ -33,6 +35,8 @@ export type Food = {
   reasonTemplate: string;
   /** Present when this dish can be cooked at home. */
   recipe?: Recipe;
+  /** Curated for Grab a snack intent. */
+  snack?: boolean;
 };
 
 export type Answers = {
@@ -41,6 +45,8 @@ export type Answers = {
   texture: Texture;
   heaviness: Heaviness | "any";
   adventure: Adventure;
+  /** "any" for standard quiz; hot/cold from no-clue mode. */
+  temperature: Temperature;
 };
 
 export type DnaDimension =

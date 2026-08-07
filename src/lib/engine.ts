@@ -11,6 +11,7 @@ import type {
   Recommendation,
   ScoredFood,
   SessionState,
+  Temperature,
   Texture,
 } from "./taste-types";
 
@@ -62,7 +63,10 @@ function heavinessScore(
   food: Food,
 ): number {
   if (answer === "any") return 0.5;
-  return 1 - Math.abs(HEAVINESS_VALUE[answer] - HEAVINESS_VALUE[food.heaviness]) / 2;
+  return (
+    1 -
+    Math.abs(HEAVINESS_VALUE[answer] - HEAVINESS_VALUE[food.heaviness]) / 2
+  );
 }
 
 function adventureScore(answer: Adventure, food: Food): number {
@@ -70,7 +74,24 @@ function adventureScore(answer: Adventure, food: Food): number {
   return 1 - Math.abs(food.adventurousness - target) / 4;
 }
 
+function temperatureScore(answer: Temperature, food: Food): number {
+  if (answer === "any") return 0.5;
+  if (food.temperature === answer) return 1;
+  if (food.temperature === "room") return 0.55;
+  return 0.2;
+}
+
 function quizMatch(answers: Answers, food: Food): number {
+  const caresAboutTemp = answers.temperature !== "any";
+  if (caresAboutTemp) {
+    return (
+      0.28 * flavorScore(answers.flavor, food) +
+      0.24 * textureScore(answers.texture, food) +
+      0.18 * heavinessScore(answers.heaviness, food) +
+      0.15 * adventureScore(answers.adventure, food) +
+      0.15 * temperatureScore(answers.temperature, food)
+    );
+  }
   return (
     0.35 * flavorScore(answers.flavor, food) +
     0.3 * textureScore(answers.texture, food) +
@@ -134,21 +155,30 @@ function scoreFood(
   };
 }
 
+function candidatePool(answers: Answers): Food[] {
+  if (answers.intent === "recipe") {
+    return CATALOG.filter((food) => food.recipe != null);
+  }
+  if (answers.intent === "snack") {
+    return CATALOG.filter((food) => food.snack === true);
+  }
+  return CATALOG;
+}
+
 export function rank(
   answers: Answers,
   dna: DnaProfile,
   session: SessionState,
 ): Recommendation {
-  const pool =
-    answers.intent === "recipe"
-      ? CATALOG.filter((food) => food.recipe != null)
-      : CATALOG;
+  const pool = candidatePool(answers);
 
   if (pool.length < 3) {
     throw new Error(
-      answers.intent === "recipe"
-        ? "Catalog must contain at least three foods with recipes"
-        : "Catalog must contain at least three foods",
+      answers.intent === "snack"
+        ? "Catalog must contain at least three snack foods"
+        : answers.intent === "recipe"
+          ? "Catalog must contain at least three foods with recipes"
+          : "Catalog must contain at least three foods",
     );
   }
 

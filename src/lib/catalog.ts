@@ -4,6 +4,7 @@ import type { Food } from "./taste-types";
  * ~30 specific dishes covering every quiz direction.
  * Images live in public/food/<id>.jpg
  * Dishes with `recipe` are eligible for Cook mode.
+ * Dishes with `snack: true` are eligible for Grab a snack.
  */
 export const CATALOG: Food[] = [
   {
@@ -202,6 +203,7 @@ export const CATALOG: Food[] = [
     temperature: "room",
     adventurousness: 2,
     dietaryTags: ["vegetarian", "gluten-free"],
+    snack: true,
     image: "/food/sour-gummy-candy.jpg",
     imageAlt: "Pile of colorful sour gummy candies",
     imageCredit: "Sharon McCutcheon / Unsplash",
@@ -236,6 +238,7 @@ export const CATALOG: Food[] = [
     temperature: "cold",
     adventurousness: 3,
     dietaryTags: ["vegan", "gluten-free"],
+    snack: true,
     image: "/food/mango-with-tajin.jpg",
     imageAlt: "Fresh mango slices with chili powder",
     imageCredit: "Charles Deluvio / Unsplash",
@@ -335,6 +338,7 @@ export const CATALOG: Food[] = [
     temperature: "room",
     adventurousness: 1,
     dietaryTags: ["vegetarian", "contains-gluten", "vegan"],
+    snack: true,
     image: "/food/avocado-toast.jpg",
     imageAlt: "Avocado toast with chili flakes on a plate",
     imageCredit: "Joseph Gonzalez / Unsplash",
@@ -403,6 +407,7 @@ export const CATALOG: Food[] = [
     temperature: "room",
     adventurousness: 1,
     dietaryTags: ["vegetarian", "gluten-free", "contains-dairy"],
+    snack: true,
     image: "/food/caprese-salad.jpg",
     imageAlt: "Caprese salad with tomato, mozzarella, and basil",
     imageCredit: "Jennifer Pallian / Unsplash",
@@ -435,6 +440,7 @@ export const CATALOG: Food[] = [
     temperature: "hot",
     adventurousness: 2,
     dietaryTags: ["vegetarian", "contains-gluten", "contains-dairy", "contains-egg"],
+    snack: true,
     image: "/food/chocolate-lava-cake.jpg",
     imageAlt: "Chocolate lava cake with molten center",
     imageCredit: "Alex Lvrs / Unsplash",
@@ -614,6 +620,7 @@ export const CATALOG: Food[] = [
     temperature: "cold",
     adventurousness: 1,
     dietaryTags: ["vegetarian", "contains-dairy", "contains-gluten"],
+    snack: true,
     image: "/food/soft-serve-cone.jpg",
     imageAlt: "Vanilla soft serve ice cream cone",
     imageCredit: "Ian Dooley / Unsplash",
@@ -719,6 +726,7 @@ export const CATALOG: Food[] = [
     temperature: "cold",
     adventurousness: 2,
     dietaryTags: ["vegetarian", "gluten-free", "contains-dairy"],
+    snack: true,
     image: "/food/watermelon-feta-salad.jpg",
     imageAlt: "Watermelon salad with feta and mint",
     imageCredit: "Louis Hansel / Unsplash",
@@ -751,6 +759,7 @@ export const CATALOG: Food[] = [
     temperature: "hot",
     adventurousness: 2,
     dietaryTags: ["vegetarian", "contains-dairy", "gluten-free"],
+    snack: true,
     image: "/food/loaded-nachos.jpg",
     imageAlt: "Plate of loaded nachos with cheese and jalapeños",
     imageCredit: "Amirali Mirhashemian / Unsplash",
@@ -783,6 +792,7 @@ export const CATALOG: Food[] = [
     temperature: "cold",
     adventurousness: 3,
     dietaryTags: ["vegetarian", "contains-dairy"],
+    snack: true,
     image: "/food/matcha-latte.jpg",
     imageAlt: "Iced matcha latte in a clear glass",
     imageCredit: "Ash Edmonds / Unsplash",
@@ -852,6 +862,7 @@ export const CATALOG: Food[] = [
     temperature: "hot",
     adventurousness: 2,
     dietaryTags: ["vegetarian", "contains-gluten"],
+    snack: true,
     image: "/food/churro-bites.jpg",
     imageAlt: "Cinnamon sugar churros on a plate",
     imageCredit: "Fernando Andrade / Unsplash",
@@ -954,6 +965,7 @@ export const CATALOG: Food[] = [
     temperature: "hot",
     adventurousness: 3,
     dietaryTags: ["vegetarian", "gluten-free", "contains-dairy"],
+    snack: true,
     image: "/food/elote.jpg",
     imageAlt: "Grilled Mexican street corn with cheese and chili",
     imageCredit: "Alex Lvrs / Unsplash",
@@ -1023,6 +1035,7 @@ export const CATALOG: Food[] = [
     temperature: "cold",
     adventurousness: 2,
     dietaryTags: ["vegetarian", "contains-dairy", "gluten-free"],
+    snack: true,
     image: "/food/affogato.jpg",
     imageAlt: "Affogato with espresso poured over gelato",
     imageCredit: "Nathan Dumlao / Unsplash",

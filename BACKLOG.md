@@ -37,24 +37,23 @@ offers all four intents. Snack catalog and no-clue pairwise flow are P0-2 / P0-3
 
 ---
 
-### P0-2 · Snack intent + curated snack catalog
+### P0-2 · Snack intent + curated snack catalog · done
 **Routes:** `/taste`, `/result/[id]`  
 **Modules:** `taste-types.ts`, `catalog.ts`, `engine.ts`  
 **PRD:** §19, §62  
 
-Add `snack` intent. Curated snack records (name, flavor/texture tags, temperature, hunger suitability, dietary tags, image). Rank filters to snacks. Result CTA is accept / try again (no Places, no full recipe required).
-
-**Done when:** Snack path returns a specific snack in ~30s with why line and feedback.
+12 curated `snack: true` foods. Rank filters to snacks. Result stays dish-first
+(no Places / no recipe CTA). Standard craving axes still apply for snack.
 
 ---
 
-### P0-3 · "I have no clue" narrowing mode
+### P0-3 · "I have no clue" narrowing mode · done
 **Routes:** `/taste`  
 **PRD:** §16  
 
-Broad pairwise questions (hot/cold, light/filling, crunchy/soft, safe/adventurous) that map into the same craving attributes used by `rank()`. Signature experience; keep copy short and reactive.
-
-**Done when:** Completing no-clue yields a specific dish without using the standard four-axis labels as the first screen.
+Pairwise flow: Hot/cold → Light/filling → Crunchy/soft → Sweet/savory →
+Safe/adventurous. Maps into Answers (including temperature). Light reactive
+copy under each question.
 
 ---
 
