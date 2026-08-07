@@ -589,6 +589,7 @@ export function TasteQuiz() {
   if (!current) return null;
 
   const selected = hydrated ? answers[current.key] : undefined;
+  const StepIcon = QUIZ_STEP_ICONS[current.key];
   // Reference layout: full-width list cards. Stack always reads clearer than a
   // 2-up tile grid for tap targets and short descriptions.
   const tileClass = "quiz-options quiz-options-stack";
@@ -692,12 +693,9 @@ export function TasteQuiz() {
         <div className="quiz-question-copy">
           {STEP_CATEGORY[current.key] ? (
             <p className="quiz-category">
-              {QUIZ_STEP_ICONS[current.key] ? (
+              {StepIcon ? (
                 <span className="quiz-category-icon" aria-hidden>
-                  {(() => {
-                    const StepIcon = QUIZ_STEP_ICONS[current.key];
-                    return <StepIcon size={14} strokeWidth={1.5} />;
-                  })()}
+                  <StepIcon size={14} strokeWidth={1.5} />
                 </span>
               ) : null}
               {STEP_CATEGORY[current.key]}
