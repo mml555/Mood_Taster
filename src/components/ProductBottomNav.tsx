@@ -15,14 +15,13 @@ const TABS: {
   label: string;
   Icon: typeof Utensils;
 }[] = [
-  { id: "taste", href: "/taste", label: "Taste", Icon: Utensils },
+  { id: "taste", href: "/", label: "Taste", Icon: Utensils },
   { id: "stats", href: "/dna", label: "Stats", Icon: LayoutDashboard },
   { id: "profile", href: "/account", label: "Profile", Icon: UserRound },
 ];
 
 /**
- * Mobile product nav (≤720px). Matches reference IA:
- * Taste · Stats · Profile. Docs stay in the footer.
+ * Product nav: Taste · Stats · Profile (prototype IA).
  */
 export function ProductBottomNav({ current }: ProductBottomNavProps) {
   return (
@@ -48,7 +47,7 @@ export function ProductBottomNav({ current }: ProductBottomNavProps) {
                       : "product-bottom-nav-icon"
                   }
                 >
-                  <Icon size={24} strokeWidth={active ? 2 : 1.5} aria-hidden />
+                  <Icon size={28} strokeWidth={active ? 2 : 1.75} aria-hidden />
                 </span>
                 <span>{label}</span>
               </Link>

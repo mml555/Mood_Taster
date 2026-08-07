@@ -1,9 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
-import { LayoutDashboard, UserRound, Utensils } from "lucide-react";
+import { Dna, Utensils } from "lucide-react";
 import { AuthNav } from "@/components/AuthNav";
+import { useAuthSession } from "@/lib/use-auth-session";
 
 type SiteHeaderProps = {
   current?:
@@ -21,67 +21,49 @@ type SiteHeaderProps = {
     | "legal";
 };
 
-const PRODUCT_LINKS = [
-  { id: "taste", href: "/taste", label: "Taste", Icon: Utensils },
-  { id: "stats", href: "/dna", label: "Stats", Icon: LayoutDashboard },
-  { id: "profile", href: "/account", label: "Profile", Icon: UserRound },
-] as const;
-
-function productActive(
-  current: SiteHeaderProps["current"],
-): "taste" | "stats" | "profile" | null {
-  if (current === "dna") return "stats";
-  if (current === "account") return "profile";
-  if (
-    current === "home" ||
-    current === "taste" ||
-    current === "result" ||
-    current === "explore" ||
-    current === "favorites" ||
-    current === "history"
-  ) {
-    return "taste";
-  }
-  return null;
-}
-
 /**
- * Product chrome stays visually stable. Home skips the lockup (hero owns brand).
- * Everywhere else: lockup + desktop product tabs + auth. Mobile tabs live in
- * ProductBottomNav; header product links use .nav-tab and hide ≤720px.
+ * Product chrome: brand lockup or welcome row + Sign In / DNA Profile.
+ * Mobile tabs live in ProductBottomNav.
  */
 export function SiteHeader({ current = "home" }: SiteHeaderProps) {
-  const onHome = current === "home";
+  const auth = useAuthSession();
   const onDocs =
     current === "prd" ||
     current === "strategy" ||
     current === "brand" ||
     current === "legal";
-  const active = productActive(current);
+  const onAuthSurface =
+    current === "account" &&
+    (typeof window === "undefined" || true);
 
   return (
-    <header className={onHome ? "top top-home" : "top top-compact"}>
-      {!onHome ? (
-        <Link className="mark" href="/">
-          <Image
-            className="mark-lockup"
-            src="/brand/lockup-purple-sm.png"
-            alt="Mood Taster"
-            width={200}
-            height={26}
-            priority
-          />
-        </Link>
-      ) : null}
+    <header className={current === "home" ? "top top-home" : "top top-compact"}>
+      <div className="nav-brand-row">
+        {auth.status === "user" ? (
+          <Link href="/account" className="nav-brand-row">
+            <span
+              className="profile-avatar"
+              style={{ width: "2.75rem", height: "2.75rem", fontSize: "1rem" }}
+              aria-hidden
+            >
+              {(auth.username ?? "M").charAt(0).toUpperCase()}
+            </span>
+            <span className="nav-welcome">
+              <span className="nav-welcome-label">Welcome,</span>
+              <span className="nav-welcome-name">
+                {auth.username ?? "Friend"}
+              </span>
+            </span>
+          </Link>
+        ) : (
+          <Link href="/" className="nav-brand-row">
+            <Utensils size={22} strokeWidth={2} aria-hidden />
+            <span>Mood Taster</span>
+          </Link>
+        )}
+      </div>
       <nav aria-label="Primary">
-        {onHome ? (
-          <>
-            <a className="nav-secondary" href="#how">
-              How it works
-            </a>
-            <AuthNav current={current} compact />
-          </>
-        ) : onDocs ? (
+        {onDocs ? (
           <>
             <Link className="nav-primary nav-with-icon" href="/taste">
               <Utensils size={16} strokeWidth={1.5} aria-hidden />
@@ -89,21 +71,17 @@ export function SiteHeader({ current = "home" }: SiteHeaderProps) {
             </Link>
             <AuthNav current={current} compact />
           </>
-        ) : (
-          <>
-            {PRODUCT_LINKS.map(({ id, href, label, Icon }) => (
-              <Link
-                key={id}
-                className="nav-primary nav-with-icon nav-tab"
-                href={href}
-                aria-current={active === id ? "page" : undefined}
-              >
-                <Icon size={16} strokeWidth={1.5} aria-hidden />
-                <span className="nav-dna-label">{label}</span>
-              </Link>
-            ))}
-            <AuthNav current={current} compact />
-          </>
+        ) : auth.status === "user" ? (
+          <Link
+            className="cta nav-with-icon"
+            href="/dna"
+            style={{ padding: "0.5rem 1rem", fontSize: "0.85rem" }}
+          >
+            <Dna size={16} strokeWidth={2} aria-hidden />
+            DNA Profile
+          </Link>
+        ) : onAuthSurface && current === "account" ? null : (
+          <AuthNav current={current} compact />
         )}
       </nav>
     </header>

@@ -37,9 +37,7 @@ function headerCurrent(pathname: string): HeaderCurrent {
 }
 
 function bottomTab(pathname: string): ProductTab | undefined {
-  if (
-    pathname.startsWith("/dna")
-  ) {
+  if (pathname.startsWith("/dna")) {
     return "stats";
   }
   if (
@@ -52,7 +50,11 @@ function bottomTab(pathname: string): ProductTab | undefined {
   if (
     pathname === "/" ||
     pathname.startsWith("/taste") ||
-    pathname.startsWith("/result")
+    pathname.startsWith("/result") ||
+    pathname.startsWith("/explore") ||
+    pathname.startsWith("/favorites") ||
+    pathname.startsWith("/history") ||
+    pathname.startsWith("/passport")
   ) {
     return "taste";
   }
