@@ -3,21 +3,31 @@
 import { useRouter, useSearchParams } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
-import { readDna } from "@/lib/dna";
+import { loadDnaForUser } from "@/lib/dna-sync";
 import { rank } from "@/lib/engine";
+import { QUIZ_OPTION_ICONS, QUIZ_STEP_ICONS } from "@/lib/mood-icons";
 import { emptySession, writeSession } from "@/lib/session";
 import type { Answers } from "@/lib/taste-types";
 import {
   ADVENTURE,
   FLAVORS,
   HEAVINESS,
+  INTENTS,
   TEXTURES,
 } from "@/lib/taste-types";
 
 const STEPS = [
   {
+    key: "intent" as const,
+    question: "Eat out or cook?",
+    options: [
+      { value: "restaurant", label: "Eat out" },
+      { value: "recipe", label: "Cook" },
+    ],
+  },
+  {
     key: "flavor" as const,
-    question: "What kind of flavor?",
+    question: "What flavor?",
     options: [
       { value: "savory", label: "Savory" },
       { value: "spicy", label: "Spicy" },
@@ -27,7 +37,7 @@ const STEPS = [
   },
   {
     key: "texture" as const,
-    question: "What texture sounds right?",
+    question: "What texture?",
     options: [
       { value: "crunchy", label: "Crunchy" },
       { value: "creamy", label: "Creamy" },
@@ -42,15 +52,15 @@ const STEPS = [
       { value: "light", label: "Light" },
       { value: "medium", label: "Medium" },
       { value: "filling", label: "Filling" },
-      { value: "any", label: "I don't care" },
+      { value: "any", label: "Any" },
     ],
   },
   {
     key: "adventure" as const,
-    question: "How adventurous?",
+    question: "How wild?",
     options: [
-      { value: "safe", label: "Safe favorite" },
-      { value: "curious", label: "A little different" },
+      { value: "safe", label: "Safe" },
+      { value: "curious", label: "A little new" },
       { value: "surprise", label: "Surprise me" },
     ],
   },
@@ -59,6 +69,7 @@ const STEPS = [
 type PartialAnswers = Partial<Answers>;
 
 const DRAFT_KEY = "mood-taster-quiz-draft";
+const TOTAL_STEPS = STEPS.length;
 
 function readDraft(): PartialAnswers {
   if (typeof window === "undefined") return {};
@@ -82,15 +93,17 @@ function clearDraft() {
 function parseStep(raw: string | null): number {
   const n = Number(raw ?? "1");
   if (!Number.isFinite(n) || n < 1) return 1;
-  return Math.min(4, Math.floor(n));
+  return Math.min(TOTAL_STEPS, Math.floor(n));
 }
 
 function isComplete(answers: PartialAnswers): answers is Answers {
   return Boolean(
-    answers.flavor &&
+    answers.intent &&
+      answers.flavor &&
       answers.texture &&
       answers.heaviness &&
       answers.adventure &&
+      INTENTS.includes(answers.intent) &&
       FLAVORS.includes(answers.flavor) &&
       TEXTURES.includes(answers.texture) &&
       (HEAVINESS.includes(answers.heaviness as (typeof HEAVINESS)[number]) ||
@@ -115,6 +128,7 @@ export function TasteQuiz() {
 
   const current = STEPS[step - 1];
   const stepLabel = String(step).padStart(2, "0");
+  const totalLabel = String(TOTAL_STEPS).padStart(2, "0");
 
   const goStep = useCallback(
     (next: number) => {
@@ -124,10 +138,10 @@ export function TasteQuiz() {
   );
 
   const finish = useCallback(
-    (finalAnswers: Answers) => {
+    async (finalAnswers: Answers) => {
       clearDraft();
       const session = emptySession(finalAnswers);
-      const dna = readDna();
+      const dna = await loadDnaForUser();
       const rec = rank(finalAnswers, dna, session);
       writeSession({
         ...session,
@@ -145,7 +159,7 @@ export function TasteQuiz() {
       setAnswers(next);
       writeDraft(next);
 
-      if (step < 4) {
+      if (step < TOTAL_STEPS) {
         goStep(step + 1);
         return;
       }
@@ -160,19 +174,46 @@ export function TasteQuiz() {
   if (!current) return null;
 
   const selected = hydrated ? answers[current.key] : undefined;
+  const StepIcon = QUIZ_STEP_ICONS[current.key];
+  const tileClass =
+    current.options.length <= 2
+      ? "quiz-options quiz-options-stack"
+      : "quiz-options quiz-options-grid";
 
   return (
     <section className="quiz" aria-labelledby="quiz-question">
-      <p className="step quiz-progress" aria-live="polite">
-        {stepLabel} / 04
-      </p>
-      <h1 id="quiz-question" className="quiz-question">
-        {current.question}
-      </h1>
+      <div className="quiz-progress" aria-live="polite">
+        <span className="visually-hidden">
+          Step {stepLabel} of {totalLabel}
+        </span>
+        <ol className="quiz-dots" aria-hidden>
+          {STEPS.map((s, i) => {
+            const n = i + 1;
+            const state =
+              n < step ? "is-done" : n === step ? "is-current" : "";
+            return (
+              <li
+                key={s.key}
+                className={state ? `quiz-dot ${state}` : "quiz-dot"}
+              />
+            );
+          })}
+        </ol>
+      </div>
 
-      <ul className="quiz-options" role="list">
+      <div className="quiz-question-block">
+        <span className="quiz-question-icon" aria-hidden>
+          <StepIcon size={20} strokeWidth={1.5} />
+        </span>
+        <h1 id="quiz-question" className="quiz-question">
+          {current.question}
+        </h1>
+      </div>
+
+      <ul className={tileClass} role="list">
         {current.options.map((opt) => {
           const isSelected = selected === opt.value;
+          const Icon = QUIZ_OPTION_ICONS[opt.value];
           return (
             <li key={opt.value}>
               <button
@@ -182,7 +223,12 @@ export function TasteQuiz() {
                 }
                 onClick={() => onChoose(opt.value)}
               >
-                {opt.label}
+                {Icon ? (
+                  <span className="quiz-option-icon" aria-hidden>
+                    <Icon size={22} strokeWidth={1.5} />
+                  </span>
+                ) : null}
+                <span className="quiz-option-label">{opt.label}</span>
               </button>
             </li>
           );

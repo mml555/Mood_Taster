@@ -139,16 +139,25 @@ export function rank(
   dna: DnaProfile,
   session: SessionState,
 ): Recommendation {
-  const scored = CATALOG.map((food) =>
-    scoreFood(food, answers, dna, session),
-  ).sort((a, b) => {
-    if (b.score !== a.score) return b.score - a.score;
-    return a.food.id.localeCompare(b.food.id);
-  });
+  const pool =
+    answers.intent === "recipe"
+      ? CATALOG.filter((food) => food.recipe != null)
+      : CATALOG;
 
-  if (scored.length < 3) {
-    throw new Error("Catalog must contain at least three foods");
+  if (pool.length < 3) {
+    throw new Error(
+      answers.intent === "recipe"
+        ? "Catalog must contain at least three foods with recipes"
+        : "Catalog must contain at least three foods",
+    );
   }
+
+  const scored = pool
+    .map((food) => scoreFood(food, answers, dna, session))
+    .sort((a, b) => {
+      if (b.score !== a.score) return b.score - a.score;
+      return a.food.id.localeCompare(b.food.id);
+    });
 
   return {
     primary: scored[0],

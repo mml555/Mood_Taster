@@ -1,4 +1,5 @@
 import type { SessionState } from "./taste-types";
+import { parseAnswers } from "./validate";
 
 export const SESSION_KEY = "mood-taster-session";
 
@@ -16,15 +17,23 @@ export function readSession(): SessionState | null {
     const raw = sessionStorage.getItem(SESSION_KEY);
     if (!raw) return null;
     const parsed = JSON.parse(raw) as SessionState;
+    const answers = parseAnswers(parsed?.answers);
     if (
-      !parsed?.answers?.flavor ||
-      !parsed?.answers?.texture ||
+      !answers ||
       !Array.isArray(parsed.rejectedIds) ||
       !Array.isArray(parsed.servedIds)
     ) {
       return null;
     }
-    return parsed;
+    return {
+      answers,
+      rejectedIds: parsed.rejectedIds.filter(
+        (id): id is string => typeof id === "string",
+      ),
+      servedIds: parsed.servedIds.filter(
+        (id): id is string => typeof id === "string",
+      ),
+    };
   } catch {
     return null;
   }

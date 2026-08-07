@@ -1,6 +1,37 @@
+import Image from "next/image";
 import Link from "next/link";
+import { ArrowRight } from "lucide-react";
 import { SiteFooter } from "@/components/SiteFooter";
 import { SiteHeader } from "@/components/SiteHeader";
+import { ProfileNudge } from "@/components/ProfileNudge";
+import { FLOW_ICONS } from "@/lib/mood-icons";
+
+const PEEK_DISHES = [
+  {
+    id: "crispy-hot-honey-chicken-sandwich",
+    name: "Hot honey chicken",
+    image: "/food/crispy-hot-honey-chicken-sandwich.jpg",
+    alt: "Crispy fried chicken sandwich with honey drizzle",
+  },
+  {
+    id: "mango-with-tajin",
+    name: "Mango with Tajin",
+    image: "/food/mango-with-tajin.jpg",
+    alt: "Fresh mango slices dusted with Tajin",
+  },
+  {
+    id: "birria-tacos",
+    name: "Birria tacos",
+    image: "/food/birria-tacos.jpg",
+    alt: "Crispy birria tacos with consomme",
+  },
+  {
+    id: "avocado-toast",
+    name: "Avocado toast",
+    image: "/food/avocado-toast.jpg",
+    alt: "Avocado toast on rustic bread",
+  },
+] as const;
 
 export default function HomePage() {
   return (
@@ -11,62 +42,86 @@ export default function HomePage() {
           <p className="eyebrow">Taste by feeling</p>
           <h1 id="brand">Hungry?</h1>
           <p className="lede">
-            Let&apos;s figure out what you actually want. Four quick taps about
-            flavor, texture, weight, and how far you want to wander. One
-            specific dish. Not another endless menu.
+            Eat out or cook. Five quick taps. One dish. Swipe if it is not
+            right.
           </p>
           <div className="cta-row">
             <Link className="cta" href="/taste">
-              Start
+              Show me
+              <ArrowRight size={20} strokeWidth={1.5} aria-hidden />
             </Link>
           </div>
+
+          <ul className="hero-peek" aria-label="Dishes you might get">
+            {PEEK_DISHES.map((dish) => (
+              <li key={dish.id}>
+                <Image
+                  src={dish.image}
+                  alt={dish.alt}
+                  width={240}
+                  height={240}
+                  sizes="(max-width: 720px) 28vw, 140px"
+                  className="hero-peek-image"
+                />
+                <span className="hero-peek-name">{dish.name}</span>
+              </li>
+            ))}
+          </ul>
         </section>
 
         <section className="how" id="how" aria-labelledby="how-title">
-          <h2 id="how-title">Craving → match → taste</h2>
-          <p className="section-lede">
-            Three steps. One job each. No filter maze.
-          </p>
+          <h2 id="how-title">See. React. Taste.</h2>
+          <p className="section-lede">Three steps. One job each.</p>
           <ol className="flow">
             <li>
+              <span className="flow-icon" aria-hidden>
+                <FLOW_ICONS.feel size={24} strokeWidth={1.5} />
+              </span>
               <span className="step">01</span>
-              <h3>Craving</h3>
+              <h3>Feel</h3>
               <p>
-                Say how you want food to feel: hot, crunchy, spicy, light. Four
-                questions. Under twenty seconds.
+                Pick eat out or cook, then how you want food to feel. Five
+                taps.
               </p>
             </li>
             <li>
+              <span className="flow-icon" aria-hidden>
+                <FLOW_ICONS.match size={24} strokeWidth={1.5} />
+              </span>
               <span className="step">02</span>
               <h3>Match</h3>
               <p>
-                Get one specific dish, plus a short reason it fits what you just
-                told us.
+                Get one dish and a short why. Eat out finds nearby. Cook shows
+                the recipe.
               </p>
             </li>
             <li>
+              <span className="flow-icon" aria-hidden>
+                <FLOW_ICONS.react size={24} strokeWidth={1.5} />
+              </span>
               <span className="step">03</span>
-              <h3>Taste</h3>
+              <h3>React</h3>
               <p>
-                Rate it. Not feeling it? Take one different pick without
-                starting over. Your Taste DNA learns for next time.
+                Like it, skip it, or try again. Your Taste DNA learns as you
+                go.
               </p>
             </li>
           </ol>
         </section>
 
         <section className="about" id="about" aria-labelledby="about-title">
-          <h2 id="about-title">Built for the craving, not the calorie</h2>
+          <h2 id="about-title">Mood first</h2>
           <p>
-            Mood Taster is not a therapist, delivery service, or calorie
-            counter. It starts from how you want food to feel, then names one
-            dish you can actually go get or make.
+            Not a therapist. Not delivery. Not a calorie counter. Just the
+            dish that fits how you feel.
           </p>
           <div className="cta-row">
             <Link className="cta" href="/taste">
-              Find a dish
+              Show me
+              <ArrowRight size={20} strokeWidth={1.5} aria-hidden />
             </Link>
           </div>
+          <ProfileNudge context="home" />
         </section>
       </main>
       <SiteFooter />

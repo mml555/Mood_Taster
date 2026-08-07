@@ -4,17 +4,18 @@ Match how you feel to what you should taste. Mood first, menus second.
 
 ## Product
 
-- Flow: craving quiz → one dish → act (rate / reject) → Taste DNA
-- Client-only for Ship Night: no auth, no DB, no Places
+- Flow: Eat out or Cook → craving quiz → one dish → act → Taste DNA
+- Eat out: nearby places. Cook: catalog recipes (ingredients + steps)
 - Specific dishes only, never cuisine categories
+- Optional accounts (Supabase); guests work without an account
 
 ## Design
 
-- Two tones (`--ink`, `--paper`) + saffron `--accent`
-- No gradients, borders, shadows, or card grids
-- Quiz choices are type lists (tone + weight), not bordered pills
-- No semantic green/red for feedback
-- No em dashes in copy
+- Ghost White `--paper` `#fdfaff`, Indigo `--ink` `#510c85`, Gold `--accent` `#ffdf6e`
+- Rounded language (`--radius-card` 20px, buttons 14px). 8px spacing
+- No gradients, no outlined buttons, almost no shadows
+- Swipe + ♡ × ↻ on the result card
+- No emojis. No semantic green/red. No em dashes in copy
 
 ## Code
 

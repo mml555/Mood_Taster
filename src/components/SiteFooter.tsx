@@ -1,9 +1,19 @@
 import Link from "next/link";
+import Image from "next/image";
 
 export function SiteFooter() {
   return (
     <footer className="foot">
-      <p className="foot-brand">Mood Taster</p>
+      <p className="foot-brand">
+        <Image
+          className="foot-mark"
+          src="/brand/mark-purple-sm.png"
+          alt=""
+          width={28}
+          height={23}
+        />
+        Mood Taster
+      </p>
       <p className="foot-meta">
         <Link href="/prd">PRD</Link>
         {" · "}

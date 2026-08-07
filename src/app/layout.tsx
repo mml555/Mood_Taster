@@ -19,6 +19,13 @@ export const metadata: Metadata = {
     "Figure out what you actually want to eat in under 30 seconds. A few questions about your mood, then one specific pick. Not another endless menu.",
 };
 
+export const viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover" as const,
+  themeColor: "#fdfaff",
+};
+
 export default function RootLayout({
   children,
 }: Readonly<{

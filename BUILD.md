@@ -7,13 +7,12 @@ Scope: one night, nine tickets, four routes, no backend
 
 ## 1. What we are shipping
 
-Mood Taster asks four one-tap questions about what you are craving and returns one specific
+Mood Taster asks Eat out or Cook, then four craving taps, and returns one specific
 dish, not a category and not a menu. You can reject it and get another without redoing the
 quiz. Rating the result updates a local Taste DNA profile that visibly changes the next
 recommendation.
 
-Everything runs in the browser. No accounts, no database, no restaurant or delivery
-integration.
+Eat out shows nearby places. Cook shows ingredients and steps from the catalog.
 
 ### The judged demo (three minute budget)
 
@@ -21,7 +20,7 @@ This walk is the spec. If a change does not serve one of these ten steps, it is 
 
 1. Open the public URL in incognito. No login.
 2. Tap start.
-3. Answer four questions.
+3. Pick Eat out or Cook, then answer four craving questions.
 4. Receive a specific dish with a reason.
 5. Tap "Not feeling it".
 6. Receive a different dish that still matches the craving.
@@ -39,15 +38,33 @@ settled. Raise an objection before you start, not in a PR.
 
 | Ticket text says | We are doing | Why |
 |---|---|---|
-| Tailwind, deep purple, poppy yellow, large rounded controls | The existing ink, paper, saffron system. No Tailwind. Flat fills, square corners, spacing led | `.cursor/rules/design-system.mdc` and `CLAUDE.md` are checked in and win |
+| Tailwind, deep purple, poppy yellow, large rounded controls | Brand Guide v1 without Tailwind: Ghost White / Indigo / Gold, CSS variables, rounded cards and buttons | `/brand` and `.cursor/rules/design-system.mdc` are source of truth |
 | "Create the Next.js application" | It already exists (Next 16, React 19, TypeScript). Ticket 1 shrinks to stubbing four routes and confirming the deploy | Repo state |
 | Homepage is the marketing hero | `/` becomes the app entry ("Hungry?"). `/prd` and `/strategy` stay reachable from the footer | Saves a tap in a three minute demo |
-| `PRD.md` lists Taste DNA as out of scope | `PRD.md` is knowingly left stale. Time goes to code | Deliberate call, noted here so nobody "fixes" it mid build |
+| Early Ship Night tickets vs later PRD | `PRD.md` v1.0 + `BACKLOG.md` are the product target; this file remains the Ship Night build record | Post-demo work is ticketed in BACKLOG, not by rewriting these tickets |
 | "No external AI is required for the core flow" | Preserved exactly. AI is an enhancement layer and never a dependency | Ticket 4 |
 
-**Dropped, do not build:** Google Places or any map API, the three lane structure (Go Out /
-Make Something / Grab a snack), recipes, and PostHog analytics. Feedback lives entirely in
-local Taste DNA.
+**Dropped, do not build:** the three lane snack path (Grab a snack), PostHog
+analytics, live menus, and delivery/reservation booking.
+
+**Now in scope (added after Ship Night tickets):** Eat out vs Cook as the first
+quiz step, and full catalog recipes (ingredients + steps) for Cook mode.
+
+**Added after the tickets were written**, on an explicit call, so the "not tonight" list in
+section 11 no longer governs these:
+
+| Surface | What it does |
+|---|---|
+| Eat out / Cook | First quiz step. Cook filters to dishes with recipes; Eat out keeps Nearby |
+| Catalog recipes | Ingredients and steps on the result when intent is Cook |
+| AI why line | Azure rewrites the deterministic explanation after paint |
+| AI riff | One practical tip about eating the dish |
+| Conversational reject | "Not feeling it" takes a reason ("too heavy"), and the model moves the craving axes. Ranking stays deterministic |
+| Google Places | Nearby spots on the Eat out result screen, auto-loaded on mount |
+
+Places auto-loads rather than waiting for a tap. That fires a location permission prompt inside
+the judged flow, which was raised and accepted. The mitigation is that the same slot renders a
+maps deep link the instant permission is denied, so the region is never dead.
 
 ---
 
@@ -346,7 +363,7 @@ are preserved when stepping backward. On completion, route to
 `/result/<primaryId>?f=&t=&h=&a=` with the answers in the query string (section 3).
 
 - [ ] Starts with no account
-- [ ] Exactly four questions
+- [ ] Intent step plus four craving questions (five taps total)
 - [ ] Usable one handed on mobile
 - [ ] Back does not restart the flow
 - [ ] Completed answers reach the engine
@@ -472,10 +489,30 @@ a judge.
 
 Two providers, two phases, and they do not overlap.
 
-| Phase | Provider | Runs | Ships to production |
-|---|---|---|---|
-| Build time | Gemini free tier | Once, as a script | No. Only its committed output |
-| Runtime | Azure OpenAI | On the result screen | Yes, as optional enhancement |
+Runtime uses a **provider chain: Gemini first, Azure OpenAI as backup.** Measured per call,
+including connection setup:
+
+| Provider | Latency | Notes |
+|---|---|---|
+| Gemini 3.1 Flash Lite | 1.8s to 2.2s | Free, and the faster of the two. One call in three hung outright during testing |
+| Azure `gpt-5.6-terra` | 2.0s to 3.9s | ~1.0s of that is generation. Billed, but did not fail once |
+
+Gemini leads because it is faster and free. Azure sits behind it because Gemini is the less
+reliable of the two. Gemini's timeout is 6s, Azure's is 8s.
+
+**Where the latency actually goes.** Generation is only about 1s. Connection setup (DNS, TCP,
+TLS) measured 0.7s to 1.3s per cold connection, which is 20% to 35% of the total. Node's global
+fetch agent pools connections, so warm instances skip it. Do not introduce custom agents.
+
+Two changes cut real time:
+
+- **One request, not two.** `/api/explain` originally issued parallel calls for the why line and
+  the riff. It now asks for both in a single JSON reply. That halves quota cost and, on a cold
+  instance, halves the handshakes. End to end this took the route from about 4s to **1.3s cold
+  and 0.7s warm**.
+- **Timeouts sized to measurement, not to guesswork.** The original 2.5s ceiling was below
+  Azure's actual latency, so every call aborted and the feature silently did nothing while
+  appearing wired up.
 
 ### Why explanations are precomputed
 
@@ -526,6 +563,46 @@ engine -> dish + precomputed explanation   (instant, from JSON, always correct)
 The floor here is an AI-written sentence that a human already approved, not a template. If
 Azure never responds, the demo is still showing generated copy.
 
+**We are on the Foundry v1 Responses API**, not the classic Azure OpenAI surface. Getting this
+wrong costs an hour, so it is spelled out:
+
+| | Classic (do not use) | v1 GA (ours) |
+|---|---|---|
+| Path | `/openai/deployments/<name>/chat/completions` | `/openai/v1/responses` |
+| `api-version` | Required, requests fail without it | **Not required. There is no such variable** |
+| Deployment | In the URL path | In the body as `model` |
+| Body | `messages` | `input`, plus optional `instructions` |
+| Client | `AzureOpenAI()` | Plain `OpenAI()` with `baseURL`, or raw `fetch` |
+
+Minimal call, which is the whole integration:
+
+```
+POST https://<resource>.services.ai.azure.com/openai/v1/responses
+api-key: $AZURE_OPENAI_API_KEY
+Content-Type: application/json
+
+{ "model": "gpt-5.6-terra",
+  "instructions": "<the one sentence rule>",
+  "input": "<dish name, matched attributes, current line>",
+  "max_output_tokens": 60 }
+```
+
+Read the text off `output_text`. Use raw `fetch` rather than adding the `openai` package. It is
+a single POST, and `coding-standards.mdc` says to avoid abstraction until a second use appears.
+
+**Measured behaviour of this deployment**, confirmed against the live resource rather than
+assumed:
+
+- **Latency is about 4 seconds**, not the 2.5s this document originally guessed. Any timeout
+  below that silently returns nothing. `/api/explain` uses 8s, which is safe because it fires
+  after paint on an already-complete result screen.
+- **There is no top-level `output_text` in the REST response.** That field is an SDK
+  convenience. Raw callers must walk `output[]` for the item with `type: "message"`, then its
+  `content[]` for `type: "output_text"`. Coding to the docs' example returns `undefined`.
+- **It is a reasoning model**, defaulting to `effort: "medium"`. We send `low`. Budget
+  `max_output_tokens` well above the sentence length you want, since reasoning is spent first.
+- `store: true` is the default, so Azure retains responses.
+
 Rules:
 
 - Keys stay server side in `/api/explain`. Never `NEXT_PUBLIC_`. There is no legitimate
@@ -541,13 +618,36 @@ Rules:
   | `GEMINI_API_KEY` | build | Local only. Never in Vercel |
   | `GEMINI_MODEL` | build | Must be a Flash Lite variant. The 20 RPD models cannot finish a run |
   | `GEMINI_BATCH_SIZE` | build | Default 10. Lower values risk exceeding the daily ceiling |
-  | `AZURE_OPENAI_ENDPOINT` | runtime | No trailing slash |
-  | `AZURE_OPENAI_API_KEY` | runtime | |
-  | `AZURE_OPENAI_DEPLOYMENT` | runtime | The **deployment** name, not the model name. Most common Azure misconfiguration |
-  | `AZURE_OPENAI_API_VERSION` | runtime | Sent as `?api-version=`. Azure requests fail without it |
+  | `AZURE_OPENAI_ENDPOINT` | runtime | Includes the `/openai/v1/` suffix, **with** trailing slash |
+  | `AZURE_OPENAI_API_KEY` | runtime | Sent as the `api-key` header |
+  | `AZURE_OPENAI_DEPLOYMENT` | runtime | Deployment name, sent in the body as `model`. Currently `gpt-5.6-terra` |
+  | `AZURE_OPENAI_REASONING_EFFORT` | runtime | Defaults to `low` in code. The model's own default is `medium`, which costs latency |
+  | `GOOGLE_PLACES_API_KEY` | runtime | **Must not carry an HTTP referrer restriction.** See below |
 
-  The four Azure variables are all-or-nothing. Three of four means "Azure not configured" and
+  **The Places key is referrer restricted, and that is handled in code.** Google enforces the
+  restriction against the `Referer` header, which a server side request does not send by
+  default, producing `403 API_KEY_HTTP_REFERRER_BLOCKED`. `/api/places` therefore sets `Referer`
+  explicitly from `PLACES_REFERRER`, and uses `node:https` rather than `fetch` so the header
+  goes out verbatim.
+
+  **A shell-exported variable beats `.env`.** `~/.zshrc` exported a different
+  `GOOGLE_PLACES_API_KEY` (twice), and because `process.env` wins over `.env` files, the app
+  silently used the wrong key and returned `403 PERMISSION_DENIED` on every lookup while `.env`
+  looked correct. If Places fails, check for an ambient export before you touch anything else:
+
+  ```
+  echo $GOOGLE_PLACES_API_KEY          # should be empty
+  grep -n GOOGLE_PLACES_API_KEY ~/.zshrc
+  ```
+
+  The route logs the first ten characters of the key it actually used on a non-200, which makes
+  this visible instead of silent.
+
+  The three Azure variables are all-or-nothing. Two of three means "Azure not configured" and
   the call is skipped, not attempted and failed.
+
+  There is deliberately **no `AZURE_OPENAI_API_VERSION`**. The v1 GA endpoint does not take one.
+  If someone adds it back, they are building against the classic path by mistake.
 - **Model output is untrusted input**, at build time and at runtime both. Strip markup and
   control characters, collapse whitespace, enforce one sentence and a length cap, and reject any
   em dash, which this repo bans everywhere. A violation at build time fails the entry loudly so
@@ -560,52 +660,46 @@ Rules:
 
 ## 8. Design system
 
-`.cursor/rules/design-system.mdc` governs every screen. Two tones plus one accent, flat fills,
-separation by space and type.
+`.cursor/rules/design-system.mdc` and `/brand` govern every screen. Brand Guide v1:
+Ghost White canvas, Indigo primary, Royal Gold highlight.
 
-- `--ink` `#14110f`, `--paper` `#f2ebe0`, `--accent` `#e4a01a` (saffron, small marks only).
-  Every other neutral is a `color-mix` of the first two. No fourth hue.
-- **No gradients, no borders, no shadows, no card grids, no `border-radius` above 2px.**
+- `--paper` `#fdfaff`, `--ink` `#510c85`, `--accent` `#ffdf6e`.
+  Every other neutral is a `color-mix` of paper and ink. No fourth hue.
+- Rounded language: cards 20px, buttons 14px, pills fully rounded. 8px spacing.
+- No gradients. No outlined buttons. Shadows rare (main result card only).
 - Extend `src/app/globals.css`. Use the existing spacing ramp, do not invent values.
-- Primary actions invert the tones (paper background, ink text). That is the only filled
-  element in the system, and `.cta` already implements it.
+- Primary actions: indigo fill, light text (`.cta`). Highlight: gold fill, indigo text.
 - Keep `:focus-visible` rings on everything interactive.
 
-**Quiz choices are the trap.** A four option question wants bordered pills. Build it as a large
-type list separated by the spacing ramp. Selected state reads as tone and weight (`--paper`
-against `--paper-quiet`), never a ring or a box. The progress indicator reuses the accent
-`.step` treatment as "01 / 04".
+**Quiz choices.** Soft rounded selectable rows (`--ink-raised`). Selected state is
+indigo fill with light text. Progress reads as "01 / 04".
 
-**Feedback buttons are type, not colored chips.** There is no success green or failure red in
-this palette. Nailed it and Nope are distinguished by placement and weight.
+**Result reactions.** Swipe right / ♡ = like (`nailed`). Swipe left / × = nope then
+next. ↻ = try again without rating. Quiet links keep Kinda and conversational Why?.
+No success green or failure red.
 
 ### Icons
 
-`lucide-react` is the icon set and the only new runtime dependency in the build. No emoji
+Unicode reaction marks (♡ × ↻) plus `lucide-react` where needed. No emoji
 anywhere in the product.
 
-- Icons inherit `currentColor` and sit in ink or paper. Never saffron, which is reserved for
-  small type marks.
-- One stroke width across the app (`strokeWidth={1.5}`), sizes from a short set (16, 20, 24).
-- Icons are functional, never decorative. If an icon sits next to a label that already says the
-  same thing, drop the icon.
+- Icons inherit `currentColor`. Gold is for highlights, not every icon.
+- One stroke width for lucide (`strokeWidth={1.5}`), sizes from a short set (16, 20, 24).
+- Icons are functional, never decorative.
 - Every icon-only control needs an `aria-label`. Icons inside a labelled button get
   `aria-hidden`.
 
-Working map, adjust in the ticket:
+Working map:
 
-| Surface | Icon |
+| Surface | Control |
 |---|---|
-| Quiz back control | `ArrowLeft` |
-| Not feeling it | `RefreshCw` |
+| Quiz back | `ArrowLeft` / ← |
+| Like | ♡ |
+| Not for me | × |
+| Try again | ↻ |
 | Why this? (expand) | `ChevronDown` |
-| Nailed it / Kinda / Nope | `Check` / `Minus` / `X` |
 | Taste DNA link and dashboard | `Sparkles` |
-| Reset profile | `RotateCcw` |
-
-The rating trio is the place to be careful. `Check` and `X` read as green and red in most
-products, and this palette has neither. They stay ink on paper, distinguished by placement and
-weight, exactly like the labels beside them.
+| Reset | `RotateCcw` |
 
 ### Food images
 
@@ -623,18 +717,15 @@ discover a CDN timeout, and it avoids `remotePatterns` config, rate limits, and 
 photo being taken down between now and judging. Total payload lands around 3MB, which is fine
 in `public/`.
 
-**Rendering, and this is where the design system bites:**
+**Rendering:**
 
 - Use `next/image` with explicit `width` and `height`, `sizes` set for a 390px viewport, and
   `priority` on the result screen hero so it is not the thing the judge waits for.
-- Square corners. No border, no shadow, no rounded mask, no gradient scrim over the photo. A
-  photo is content, so it is allowed to be the one rich element on the screen, but it does not
-  get decoration layered on it.
-- Full bleed to the page inset, with the dish name below it and not overlaid. Text over
-  photography needs a scrim to stay legible, and scrims are banned.
+- Inside the recommendation card, media uses `--radius-card` masking. No gradient scrim over
+  the photo. Dish name sits below, not overlaid.
 - `imageAlt` is required on every food. Empty alt is not acceptable here, the photo carries
   real information.
-- **Ship a fallback.** If an image 404s or is still being sourced, render a flat `--paper-quiet`
+- **Ship a fallback.** If an image 404s or is still being sourced, render a flat `--ink-soft`
   block at the same aspect ratio with the dish name in it. A broken image icon on stage is
   worse than no image.
 
@@ -648,7 +739,7 @@ to put a burger under "poke bowl". This needs a human pass, not a search-and-pas
 | # | Risk | Mitigation |
 |---|---|---|
 | 1 | **Hydration mismatch.** Every screen reads `sessionStorage` or `localStorage`. A read during render blanks the page | All storage reads go inside `useEffect`. Render a neutral first paint |
-| 2 | **Quiz UI versus the design system.** Borders and rounded pills are banned | Section 8. Tone and weight carry selection |
+| 2 | **Quiz UI versus the design system.** Outlined pills fight Brand Guide v1 | Section 8. Soft rounded rows, indigo selected fill |
 | 3 | **Catalog coverage.** Fewer than five matches on a path returns something obviously wrong | Ticket 2 ships a coverage assertion, not just 30 rows |
 | 4 | **DNA learning rate.** A flat delta lets one rating swing a dimension and fails Ticket 7 | Decaying rate, section 5 |
 | 5 | **The explanation generation run is a schedule bottleneck.** It cannot start until both the catalog and the engine are done, and a catalog edit afterwards means regenerating | Freeze the catalog before the run. Batch at 10 per request so a regeneration costs ~96 of the 500 daily requests, not 960 |
@@ -692,11 +783,14 @@ to put a burger under "poke bowl". This needs a human pass, not a search-and-pas
 
 No tickets, no branches, no "quick" additions:
 
-authentication, restaurants or map APIs, live menu search, recipes, saved history, favorites,
-quests, badges, XP, Food Passport, social functionality, native apps, image recognition.
+snack lane, live menu search, delivery or reservation booking, saved history,
+favorites, quests, badges, XP, Food Passport, social functionality, native apps,
+image recognition.
 
-Also dropped from earlier drafts of this project: Google Places, the three lane structure, and
-PostHog analytics.
+Eat out vs Cook, catalog recipes, Google Places on Eat out results, and optional
+auth are in scope now (see section 2).
+
+Also dropped from earlier drafts of this project: PostHog analytics.
 
 ---
 
@@ -732,6 +826,6 @@ rejection sinking, and the bound on a single rating's effect. It is the safest t
    an already-good sentence. Somebody should confirm the cost of a night of team testing plus
    judging is acceptable, and decide whether it stays on for the demo or is a nice-to-have that
    gets switched off by unsetting four variables.
-3. `PRD.md` stays stale by choice. It currently lists Taste DNA as out of scope and describes a
-   three lane flow that we are not building. `/prd` is publicly linked.
+3. Post-Ship Night product work is tracked in `BACKLOG.md` (P0→P2) against `PRD.md` v1.0.
+   `/prd` mirrors the PRD. This BUILD file stays the Ship Night record.
 4. Git commits, making the repository public, and the Vercel deploy need an explicit go ahead.
