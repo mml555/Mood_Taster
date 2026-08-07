@@ -51,6 +51,13 @@
   --press-depth-sm: 4px;
   --shadow-card: 0 12px 32px color-mix(in srgb, var(--ink) 12%, transparent);
 
+  /* Control rhythm: one height, one pad, one icon scale */
+  --control-h: 3.25rem;
+  --control-pad-x: 1.25rem;
+  --icon-sm: 1rem;
+  --icon-md: 1.25rem;
+  --icon-lg: 1.5rem;
+
   /* Comfortaa Regular (400) is the brand face; heavier weights for hierarchy */
   --font-display: var(--font-comfortaa), "Comfortaa", system-ui, sans-serif;
   --font-body: var(--font-comfortaa), "Comfortaa", system-ui, sans-serif;
@@ -262,7 +269,8 @@ button {
   width: 100%;
   max-width: var(--measure);
   margin-inline: auto;
-  padding: var(--space-4) var(--page-inset) var(--space-3);
+  padding: max(var(--space-4), env(safe-area-inset-top)) var(--page-inset)
+    var(--space-3);
   text-align: center;
 }
 
@@ -436,7 +444,7 @@ button {
   border-bottom-width: 2px;
 }
 
-/* Secondary: white, indigo border, pressable. */
+/* Secondary: white, soft edge, pressable. */
 .cta-secondary,
 .press-btn-secondary {
   display: inline-flex;
@@ -449,8 +457,8 @@ button {
   font-size: 1.05rem;
   font-weight: 700;
   text-decoration: none;
-  border: var(--press-border) solid color-mix(in srgb, var(--ink) 20%, transparent);
-  border-bottom: var(--press-depth) solid color-mix(in srgb, var(--ink) 20%, transparent);
+  border: 1px solid color-mix(in srgb, var(--ink) 10%, transparent);
+  border-bottom: var(--press-depth) solid color-mix(in srgb, var(--ink) 14%, transparent);
   border-radius: var(--radius-btn);
   cursor: pointer;
   transition: transform 0.15s var(--ease), border-bottom-width 0.15s var(--ease),
@@ -559,8 +567,8 @@ button {
 /* Quiet home below-fold: one short column, no competing CTAs. */
 .how-quiet {
   /* Inherits --measure from .how. Prose inside stays short via its own caps. */
-  padding-top: var(--space-3);
-  padding-bottom: var(--space-5);
+  padding-top: var(--space-2);
+  padding-bottom: var(--space-4);
   text-align: center;
 }
 
@@ -1279,7 +1287,7 @@ button {
   width: 100%;
   max-width: var(--measure);
   margin: 0 auto;
-  padding: var(--space-3) var(--page-inset) var(--space-5);
+  padding: var(--space-3) var(--page-inset) var(--space-4);
   min-height: auto;
 }
 
@@ -1468,8 +1476,8 @@ button {
   font-size: 0.9rem;
   font-weight: 700;
   cursor: pointer;
-  border: var(--press-border) solid color-mix(in srgb, var(--ink) 20%, transparent);
-  border-bottom: var(--press-depth) solid color-mix(in srgb, var(--ink) 20%, transparent);
+  border: 1px solid color-mix(in srgb, var(--ink) 8%, transparent);
+  border-bottom: var(--press-depth) solid color-mix(in srgb, var(--ink) 14%, transparent);
   border-radius: var(--radius-card);
   box-shadow: none;
   transition: background 0.2s ease, color 0.2s ease, transform 0.15s var(--ease),
@@ -1482,8 +1490,8 @@ button {
 .quiz-options-stack:has(.quiz-option-desc) .quiz-option {
   flex-direction: row;
   text-align: left;
-  min-height: 5.5rem;
-  padding: var(--space-4);
+  min-height: 5rem;
+  padding: var(--space-3) var(--space-4);
   gap: var(--space-3);
 }
 
@@ -1591,8 +1599,8 @@ button {
   font-weight: 500;
   text-decoration: none;
   cursor: pointer;
-  border: var(--press-border) solid color-mix(in srgb, var(--ink) 10%, transparent);
-  border-bottom: var(--press-depth-sm) solid color-mix(in srgb, var(--ink) 10%, transparent);
+  border: 1px solid color-mix(in srgb, var(--ink) 8%, transparent);
+  border-bottom: var(--press-depth-sm) solid color-mix(in srgb, var(--ink) 12%, transparent);
   border-radius: var(--radius-sm);
 }
 
@@ -1685,8 +1693,8 @@ button {
   padding: 0;
   overflow: hidden;
   background: #fff;
-  border: var(--press-border) solid color-mix(in srgb, var(--ink) 10%, transparent);
-  border-bottom: 8px solid color-mix(in srgb, var(--ink) 10%, transparent);
+  border: 0;
+  border-bottom: var(--press-depth) solid color-mix(in srgb, var(--ink) 10%, transparent);
   border-radius: var(--radius-xl);
   box-shadow: var(--shadow-card);
   user-select: none;
@@ -1880,7 +1888,7 @@ button {
   padding: var(--space-3) var(--page-inset);
   background: var(--paper);
   /* Sit just above the fixed Taste · Stats · Profile bar. */
-  bottom: 4.25rem;
+  bottom: 3.75rem;
   padding-bottom: var(--space-3);
 }
 
@@ -1896,8 +1904,8 @@ button {
   font-size: 1.05rem;
   font-weight: 700;
   cursor: pointer;
-  border: var(--press-border) solid color-mix(in srgb, var(--ink) 10%, transparent);
-  border-bottom: var(--press-depth) solid color-mix(in srgb, var(--ink) 10%, transparent);
+  border: 1px solid color-mix(in srgb, var(--ink) 8%, transparent);
+  border-bottom: var(--press-depth) solid color-mix(in srgb, var(--ink) 12%, transparent);
   border-radius: var(--radius-btn);
   transition: background 0.2s ease, transform 0.15s var(--ease),
     border-bottom-width 0.15s var(--ease);
@@ -1933,7 +1941,7 @@ button {
 }
 
 .reaction-btn-like .reaction-label {
-  font-size: 1.15rem;
+  font-size: 1rem;
 }
 
 .reaction-btn-like:hover:not(:disabled),
@@ -1944,7 +1952,9 @@ button {
 
 .reaction-btn-nope {
   flex: 0 0 auto;
-  max-width: 7.5rem;
+  width: var(--control-h);
+  max-width: none;
+  padding-inline: 0;
   color: color-mix(in srgb, var(--ink) 70%, transparent);
 }
 
@@ -3312,7 +3322,7 @@ button {
   }
 
   .product-main-with-nav .reaction-dock {
-    bottom: 4.25rem;
+    bottom: 3.75rem;
     padding-bottom: var(--space-3);
   }
 
@@ -3878,10 +3888,13 @@ button {
   right: 0;
   bottom: 0;
   z-index: 40;
-  background: #fff;
-  border-top: 2px solid color-mix(in srgb, var(--ink) 10%, transparent);
-  padding: 0.4rem var(--page-inset) 0;
-  padding-bottom: max(0.5rem, env(safe-area-inset-bottom));
+  background: color-mix(in srgb, var(--paper) 92%, transparent);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border-top: 0;
+  box-shadow: 0 -8px 24px color-mix(in srgb, var(--ink) 6%, transparent);
+  padding: 0.35rem var(--page-inset) 0;
+  padding-bottom: max(0.35rem, env(safe-area-inset-bottom));
 }
 
 .product-bottom-nav-list {
@@ -3890,7 +3903,7 @@ button {
   padding: 0;
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 0.25rem;
+  gap: 0.15rem;
   width: 100%;
   max-width: var(--measure);
 }
@@ -3900,13 +3913,13 @@ button {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 0.15rem;
-  min-height: 3.5rem;
-  padding: 0.25rem 0.2rem;
+  gap: 0.1rem;
+  min-height: 3.15rem;
+  padding: 0.2rem 0.15rem;
   border-radius: var(--radius-btn);
   color: var(--paper-muted);
   text-decoration: none;
-  font-size: 0.7rem;
+  font-size: 0.68rem;
   font-weight: 700;
   letter-spacing: 0.01em;
   -webkit-tap-highlight-color: transparent;
@@ -3916,7 +3929,9 @@ button {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 0.5rem;
+  width: 2.5rem;
+  height: 2.5rem;
+  padding: 0;
   border-radius: var(--radius-lg);
 }
 
@@ -3935,12 +3950,12 @@ button {
 }
 
 .product-main-with-nav {
-  padding-bottom: max(5.5rem, calc(env(safe-area-inset-bottom) + 4.5rem));
+  padding-bottom: max(5rem, calc(env(safe-area-inset-bottom) + 4rem));
 }
 
 .product-main-with-nav:has(.result) {
   /* Room for sticky reactions above the fixed bottom nav. */
-  padding-bottom: max(11rem, calc(env(safe-area-inset-bottom) + 9.5rem));
+  padding-bottom: max(10rem, calc(env(safe-area-inset-bottom) + 8.5rem));
 }
 
 /* Skeletons to prevent visual whiplash & layout shifts */
@@ -3959,11 +3974,11 @@ button {
 }
 
 .skeleton-card {
-  background: var(--paper);
+  background: var(--ink-raised);
   border-radius: var(--radius-card);
   padding: var(--space-4);
   margin-bottom: var(--space-4);
-  border: 1px solid var(--ink-raised);
+  border: 0;
   animation: pulse-soft 1.8s ease-in-out infinite;
 }
 
@@ -4143,9 +4158,9 @@ button {
 }
 
 .top {
-  border-bottom: 2px solid color-mix(in srgb, var(--ink) 5%, transparent);
-  backdrop-filter: blur(12px);
-  background: color-mix(in srgb, var(--paper) 80%, transparent);
+  border-bottom: 0;
+  backdrop-filter: none;
+  background: transparent;
 }
 
 .nav-signin,
@@ -4185,8 +4200,8 @@ button {
   position: relative;
   display: flex;
   flex-direction: column;
-  gap: var(--space-4);
-  padding: var(--space-4) 0 var(--space-5);
+  gap: var(--space-3);
+  padding: var(--space-3) 0 var(--space-4);
   overflow: hidden;
 }
 
@@ -4226,32 +4241,33 @@ button {
 .stats-card {
   position: relative;
   overflow: hidden;
-  padding: var(--space-4);
+  padding: var(--space-3);
   background: #fff;
-  border: var(--press-border) solid color-mix(in srgb, var(--ink) 10%, transparent);
-  border-bottom: var(--press-depth) solid color-mix(in srgb, var(--ink) 10%, transparent);
+  border: 0;
+  border-bottom: var(--press-depth-sm) solid color-mix(in srgb, var(--ink) 8%, transparent);
   border-radius: var(--radius-card);
+  box-shadow: 0 8px 20px color-mix(in srgb, var(--ink) 6%, transparent);
 }
 
 .stats-card-ink {
   background: var(--ink);
   color: var(--paper);
-  border-color: var(--ink-deep);
   border-bottom-color: var(--ink-deep);
+  box-shadow: none;
 }
 
 .stats-card-value {
   display: block;
   margin-top: var(--space-2);
-  font-size: 2rem;
+  font-size: 1.75rem;
   font-weight: 700;
   line-height: 1;
 }
 
 .stats-card-label {
   display: block;
-  margin-top: 0.35rem;
-  font-size: 0.85rem;
+  margin-top: 0.3rem;
+  font-size: 0.8rem;
   font-weight: 700;
   opacity: 0.7;
 }
@@ -4264,11 +4280,12 @@ button {
 .stats-cravings {
   position: relative;
   z-index: 1;
-  padding: var(--space-4);
+  padding: var(--space-3);
   background: #fff;
-  border: var(--press-border) solid color-mix(in srgb, var(--ink) 10%, transparent);
-  border-bottom: var(--press-depth) solid color-mix(in srgb, var(--ink) 10%, transparent);
+  border: 0;
+  border-bottom: var(--press-depth-sm) solid color-mix(in srgb, var(--ink) 8%, transparent);
   border-radius: var(--radius-card);
+  box-shadow: 0 8px 20px color-mix(in srgb, var(--ink) 6%, transparent);
 }
 
 .stats-cravings h2 {
@@ -4397,10 +4414,12 @@ button {
 
 .profile-radar-card {
   background: #fff;
-  border: var(--press-border) solid color-mix(in srgb, var(--ink) 10%, transparent);
+  border: 0;
+  border-bottom: var(--press-depth-sm) solid color-mix(in srgb, var(--ink) 8%, transparent);
   border-radius: var(--radius-card);
   padding: var(--space-3);
   height: 280px;
+  box-shadow: 0 8px 20px color-mix(in srgb, var(--ink) 6%, transparent);
 }
 
 .profile-settings {
@@ -4416,8 +4435,10 @@ button {
 
 .profile-settings-list {
   background: #fff;
-  border: var(--press-border) solid color-mix(in srgb, var(--ink) 10%, transparent);
+  border: 0;
+  border-bottom: var(--press-depth-sm) solid color-mix(in srgb, var(--ink) 8%, transparent);
   border-radius: var(--radius-card);
+  box-shadow: 0 8px 20px color-mix(in srgb, var(--ink) 6%, transparent);
   overflow: hidden;
 }
 
@@ -4473,8 +4494,8 @@ button {
   margin-inline: auto;
   padding: var(--space-5);
   background: #fff;
-  border: var(--press-border) solid color-mix(in srgb, var(--ink) 10%, transparent);
-  border-bottom: 8px solid color-mix(in srgb, var(--ink) 10%, transparent);
+  border: 0;
+  border-bottom: var(--press-depth) solid color-mix(in srgb, var(--ink) 10%, transparent);
   border-radius: var(--radius-xl);
   box-shadow: var(--shadow-card);
   text-align: center;
@@ -4511,7 +4532,7 @@ button {
   justify-content: space-between;
   gap: var(--space-2);
   padding-bottom: var(--space-2);
-  border-bottom: 2px solid color-mix(in srgb, var(--ink) 10%, transparent);
+  border-bottom: 0;
 }
 
 .recipe-exp-title {
@@ -4535,7 +4556,7 @@ button {
   padding: 0.65rem 1rem;
   font-weight: 700;
   border-radius: var(--radius-sm);
-  border: var(--press-border) solid color-mix(in srgb, var(--ink) 10%, transparent);
+  border: 1px solid color-mix(in srgb, var(--ink) 8%, transparent);
   background: #fff;
   color: var(--ink);
   cursor: pointer;
@@ -4563,8 +4584,8 @@ button {
 .recipe-exp-meta-card {
   text-align: center;
   padding: var(--space-3);
-  background: #fff;
-  border: var(--press-border) solid color-mix(in srgb, var(--ink) 10%, transparent);
+  background: var(--ink-raised);
+  border: 0;
   border-radius: var(--radius-lg);
 }
 

@@ -47,7 +47,7 @@ export function ProductBottomNav({ current }: ProductBottomNavProps) {
                       : "product-bottom-nav-icon"
                   }
                 >
-                  <Icon size={28} strokeWidth={active ? 2 : 1.75} aria-hidden />
+                  <Icon size={22} strokeWidth={active ? 2 : 1.75} aria-hidden />
                 </span>
                 <span>{label}</span>
               </Link>
