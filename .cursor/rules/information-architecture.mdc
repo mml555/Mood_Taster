@@ -37,8 +37,8 @@ Keep this sequence intact. Do not bury mood capture behind long onboarding.
 
 ## Navigation rules
 
-- Primary nav: Mood → Results path only until product expands
-- Footer: PRD, Strategy, Brand, Taste DNA, Favorites, Privacy, GitHub
+- Primary chrome: Taste · Stats · Profile tab bar (no site header or footer)
+- Doc pages: brand home link in the hero only
 - Avoid mega-menus, pill clusters, and competing CTAs on the same surface
 
 ## Naming

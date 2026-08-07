@@ -799,12 +799,12 @@ button {
 .doc-page .doc {
   position: relative;
   z-index: 1;
-  /* Same frame as every other page, so the PRD and Strategy bodies line up
-     with the nav above them instead of sitting 32px inside it. */
+  /* Same frame as every other page. */
   width: 100%;
   max-width: var(--measure);
   margin: 0 auto;
-  padding: 0 var(--page-inset) var(--space-6);
+  padding: max(var(--space-3), env(safe-area-inset-top)) var(--page-inset)
+    var(--space-6);
 }
 
 .doc-hero {
@@ -1871,6 +1871,19 @@ button {
   margin-top: var(--space-3);
 }
 
+.product-main-with-nav .reaction-dock {
+  position: sticky;
+  z-index: 5;
+  margin-top: var(--space-4);
+  margin-left: calc(-1 * var(--page-inset));
+  margin-right: calc(-1 * var(--page-inset));
+  padding: var(--space-3) var(--page-inset);
+  background: var(--paper);
+  /* Sit just above the fixed Taste · Stats · Profile bar. */
+  bottom: 4.25rem;
+  padding-bottom: var(--space-3);
+}
+
 .reaction-btn {
   display: inline-flex;
   align-items: center;
@@ -2551,6 +2564,28 @@ button {
   color: var(--paper-muted);
   font-size: 1rem;
   line-height: 1.5;
+}
+
+/*
+ * Model copy usually arrives with the first paint, prefetched during the quiz
+ * interstitial. When it lands late it replaces a line already on screen, so it
+ * dissolves in rather than snapping. Slow and small on purpose: this should
+ * read as the line settling, not as a second thing happening.
+ */
+.result-desc.is-polished,
+.result-riff.is-polished {
+  animation: copy-settle 520ms ease-out both;
+}
+
+@keyframes copy-settle {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .result-act-link {
@@ -3276,6 +3311,11 @@ button {
     background: var(--paper);
   }
 
+  .product-main-with-nav .reaction-dock {
+    bottom: 4.25rem;
+    padding-bottom: var(--space-3);
+  }
+
   .reaction-quiet {
     margin-top: var(--space-2);
     gap: var(--space-3);
@@ -3898,10 +3938,9 @@ button {
   padding-bottom: max(5.5rem, calc(env(safe-area-inset-bottom) + 4.5rem));
 }
 
-.product-main-with-nav .reaction-dock {
-  /* Sit just above the fixed Taste · Stats · Profile bar. */
-  bottom: 4.25rem;
-  padding-bottom: var(--space-3);
+.product-main-with-nav:has(.result) {
+  /* Room for sticky reactions above the fixed bottom nav. */
+  padding-bottom: max(11rem, calc(env(safe-area-inset-bottom) + 9.5rem));
 }
 
 /* Skeletons to prevent visual whiplash & layout shifts */

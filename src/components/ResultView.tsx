@@ -53,6 +53,7 @@ import { confirmPassportExperience, readPassport } from "@/lib/passport";
 import { recordMeaningfulAction } from "@/lib/streak";
 import { awardRatingXp, overallTasteLabel, readXp, writeXp } from "@/lib/xp";
 import { capitalize } from "@/lib/explain";
+import { loadCopyForFood, type PolishedCopy } from "@/lib/copy-prefetch";
 import { parsePlacesResponse } from "@/lib/api-schemas";
 import {
   readCachedGeo,
@@ -759,7 +760,14 @@ export function ResultView({ food }: ResultViewProps) {
                 </p>
               ) : null}
 
-              <p className="result-desc">{explanation}</p>
+              <p
+                className={
+                  polished ? "result-desc is-polished" : "result-desc"
+                }
+                key={polished ? "polished" : "base"}
+              >
+                {explanation}
+              </p>
 
               {attrs.length > 0 ? (
                 <ul className="result-attrs" aria-label="Matched attributes">
@@ -795,7 +803,11 @@ export function ResultView({ food }: ResultViewProps) {
             </div>
           </div>
 
-          {riff ? <p className="result-riff">{riff}</p> : null}
+          {riff ? (
+            <p className={polished ? "result-riff is-polished" : "result-riff"}>
+              {riff}
+            </p>
+          ) : null}
 
           {!sessionReady ? null : hasSession ? (
             <>

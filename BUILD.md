@@ -301,7 +301,7 @@ Land `src/lib/taste-types.ts` before anything else. It unblocks 2, 4, and 7 simu
 There is no scaffolding and no Tailwind.
 
 Stub `/`, `/taste`, `/result/[id]`, and `/dna` so they render without errors, wire navigation
-between them, extend the `current` union in `src/components/SiteHeader.tsx`, and confirm a
+between them via `ProductBottomNav` in `ProductShell`, and confirm a
 Vercel deploy from `main` while the screens are still empty. Deploying before feature work is
 the entire point of this ticket.
 
