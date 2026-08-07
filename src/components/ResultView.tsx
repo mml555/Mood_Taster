@@ -2,8 +2,9 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import dynamic from "next/dynamic";
 import { useRouter, useSearchParams } from "next/navigation";
-import { ArrowRight, ChefHat, Clock, MapPin, Search, Sparkles } from "lucide-react";
+import { ArrowRight, ChefHat, MapPin, Search, Sparkles } from "lucide-react";
 import {
   useCallback,
   useEffect,
@@ -23,7 +24,16 @@ import {
 } from "@/lib/dna";
 import { persistDna } from "@/lib/dna-sync";
 import { ProfileNudge } from "@/components/ProfileNudge";
+import type { PlacesState } from "@/components/result/NearbySection";
 import { nextAfterReject, rank } from "@/lib/engine";
+import { capitalize } from "@/lib/explain";
+import {
+  mapsSearchUrl,
+  readCachedGeo,
+  readPrefetchedPlaces,
+  writeCachedGeo,
+  writePrefetchedPlaces,
+} from "@/lib/places-prefetch";
 import {
   markRejected,
   markServed,
@@ -37,9 +47,20 @@ import type {
   Intent,
   NearbyPlace,
   Rating,
-  Recipe,
   SessionState,
 } from "@/lib/taste-types";
+
+const RecipeSection = dynamic(
+  () =>
+    import("@/components/result/RecipeSection").then((m) => m.RecipeSection),
+  { ssr: false },
+);
+
+const NearbySection = dynamic(
+  () =>
+    import("@/components/result/NearbySection").then((m) => m.NearbySection),
+  { ssr: false },
+);
 
 type ResultViewProps = {
   food: Food;
@@ -47,19 +68,16 @@ type ResultViewProps = {
 
 const SWIPE_THRESHOLD = 80;
 
-/** Always available, needs no key and no permission. The floor under Places. */
-function mapsSearchUrl(food: Food): string {
-  return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
-    `${food.name} restaurant`,
-  )}`;
-}
-
 function prefersReducedMotion(): boolean {
   if (typeof window === "undefined") return false;
   return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 }
 
-type PlacesState = "locating" | "loading" | "ready" | "fallback";
+/** Seed intent on first paint so places can start without waiting on effects. */
+function readIntentSync(): Intent | null {
+  if (typeof window === "undefined") return null;
+  return readSession()?.answers.intent ?? null;
+}
 
 export function ResultView({ food }: ResultViewProps) {
   const router = useRouter();
@@ -88,7 +106,7 @@ export function ResultView({ food }: ResultViewProps) {
   const [cookTip, setCookTip] = useState<string | null>(null);
   const [places, setPlaces] = useState<NearbyPlace[]>([]);
   const [placesState, setPlacesState] = useState<PlacesState>("locating");
-  const [intent, setIntent] = useState<Intent | null>(null);
+  const [intent, setIntent] = useState<Intent | null>(readIntentSync);
 
   const [whyPanelOpen, setWhyPanelOpen] = useState(false);
   const [rejectNoteText, setRejectNoteText] = useState("");
@@ -281,6 +299,7 @@ export function ResultView({ food }: ResultViewProps) {
           setPlacesState("fallback");
           return;
         }
+        writePrefetchedPlaces(food.id, found);
         setPlaces(found);
         setPlacesState("ready");
       } catch {
@@ -310,7 +329,13 @@ export function ResultView({ food }: ResultViewProps) {
 
   const goToNext = useCallback(
     (session: SessionState, answers: Answers) => {
-      const next = nextAfterReject(answers, readDna(), session, food.id);
+      const next = nextAfterReject(
+        answers,
+        readDna(),
+        session,
+        food.id,
+        readDietary(),
+      );
       if (!next) {
         setEmptyAlts(true);
         busyRef.current = false;
@@ -940,153 +965,6 @@ export function ResultView({ food }: ResultViewProps) {
   );
 }
 
-function RecipeSection({
-  recipe,
-  cookTip,
-}: {
-  recipe: Recipe;
-  cookTip: string | null;
-}) {
-  return (
-    <div className="recipe" id="recipe">
-      <p className="recipe-label">
-        <ChefHat size={16} strokeWidth={1.5} aria-hidden />
-        Recipe
-      </p>
-      <p className="recipe-meta">
-        <span>
-          <Clock size={16} strokeWidth={1.5} aria-hidden />
-          {recipe.timeMinutes} min
-        </span>
-        <span>{recipe.servings} servings</span>
-      </p>
-
-      {cookTip ? <p className="recipe-tip">{cookTip}</p> : null}
-
-      <h2 className="recipe-heading">Ingredients</h2>
-      <ul className="recipe-ingredients">
-        {recipe.ingredients.map((item) => (
-          <li key={item}>{item}</li>
-        ))}
-      </ul>
-
-      <h2 className="recipe-heading">Steps</h2>
-      <ol className="recipe-steps">
-        {recipe.steps.map((step) => (
-          <li key={step}>{step}</li>
-        ))}
-      </ol>
-    </div>
-  );
-}
-
-function NearbySection({
-  food,
-  places,
-  state,
-}: {
-  food: Food;
-  places: NearbyPlace[];
-  state: PlacesState;
-}) {
-  if (state === "locating" || state === "loading") {
-    return (
-      <div className="nearby">
-        <p className="nearby-label">
-          <MapPin size={16} strokeWidth={1.5} aria-hidden />
-          Nearby
-        </p>
-        <p className="nearby-status" role="status">
-          {state === "locating" ? "Finding you" : "Looking nearby"}
-        </p>
-      </div>
-    );
-  }
-
-  // One slot, two outcomes. The fallback link is why a denied location or a
-  // quota error never leaves a dead region on the page.
-  if (state !== "ready" || places.length === 0) {
-    return (
-      <div className="nearby">
-        <p className="nearby-label">
-          <MapPin size={16} strokeWidth={1.5} aria-hidden />
-          Nearby
-        </p>
-        <a
-          className="nearby-link"
-          href={mapsSearchUrl(food)}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <MapPin size={20} strokeWidth={1.5} aria-hidden />
-          Search maps for {food.name}
-        </a>
-      </div>
-    );
-  }
-
-  return (
-    <div className="nearby">
-      <p className="nearby-label">
-        <MapPin size={16} strokeWidth={1.5} aria-hidden />
-        Nearby
-      </p>
-      <ul className="nearby-list">
-        {places.map((p) => (
-          <li key={`${p.name}-${p.address}`}>
-            {p.mapsUri ? (
-              <a
-                className="nearby-place"
-                href={p.mapsUri}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <span className="nearby-place-icon" aria-hidden>
-                  <MapPin size={20} strokeWidth={1.5} />
-                </span>
-                <span className="nearby-place-body">
-                  <span className="nearby-head">
-                    <span className="nearby-name">{p.name}</span>
-                    <span className="nearby-meta">
-                      {[
-                        p.miles !== null ? `${p.miles.toFixed(1)} mi` : null,
-                        p.rating !== null ? p.rating.toFixed(1) : null,
-                      ]
-                        .filter(Boolean)
-                        .join(" / ")}
-                    </span>
-                  </span>
-                  <span className="nearby-address">{p.address}</span>
-                </span>
-              </a>
-            ) : (
-              <span className="nearby-place is-static">
-                <span className="nearby-place-icon" aria-hidden>
-                  <MapPin size={20} strokeWidth={1.5} />
-                </span>
-                <span className="nearby-place-body">
-                  <span className="nearby-head">
-                    <span className="nearby-name">{p.name}</span>
-                    <span className="nearby-meta">
-                      {[
-                        p.miles !== null ? `${p.miles.toFixed(1)} mi` : null,
-                        p.rating !== null ? p.rating.toFixed(1) : null,
-                      ]
-                        .filter(Boolean)
-                        .join(" / ")}
-                    </span>
-                  </span>
-                  <span className="nearby-address">{p.address}</span>
-                </span>
-              </span>
-            )}
-          </li>
-        ))}
-      </ul>
-    </div>
-  );
-}
-
 function applySessionView(
   food: Food,
   session: SessionState,
@@ -1110,6 +988,3 @@ function applySessionView(
   setAttrs(food.flavorTags.map(capitalize).slice(0, 3));
 }
 
-function capitalize(s: string): string {
-  return s.charAt(0).toUpperCase() + s.slice(1);
-}

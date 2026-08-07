@@ -1,4 +1,4 @@
-import type { NearbyPlace } from "@/lib/taste-types";
+import type { Food, NearbyPlace } from "@/lib/taste-types";
 
 const GEO_CACHE_KEY = "mood-taster-geo";
 const GEO_CACHE_MS = 10 * 60 * 1000;
@@ -7,6 +7,13 @@ const PLACES_PREFETCH_MS = 5 * 60 * 1000;
 
 type GeoCache = { lat: number; lng: number; at: number };
 type PlacesCache = { places: NearbyPlace[]; at: number };
+
+/** Always available, needs no key and no permission. The floor under Places. */
+export function mapsSearchUrl(food: Pick<Food, "name">): string {
+  return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+    `${food.name} restaurant`,
+  )}`;
+}
 
 function readGeo(): { lat: number; lng: number } | null {
   if (typeof window === "undefined") return null;
@@ -72,7 +79,10 @@ export function readPrefetchedPlaces(foodId: string): NearbyPlace[] | null {
   }
 }
 
-function writePrefetchedPlaces(foodId: string, places: NearbyPlace[]): void {
+export function writePrefetchedPlaces(
+  foodId: string,
+  places: NearbyPlace[],
+): void {
   if (typeof window === "undefined") return;
   try {
     sessionStorage.setItem(

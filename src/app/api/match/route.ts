@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
+import { parseDietary } from "@/lib/dietary";
 import { createNeutralDna } from "@/lib/dna";
-import { rank } from "@/lib/engine";
+import { NoDietaryMatchError, rank } from "@/lib/engine";
 import { emptySession } from "@/lib/session";
 import type { DnaProfile, SessionState } from "@/lib/taste-types";
 import { parseAnswers } from "@/lib/validate";
@@ -32,6 +33,7 @@ export async function POST(request: Request) {
   }
 
   const dna: DnaProfile = parseDnaProfile(src.dna) ?? createNeutralDna();
+  const dietary = parseDietary(src.dietary);
   const session: SessionState = {
     ...emptySession(answers),
     rejectedIds: parseIdList(src.rejectedIds),
@@ -39,14 +41,20 @@ export async function POST(request: Request) {
   };
 
   try {
-    const rec = rank(answers, dna, session);
+    const rec = rank(answers, dna, session, dietary);
     return NextResponse.json({
       foodId: rec.primary.food.id,
       explanation: rec.primary.explanation,
       matchedAttributes: rec.primary.matchedAttributes,
       alternateIds: rec.alternates.slice(0, 8).map((a) => a.food.id),
     });
-  } catch {
+  } catch (err) {
+    if (err instanceof NoDietaryMatchError) {
+      return NextResponse.json(
+        { error: "No foods match your dietary settings" },
+        { status: 422 },
+      );
+    }
     return NextResponse.json(
       { error: "Could not rank foods for these answers" },
       { status: 500 },

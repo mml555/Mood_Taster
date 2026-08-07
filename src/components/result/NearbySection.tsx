@@ -1,7 +1,7 @@
 "use client";
 
 import { MapPin } from "lucide-react";
-import { mapsSearchUrl } from "@/lib/geo";
+import { mapsSearchUrl } from "@/lib/places-prefetch";
 import type { Food, NearbyPlace } from "@/lib/taste-types";
 
 export type PlacesState = "locating" | "loading" | "ready" | "fallback";

@@ -1,4 +1,6 @@
 import { RANK_FOODS } from "./catalog-data";
+import type { DietaryPrefs } from "./dietary";
+import { EMPTY_DIETARY, passesHardConstraints } from "./dietary";
 import { foodDimensions } from "./dna";
 import { buildExplanation, matchedAttributes } from "./explain";
 import type {
@@ -179,31 +181,38 @@ function withExplanation(
   };
 }
 
-function candidatePool(answers: Answers): RankFood[] {
+function candidatePool(
+  answers: Answers,
+  dietary: DietaryPrefs = EMPTY_DIETARY,
+): RankFood[] {
+  let pool: RankFood[];
   if (answers.intent === "recipe") {
-    return RANK_FOODS.filter((food) => food.hasRecipe);
+    pool = RANK_FOODS.filter((food) => food.hasRecipe);
+  } else if (answers.intent === "snack") {
+    pool = RANK_FOODS.filter((food) => food.snack === true);
+  } else {
+    pool = RANK_FOODS;
   }
-  if (answers.intent === "snack") {
-    return RANK_FOODS.filter((food) => food.snack === true);
+  return pool.filter((food) => passesHardConstraints(food, dietary));
+}
+
+export class NoDietaryMatchError extends Error {
+  constructor() {
+    super("NO_DIETARY_MATCH");
+    this.name = "NoDietaryMatchError";
   }
-  return RANK_FOODS;
 }
 
 export function rank(
   answers: Answers,
   dna: DnaProfile,
   session: SessionState,
+  dietary: DietaryPrefs = EMPTY_DIETARY,
 ): Recommendation {
-  const pool = candidatePool(answers);
+  const pool = candidatePool(answers, dietary);
 
-  if (pool.length < 3) {
-    throw new Error(
-      answers.intent === "snack"
-        ? "Catalog must contain at least three snack foods"
-        : answers.intent === "recipe"
-          ? "Catalog must contain at least three foods with recipes"
-          : "Catalog must contain at least three foods",
-    );
+  if (pool.length === 0) {
+    throw new NoDietaryMatchError();
   }
 
   const ctx = buildScoreContext(session);
@@ -214,8 +223,6 @@ export function rank(
       return a.food.id.localeCompare(b.food.id);
     });
 
-  // Explanations are only needed for the primary (and first alternate for
-  // reject-next UI). Building strings for every dish was pure waste.
   return {
     primary: withExplanation(scored[0], answers),
     alternates: scored.slice(1).map((s, i) =>
@@ -236,6 +243,7 @@ export function nextAfterReject(
   dna: DnaProfile,
   session: SessionState,
   currentId: string,
+  dietary: DietaryPrefs = EMPTY_DIETARY,
 ): ScoredFood | null {
   const withReject = {
     ...session,
@@ -243,7 +251,7 @@ export function nextAfterReject(
       ? session.rejectedIds
       : [...session.rejectedIds, currentId],
   };
-  const rec = rank(answers, dna, withReject);
+  const rec = rank(answers, dna, withReject, dietary);
   if (rec.primary.food.id === currentId) {
     const alt = rec.alternates.find((s) => s.food.id !== currentId);
     return alt ?? null;

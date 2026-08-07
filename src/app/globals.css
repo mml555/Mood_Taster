@@ -2719,15 +2719,6 @@ button {
 
 /* --- Tablet -------------------------------------------------------------- */
 
-/* The doc links are a desktop affordance. On a tablet in portrait they crowd
-   the product links off the row, so they stay hidden until there is real
-   width to spend. The footer carries them at every size. */
-@media (max-width: 999px) {
-  .nav-docs {
-    display: none;
-  }
-}
-
 /* Between the phone rules and the full desktop grid the product surfaces are
    still one column, so let them use the width instead of centering a narrow
    measure in a sea of paper. */

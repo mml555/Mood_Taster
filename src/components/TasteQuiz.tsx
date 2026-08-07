@@ -6,7 +6,8 @@ import { ArrowLeft } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { loadDnaForUser } from "@/lib/dna-sync";
 import { readDna } from "@/lib/dna";
-import { rank } from "@/lib/engine";
+import { readDietary } from "@/lib/dietary";
+import { NoDietaryMatchError, rank } from "@/lib/engine";
 import { QUIZ_OPTION_ICONS, QUIZ_STEP_ICONS } from "@/lib/mood-icons";
 import {
   prefetchPlacesForFood,
@@ -212,6 +213,7 @@ export function TasteQuiz() {
   const step = parseStep(searchParams.get("step"), totalSteps);
   const [answers, setAnswers] = useState<PartialAnswers>({});
   const [hydrated, setHydrated] = useState(false);
+  const [dietError, setDietError] = useState(false);
 
   useEffect(() => {
     queueMicrotask(() => {
@@ -252,8 +254,10 @@ export function TasteQuiz() {
   const finish = useCallback(
     (finalAnswers: Answers) => {
       clearDraft();
+      setDietError(false);
       const session = emptySession(finalAnswers);
       const dna = readDna();
+      const dietary = readDietary();
 
       if (finalAnswers.intent === "restaurant") {
         warmGeolocation();
@@ -271,7 +275,6 @@ export function TasteQuiz() {
         void loadDnaForUser();
       };
 
-      // Prefer server match; fall back to local slim rank if the API is down.
       void (async () => {
         try {
           const res = await fetch("/api/match", {
@@ -280,10 +283,15 @@ export function TasteQuiz() {
             body: JSON.stringify({
               answers: finalAnswers,
               dna,
+              dietary,
               rejectedIds: session.rejectedIds,
               servedIds: session.servedIds,
             }),
           });
+          if (res.status === 422) {
+            setDietError(true);
+            return;
+          }
           if (res.ok) {
             const data = (await res.json()) as { foodId?: string };
             if (typeof data.foodId === "string" && data.foodId) {
@@ -294,8 +302,16 @@ export function TasteQuiz() {
         } catch {
           /* local fallback below */
         }
-        const rec = rank(finalAnswers, dna, session);
-        go(rec.primary.food.id);
+        try {
+          const rec = rank(finalAnswers, dna, session, dietary);
+          go(rec.primary.food.id);
+        } catch (err) {
+          if (err instanceof NoDietaryMatchError) {
+            setDietError(true);
+            return;
+          }
+          throw err;
+        }
       })();
     },
     [router],
@@ -356,6 +372,32 @@ export function TasteQuiz() {
       router.push("/taste");
     }
   };
+
+  if (dietError) {
+    return (
+      <section className="quiz" aria-labelledby="quiz-question">
+        <h1 id="quiz-question" className="quiz-question">
+          Nothing matches
+        </h1>
+        <p className="quiz-reaction">
+          Your diet settings left no foods in this catalog. Loosen a limit, then
+          try again.
+        </p>
+        <div className="result-actions">
+          <Link className="cta" href="/dna">
+            Edit diet
+          </Link>
+          <button
+            type="button"
+            className="cta-secondary"
+            onClick={() => setDietError(false)}
+          >
+            Back to quiz
+          </button>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section className="quiz" aria-labelledby="quiz-question">
