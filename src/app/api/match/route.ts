@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { readJson } from "@/lib/api-route";
+import { HttpError, readJson, withRoute } from "@/lib/api-route";
 import { matchBodySchema } from "@/lib/api-schemas";
 import { parseDnaProfile } from "@/lib/auth-schema";
 import { parseDietary } from "@/lib/dietary";
@@ -17,16 +17,10 @@ import { parseAnswers } from "@/lib/validate";
  */
 
 const MAX_ALTERNATES = 8;
+const RANK_FAILED = "Could not rank foods for these answers";
 
-export async function POST(request: Request) {
-  let body: unknown;
-  try {
-    body = await readJson(request);
-  } catch {
-    return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
-  }
-
-  const envelope = matchBodySchema.safeParse(body);
+export const POST = withRoute("match", RANK_FAILED, async (request) => {
+  const envelope = matchBodySchema.safeParse(await readJson(request));
   if (!envelope.success) {
     return NextResponse.json({ error: "Invalid answers" }, { status: 400 });
   }
@@ -61,15 +55,9 @@ export async function POST(request: Request) {
     });
   } catch (err) {
     if (err instanceof NoDietaryMatchError) {
-      return NextResponse.json(
-        { error: "No foods match your dietary settings" },
-        { status: 422 },
-      );
+      throw new HttpError(422, "No foods match your dietary settings");
     }
-    console.error("[match] rank failed:", err);
-    return NextResponse.json(
-      { error: "Could not rank foods for these answers" },
-      { status: 500 },
-    );
+    // Anything else is a bug in the ranker. withRoute logs it and answers 500.
+    throw err;
   }
-}
+});

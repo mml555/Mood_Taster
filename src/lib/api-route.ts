@@ -72,6 +72,29 @@ export function failOnDbError(
 }
 
 /**
+ * Wraps a handler with the HttpError mapping and a logged catch-all, without
+ * requiring a session. For the public routes, which still want a thrown 400
+ * from readJson to come back as a 400 rather than an unlogged 500.
+ */
+export function withRoute(
+  scope: string,
+  failMessage: string,
+  handler: (request: Request) => Promise<NextResponse>,
+): (request: Request) => Promise<NextResponse> {
+  return async (request: Request) => {
+    try {
+      return await handler(request);
+    } catch (err) {
+      if (err instanceof HttpError) {
+        return jsonError(err.publicMessage, err.status);
+      }
+      console.error(`[${scope}] threw:`, err);
+      return jsonError(failMessage, 500);
+    }
+  };
+}
+
+/**
  * Wraps a handler that needs a signed-in user. The handler only ever runs with
  * a real session, so it can get straight to its query.
  *

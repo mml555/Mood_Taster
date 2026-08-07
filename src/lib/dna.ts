@@ -456,6 +456,25 @@ export function applyRating(
   };
 }
 
+/**
+ * Quest confirm writes a small experience bump on the target dimension
+ * (or adventurous for comfort breaker).
+ */
+export function applyQuestExperience(
+  dna: DnaProfile,
+  dimension: DnaDimension,
+  amount = 0.1,
+): { dna: DnaProfile; deltas: DnaDelta[] } {
+  const next: DnaProfile = {
+    version: DNA_VERSION,
+    prefs: { ...dna.prefs },
+    experience: { ...dna.experience },
+  };
+  const deltaMap = new Map<DnaDimension, DnaDelta>();
+  nudgeDimension(next.experience, deltaMap, dimension, amount, "experience");
+  return { dna: next, deltas: [...deltaMap.values()] };
+}
+
 /** Quiz answers write to prefs only (stated taste). */
 export function applyQuizPrefs(
   dna: DnaProfile,

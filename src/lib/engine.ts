@@ -2,6 +2,11 @@ import { RANK_FOODS } from "./catalog-data";
 import type { DietaryPrefs } from "./dietary";
 import { EMPTY_DIETARY, passesHardConstraints } from "./dietary";
 import { effectiveEntry, foodDimensions } from "./dna";
+import {
+  DEFAULT_EXPLORE_BALANCE,
+  NOVELTY_WEIGHT,
+  type ExploreBalance,
+} from "./explore-balance";
 import { buildExplanation, matchedAttributes } from "./explain";
 import { favoriteIdSet } from "./favorites";
 import type {
@@ -20,6 +25,10 @@ import type {
 
 /** Soft nudge for saved foods. Matches novelty weight so quiz still leads. */
 export const FAVORITE_BOOST = 0.05;
+
+/** Quiz + DNA weights stay fixed; novelty weight comes from explore balance. */
+const QUIZ_WEIGHT = 0.75;
+const DNA_WEIGHT = 0.2;
 
 const NEAR_FLAVOR: Record<Flavor, Flavor[]> = {
   savory: ["spicy"],

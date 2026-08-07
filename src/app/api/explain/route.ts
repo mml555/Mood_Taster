@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { ask, isAiConfigured, parseJsonObject, sanitizeLine } from "@/lib/ai";
+import { readJson, withRoute } from "@/lib/api-route";
 import { explainBodySchema } from "@/lib/api-schemas";
 import { CATALOG } from "@/lib/catalog";
 import { buildExplanation } from "@/lib/explain";
@@ -43,23 +44,19 @@ const RULES = [
   "Never invent new ingredient lists or replace the given steps.",
 ].join(" ");
 
-export async function POST(request: Request) {
+/** Every soft failure looks the same: the deterministic copy already rendered. */
+const NO_COPY = { why: null, riff: null, cookTip: null };
+
+export const POST = withRoute("explain", "Could not explain", async (request) => {
   if (!isAiConfigured()) {
-    return NextResponse.json({ why: null, riff: null, cookTip: null });
+    return NextResponse.json(NO_COPY);
   }
 
   if (!rateLimitAllow(clientRateKey(request, "explain"))) {
-    return NextResponse.json({ why: null, riff: null, cookTip: null });
+    return NextResponse.json(NO_COPY);
   }
 
-  let body: unknown;
-  try {
-    body = await request.json();
-  } catch {
-    return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
-  }
-
-  const envelope = explainBodySchema.safeParse(body);
+  const envelope = explainBodySchema.safeParse(await readJson(request));
   if (!envelope.success) {
     return NextResponse.json(
       { error: "Unknown food id or invalid answers" },
@@ -116,12 +113,12 @@ export async function POST(request: Request) {
   });
 
   if (raw === null) {
-    return NextResponse.json({ why: null, riff: null, cookTip: null });
+    return NextResponse.json(NO_COPY);
   }
 
   const parsed = parseJsonObject(raw);
   if (!parsed) {
-    return NextResponse.json({ why: null, riff: null, cookTip: null });
+    return NextResponse.json(NO_COPY);
   }
 
   // Each line is sanitized independently, so a bad riff cannot cost us a good
@@ -136,4 +133,4 @@ export async function POST(request: Request) {
       : null;
 
   return NextResponse.json({ why, riff, cookTip });
-}
+});
