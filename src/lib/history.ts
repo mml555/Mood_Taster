@@ -128,11 +128,10 @@ export function parseHistoryEntries(raw: unknown): HistoryEntry[] {
     if (!entry || seen.has(entry.id)) continue;
     seen.add(entry.id);
     out.push(entry);
-    if (out.length >= HISTORY_CAP) break;
   }
-  return out.sort(
-    (a, b) => Date.parse(b.createdAt) - Date.parse(a.createdAt),
-  );
+  return out
+    .sort((a, b) => Date.parse(b.createdAt) - Date.parse(a.createdAt))
+    .slice(0, HISTORY_CAP);
 }
 
 export function parseHistory(raw: unknown): HistoryState {
@@ -194,15 +193,17 @@ export function appendHistoryLocal(
     }
   }
 
-  const place =
-    input.place && "address" in (input.place as NearbyPlace)
-      ? snapshotPlace(input.place as NearbyPlace)
-      : input.place && typeof (input.place as HistoryPlaceSnapshot).name === "string"
-        ? {
-            name: (input.place as HistoryPlaceSnapshot).name.trim().slice(0, 120),
-            mapsUri: (input.place as HistoryPlaceSnapshot).mapsUri ?? null,
-          }
-        : null;
+  let place: HistoryPlaceSnapshot | null = null;
+  if (input.place) {
+    if ("address" in input.place) {
+      place = snapshotPlace(input.place);
+    } else if (typeof input.place.name === "string" && input.place.name.trim()) {
+      place = {
+        name: input.place.name.trim().slice(0, 120),
+        mapsUri: input.place.mapsUri ?? null,
+      };
+    }
+  }
 
   const entry: HistoryEntry = {
     id: createHistoryId(),
@@ -229,6 +230,7 @@ export function setHistoryRatingLocal(
   foodIdOrEntryId: string,
   rating: Rating,
   state?: HistoryState,
+  place?: NearbyPlace | HistoryPlaceSnapshot | null,
 ): { state: HistoryState; entry: HistoryEntry | null } {
   if (!isRating(rating)) {
     return { state: state ?? readHistory(), entry: null };
@@ -240,7 +242,22 @@ export function setHistoryRatingLocal(
   if (idx < 0) {
     return { state: current, entry: null };
   }
-  const updated: HistoryEntry = { ...current.entries[idx], rating };
+  let nextPlace = current.entries[idx].place;
+  if (!nextPlace && place) {
+    if ("address" in place) {
+      nextPlace = snapshotPlace(place);
+    } else if (typeof place.name === "string" && place.name.trim()) {
+      nextPlace = {
+        name: place.name.trim().slice(0, 120),
+        mapsUri: place.mapsUri ?? null,
+      };
+    }
+  }
+  const updated: HistoryEntry = {
+    ...current.entries[idx],
+    rating,
+    place: nextPlace,
+  };
   const entries = [...current.entries];
   entries[idx] = updated;
   const next = { entries };
@@ -292,4 +309,24 @@ export function ratingLabel(rating: Rating | null): string | null {
     default:
       return null;
   }
+}
+
+export type HistoryFilter =
+  | "all"
+  | "nailed"
+  | "kinda"
+  | "nope"
+  | "restaurant"
+  | "recipe"
+  | "snack";
+
+export function filterHistoryEntries(
+  entries: HistoryEntry[],
+  filter: HistoryFilter,
+): HistoryEntry[] {
+  if (filter === "all") return entries;
+  if (filter === "nailed" || filter === "kinda" || filter === "nope") {
+    return entries.filter((e) => e.rating === filter);
+  }
+  return entries.filter((e) => e.intent === filter);
 }

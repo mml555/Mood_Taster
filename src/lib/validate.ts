@@ -3,17 +3,21 @@ import {
   COOK_EFFORTS,
   FLAVORS,
   HEAVINESS,
+  HUNGERS,
   INTENTS,
   TEMPERATURES,
   TEXTURES,
+  VIBES,
   type Adventure,
   type Answers,
   type CookEffort,
   type Flavor,
   type Heaviness,
+  type Hunger,
   type Intent,
   type Temperature,
   type Texture,
+  type Vibe,
 } from "./taste-types";
 
 /**
@@ -59,6 +63,19 @@ export function parseAnswers(raw: unknown): Answers | null {
       ? ("any" as const)
       : oneOf<CookEffort>(COOK_EFFORTS, src.cookEffort);
 
+  // Older sessions omit hunger / vibe; treat as any.
+  const hunger =
+    src.hunger === undefined ||
+    src.hunger === null ||
+    src.hunger === "any"
+      ? ("any" as const)
+      : oneOf<Hunger>(HUNGERS, src.hunger);
+
+  const vibe =
+    src.vibe === undefined || src.vibe === null || src.vibe === "any"
+      ? ("any" as const)
+      : oneOf<Vibe>(VIBES, src.vibe);
+
   if (
     !intent ||
     !flavor ||
@@ -66,13 +83,15 @@ export function parseAnswers(raw: unknown): Answers | null {
     !adventure ||
     !heaviness ||
     !temperature ||
-    !cookEffort
+    !cookEffort ||
+    !hunger ||
+    !vibe
   ) {
     return null;
   }
 
   // Recipe sessions should carry a real effort when present; tolerate any for
-  // legacy drafts so old tabs still parse.
+  // legacy drafts so old tabs still parse. Same for Go Out hunger / vibe.
   return {
     intent,
     flavor,
@@ -81,6 +100,8 @@ export function parseAnswers(raw: unknown): Answers | null {
     adventure,
     temperature,
     cookEffort,
+    hunger,
+    vibe,
   };
 }
 

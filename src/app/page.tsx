@@ -1,9 +1,11 @@
-import Link from "next/link";
 import Image from "next/image";
 import { Candy, ChefHat, CircleHelp, MapPin } from "lucide-react";
+import { AnalyticsBeacon } from "@/components/AnalyticsBeacon";
 import { SiteFooter } from "@/components/SiteFooter";
 import { SiteHeader } from "@/components/SiteHeader";
 import { ProfileNudge } from "@/components/ProfileNudge";
+import { TrackedLink } from "@/components/TrackedLink";
+import { ANALYTICS_EVENTS } from "@/lib/analytics";
 import { FLOW_ICONS } from "@/lib/mood-icons";
 
 const PEEK_DISHES = [
@@ -74,16 +76,18 @@ function IntentPicker({ id }: { id?: string }) {
       id={id}
     >
       {ABOUT_INTENTS.map(({ intent, label, href, Icon, style }) => (
-        <Link
+        <TrackedLink
           key={intent}
           className={
             style === "primary" ? "cta intent-cta" : "cta-secondary intent-cta"
           }
           href={href}
+          event={ANALYTICS_EVENTS.intent}
+          eventProps={{ intent, source: "home" }}
         >
           <Icon size={20} strokeWidth={1.5} aria-hidden />
           {label}
-        </Link>
+        </TrackedLink>
       ))}
     </div>
   );
@@ -92,20 +96,28 @@ function IntentPicker({ id }: { id?: string }) {
 function HeroStart() {
   return (
     <div className="hero-start" role="group" aria-label="How do you want to eat">
-      <Link
+      <TrackedLink
         className="cta-highlight hero-start-primary"
         href="/taste?intent=clue&from=home"
+        event={ANALYTICS_EVENTS.intent}
+        eventProps={{ intent: "clue", source: "home" }}
       >
         Show me
-      </Link>
+      </TrackedLink>
       <p className="hero-start-hint">Four quick taps. No account needed.</p>
       <p className="hero-start-divider">Or pick a path</p>
       <div className="hero-paths">
         {PATH_INTENTS.map(({ intent, label, href, Icon }) => (
-          <Link key={intent} className="cta-secondary hero-path" href={href}>
+          <TrackedLink
+            key={intent}
+            className="cta-secondary hero-path"
+            href={href}
+            event={ANALYTICS_EVENTS.intent}
+            eventProps={{ intent, source: "home" }}
+          >
             <Icon size={18} strokeWidth={1.5} aria-hidden />
             {label}
-          </Link>
+          </TrackedLink>
         ))}
       </div>
     </div>
@@ -115,6 +127,7 @@ function HeroStart() {
 export default function HomePage() {
   return (
     <>
+      <AnalyticsBeacon event={ANALYTICS_EVENTS.home} />
       <SiteHeader current="home" />
       <main id="top">
         <section className="hero" aria-labelledby="brand">

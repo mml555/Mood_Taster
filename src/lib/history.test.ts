@@ -1,12 +1,12 @@
 import { describe, expect, it } from "vitest";
 import {
   appendHistoryLocal,
-  clearHistoryLocal,
+  filterHistoryEntries,
   parseHistoryEntries,
   setHistoryRatingLocal,
-  writeHistory,
   HISTORY_CAP,
   type HistoryEntry,
+  type HistoryState,
 } from "./history";
 import type { Answers } from "./taste-types";
 
@@ -18,7 +18,11 @@ const answers: Answers = {
   adventure: "curious",
   temperature: "any",
   cookEffort: "any",
+  hunger: "any",
+  vibe: "any",
 };
+
+const empty: HistoryState = { entries: [] };
 
 function sample(overrides: Partial<HistoryEntry> = {}): HistoryEntry {
   return {
@@ -42,7 +46,7 @@ describe("history", () => {
       { foodId: "nope" },
       sample({
         id: "newer",
-        foodId: "miso-soup",
+        foodId: "poke-bowl",
         createdAt: "2026-08-05T00:00:00.000Z",
       }),
     ]);
@@ -50,37 +54,42 @@ describe("history", () => {
   });
 
   it("appendHistoryLocal dedupes an open pick for the same food", () => {
-    clearHistoryLocal();
-    const first = appendHistoryLocal({
-      foodId: "birria-tacos",
-      intent: "restaurant",
-      answers,
-    });
+    const first = appendHistoryLocal(
+      {
+        foodId: "birria-tacos",
+        intent: "restaurant",
+        answers,
+      },
+      empty,
+    );
     expect(first.entry).not.toBeNull();
 
-    const second = appendHistoryLocal({
-      foodId: "birria-tacos",
-      intent: "restaurant",
-      answers,
-    });
+    const second = appendHistoryLocal(
+      {
+        foodId: "birria-tacos",
+        intent: "restaurant",
+        answers,
+      },
+      first.state,
+    );
     expect(second.entry).toBeNull();
     expect(second.state.entries).toHaveLength(1);
   });
 
   it("setHistoryRatingLocal updates the newest matching food", () => {
-    clearHistoryLocal();
-    appendHistoryLocal({
-      foodId: "birria-tacos",
-      intent: "restaurant",
-      answers,
-      dedupeOpen: false,
-    });
-    const { entry } = setHistoryRatingLocal("birria-tacos", "nailed");
+    const { state } = appendHistoryLocal(
+      {
+        foodId: "birria-tacos",
+        intent: "restaurant",
+        answers,
+      },
+      empty,
+    );
+    const { entry } = setHistoryRatingLocal("birria-tacos", "nailed", state);
     expect(entry?.rating).toBe("nailed");
   });
 
   it("caps stored entries", () => {
-    clearHistoryLocal();
     const many: HistoryEntry[] = [];
     for (let i = 0; i < HISTORY_CAP + 5; i += 1) {
       many.push(
@@ -90,8 +99,34 @@ describe("history", () => {
         }),
       );
     }
-    writeHistory({ entries: many });
     const trimmed = parseHistoryEntries(many);
     expect(trimmed.length).toBe(HISTORY_CAP);
+    expect(trimmed[0]?.id).toBe(`id-${HISTORY_CAP + 4}`);
+    expect(trimmed[trimmed.length - 1]?.id).toBe(`id-${5}`);
+  });
+
+  it("filterHistoryEntries splits by rating and intent", () => {
+    const entries = [
+      sample({ id: "a", rating: "nailed", intent: "restaurant" }),
+      sample({
+        id: "b",
+        foodId: "poke-bowl",
+        rating: "nope",
+        intent: "recipe",
+      }),
+      sample({
+        id: "c",
+        foodId: "poke-bowl",
+        rating: "kinda",
+        intent: "snack",
+      }),
+    ];
+    expect(filterHistoryEntries(entries, "nailed").map((e) => e.id)).toEqual([
+      "a",
+    ]);
+    expect(filterHistoryEntries(entries, "recipe").map((e) => e.id)).toEqual([
+      "b",
+    ]);
+    expect(filterHistoryEntries(entries, "all")).toHaveLength(3);
   });
 });

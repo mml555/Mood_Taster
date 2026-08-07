@@ -7,8 +7,10 @@ import {
   DNA_DIMENSIONS,
   createNeutralDna,
   discoveryPercent,
+  dnaHasEvidence,
   labelDimension,
   strongestDimensions,
+  underexploredDimensions,
 } from "@/lib/dna";
 import { loadDnaForUser, resetDnaEverywhere } from "@/lib/dna-sync";
 import { DietaryPrefsEditor } from "@/components/DietaryPrefsEditor";
@@ -61,17 +63,21 @@ export function DnaDashboard() {
   }
 
   const discovery = discoveryPercent(dna);
-  const evidenced = DNA_DIMENSIONS.filter((d) => dna[d].samples > 0);
-  const flavors = strongestDimensions(dna, FLAVOR_DIMS);
-  const textures = strongestDimensions(dna, TEXTURE_DIMS);
+  const hasEvidence = dnaHasEvidence(dna);
+  const develop = underexploredDimensions(dna, 3);
+  const flavors = strongestDimensions(dna, FLAVOR_DIMS, 3, "experience");
+  const textures = strongestDimensions(dna, TEXTURE_DIMS, 3, "experience");
+  const evidenced = DNA_DIMENSIONS.filter(
+    (d) => dna.prefs[d].samples > 0 || dna.experience[d].samples > 0,
+  );
 
   const lede = signedIn
     ? "Saved to your profile. Rate more dishes to sharpen matches."
     : isSupabaseConfigured()
-      ? "Built from ratings on this device. A free profile keeps it with you."
-      : "Built from ratings on this device. No account needed.";
+      ? "Built from picks and ratings on this device. A free profile keeps it with you."
+      : "Built from picks and ratings on this device. No account needed.";
 
-  if (evidenced.length === 0) {
+  if (!hasEvidence) {
     return (
       <section className="dna">
         <p className="eyebrow">
@@ -79,7 +85,7 @@ export function DnaDashboard() {
         </p>
         <h1 className="dna-title">Nothing yet</h1>
         <p className="dna-lede">
-          Rate a dish. Your Taste DNA grows from that.
+          Take the quiz or rate a dish. Your Taste DNA grows from that.
         </p>
         <div className="result-actions">
           <Link className="cta" href="/taste">
@@ -92,9 +98,17 @@ export function DnaDashboard() {
           </Link>
         </div>
         <ProfileNudge context="dna" />
+        <section className="account-dietary" aria-labelledby="diet-title">
+          <h2 id="diet-title" className="dietary-section-title">
+            Diet and allergies
+          </h2>
+          <DietaryPrefsEditor compact />
+        </section>
       </section>
     );
   }
+
+  const leadDevelop = develop[0];
 
   return (
     <section className="dna">
@@ -115,26 +129,52 @@ export function DnaDashboard() {
       </p>
       <p className="dna-lede">{lede}</p>
 
+      {leadDevelop ? (
+        <aside className="dna-develop callout" aria-labelledby="develop-title">
+          <p className="callout-label" id="develop-title">
+            Develop your taste
+          </p>
+          <p>
+            You like{" "}
+            <strong>{labelDimension(leadDevelop.dimension)}</strong>. Try it
+            next.
+          </p>
+          {develop.length > 1 ? (
+            <ul className="dna-develop-list">
+              {develop.slice(1).map(({ dimension }) => (
+                <li key={dimension}>{labelDimension(dimension)}</li>
+              ))}
+            </ul>
+          ) : null}
+          <div className="result-actions">
+            <Link className="cta-highlight" href="/taste">
+              Show me
+              <Search size={20} strokeWidth={1.5} aria-hidden />
+            </Link>
+          </div>
+        </aside>
+      ) : null}
+
       {flavors.length > 0 ? (
         <div className="dna-block">
-          <h2 className="dna-heading">Strongest flavors</h2>
+          <h2 className="dna-heading">Lived flavors</h2>
           <ul className="dna-list">
             {flavors.map(({ dimension, entry }) => {
               const Icon = DNA_DIMENSION_ICONS[dimension];
               return (
-              <li key={dimension}>
-                <span className="dna-dim">
-                  {Icon ? (
-                    <span className="dna-dim-icon" aria-hidden>
-                      <Icon size={20} strokeWidth={1.5} />
-                    </span>
-                  ) : null}
-                  {labelDimension(dimension)}
-                </span>
-                <span className="dna-meta">
-                  {Math.round(entry.score * 100)} · {entry.samples} samples
-                </span>
-              </li>
+                <li key={dimension}>
+                  <span className="dna-dim">
+                    {Icon ? (
+                      <span className="dna-dim-icon" aria-hidden>
+                        <Icon size={20} strokeWidth={1.5} />
+                      </span>
+                    ) : null}
+                    {labelDimension(dimension)}
+                  </span>
+                  <span className="dna-meta">
+                    {Math.round(entry.score * 100)} · {entry.samples} tries
+                  </span>
+                </li>
               );
             })}
           </ul>
@@ -143,24 +183,24 @@ export function DnaDashboard() {
 
       {textures.length > 0 ? (
         <div className="dna-block">
-          <h2 className="dna-heading">Strongest textures</h2>
+          <h2 className="dna-heading">Lived textures</h2>
           <ul className="dna-list">
             {textures.map(({ dimension, entry }) => {
               const Icon = DNA_DIMENSION_ICONS[dimension];
               return (
-              <li key={dimension}>
-                <span className="dna-dim">
-                  {Icon ? (
-                    <span className="dna-dim-icon" aria-hidden>
-                      <Icon size={20} strokeWidth={1.5} />
-                    </span>
-                  ) : null}
-                  {labelDimension(dimension)}
-                </span>
-                <span className="dna-meta">
-                  {Math.round(entry.score * 100)} · {entry.samples} samples
-                </span>
-              </li>
+                <li key={dimension}>
+                  <span className="dna-dim">
+                    {Icon ? (
+                      <span className="dna-dim-icon" aria-hidden>
+                        <Icon size={20} strokeWidth={1.5} />
+                      </span>
+                    ) : null}
+                    {labelDimension(dimension)}
+                  </span>
+                  <span className="dna-meta">
+                    {Math.round(entry.score * 100)} · {entry.samples} tries
+                  </span>
+                </li>
               );
             })}
           </ul>
@@ -168,10 +208,11 @@ export function DnaDashboard() {
       ) : null}
 
       <div className="dna-block">
-        <h2 className="dna-heading">All evidence</h2>
+        <h2 className="dna-heading">Preference vs experience</h2>
         <ul className="dna-list">
           {evidenced.map((dimension) => {
-            const entry = dna[dimension];
+            const pref = dna.prefs[dimension];
+            const exp = dna.experience[dimension];
             const Icon = DNA_DIMENSION_ICONS[dimension];
             return (
               <li key={dimension}>
@@ -184,8 +225,11 @@ export function DnaDashboard() {
                   {labelDimension(dimension)}
                 </span>
                 <span className="dna-meta">
-                  {Math.round(entry.score * 100)} · conf{" "}
-                  {Math.round(entry.confidence * 100)}%
+                  like{" "}
+                  {pref.samples > 0 ? Math.round(pref.score * 100) : "-"} ·
+                  lived{" "}
+                  {exp.samples > 0 ? Math.round(exp.score * 100) : "-"} ·{" "}
+                  {exp.samples} tries
                 </span>
               </li>
             );

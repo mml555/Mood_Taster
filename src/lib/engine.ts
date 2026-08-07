@@ -117,9 +117,47 @@ function effortScore(
   return 0.45;
 }
 
+/** Appetite size → preferred dish weight (distinct from explicit heaviness). */
+function hungerScore(hunger: Answers["hunger"], food: RankFood): number {
+  if (hunger === "any") return 0.5;
+  const target: Heaviness =
+    hunger === "peckish"
+      ? "light"
+      : hunger === "starving"
+        ? "filling"
+        : "medium";
+  return (
+    1 -
+    Math.abs(HEAVINESS_VALUE[target] - HEAVINESS_VALUE[food.heaviness]) / 2
+  );
+}
+
+/**
+ * Table vibe without new catalog fields: cozy → comfort/hot, bright →
+ * lighter/cooler, bold → higher adventure.
+ */
+function vibeScore(vibe: Answers["vibe"], food: RankFood): number {
+  if (vibe === "any") return 0.5;
+  if (vibe === "cozy") {
+    return (
+      0.55 * adventureScore("safe", food) +
+      0.45 * temperatureScore("hot", food)
+    );
+  }
+  if (vibe === "bright") {
+    return (
+      0.5 * temperatureScore("cold", food) +
+      0.5 * heavinessScore("light", food)
+    );
+  }
+  return adventureScore("surprise", food);
+}
+
 function quizMatch(answers: Answers, food: RankFood): number {
   const caresAboutTemp = answers.temperature !== "any";
   const caresAboutEffort = answers.cookEffort !== "any";
+  const caresAboutHunger = answers.hunger !== "any";
+  const caresAboutVibe = answers.vibe !== "any";
 
   if (caresAboutEffort) {
     return (
@@ -140,6 +178,21 @@ function quizMatch(answers: Answers, food: RankFood): number {
       0.15 * temperatureScore(answers.temperature, food)
     );
   }
+
+  if (caresAboutHunger || caresAboutVibe) {
+    const hungerW = caresAboutHunger ? (caresAboutVibe ? 0.17 : 0.22) : 0;
+    const vibeW = caresAboutVibe ? (caresAboutHunger ? 0.17 : 0.22) : 0;
+    const rest = 1 - hungerW - vibeW;
+    return (
+      rest * 0.35 * flavorScore(answers.flavor, food) +
+      rest * 0.3 * textureScore(answers.texture, food) +
+      rest * 0.2 * heavinessScore(answers.heaviness, food) +
+      rest * 0.15 * adventureScore(answers.adventure, food) +
+      hungerW * hungerScore(answers.hunger, food) +
+      vibeW * vibeScore(answers.vibe, food)
+    );
+  }
+
   return (
     0.35 * flavorScore(answers.flavor, food) +
     0.3 * textureScore(answers.texture, food) +
@@ -235,6 +288,9 @@ function candidatePool(
     pool = RANK_FOODS.filter((food) => food.hasRecipe);
   } else if (answers.intent === "snack") {
     pool = RANK_FOODS.filter((food) => food.snack === true);
+  } else if (answers.intent === "restaurant") {
+    // Go Out: dishes you can find nearby, not packaged snack products.
+    pool = RANK_FOODS.filter((food) => food.snack !== true);
   } else {
     pool = RANK_FOODS;
   }

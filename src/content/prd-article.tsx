@@ -141,7 +141,7 @@ export function PrdArticle() {
             <code>/explore</code> Quests, Quick Bites, passport (missing)
           </li>
           <li>
-            <code>/history</code> Past recommendations (missing)
+            <code>/history</code> Past recommendations (shipped)
           </li>
           <li>
             <code>/account</code> Account / prefs (partial)
@@ -159,7 +159,8 @@ export function PrdArticle() {
         <p>
           Specific dish, then nearby places. Target question bank includes vibe,
           flavor, texture, hunger, dietary, and more. Adaptive: stop when enough
-          signal. Shipped today: fixed four craving axes after intent.
+          signal. Shipped today: hunger and vibe (skippable) plus four craving
+          axes after Go out intent.
         </p>
         <h3>Make something (shipped as Cook)</h3>
         <p>

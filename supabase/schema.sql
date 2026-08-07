@@ -156,7 +156,7 @@ grant execute on function public.email_for_username(text) to service_role;
 -- Safe to re-run: create if not exists + drop/create policies.
 -- ---------------------------------------------------------------------------
 create table if not exists public.recommendation_history (
-  id uuid primary key default gen_random_uuid(),
+  id text primary key,
   user_id uuid not null references auth.users (id) on delete cascade,
   food_id text not null,
   intent text not null,
@@ -209,6 +209,5 @@ alter table public.profiles
 comment on column public.profiles.dietary is
   'Owner dietary hard constraints: { diets: string[], allergens: string[] }. Synced via /api/preferences.';
 
--- Follow-up for history agent (P1-1): if public.match_history (or similar)
--- lands with user_id → auth.users, prefer ON DELETE CASCADE. Account delete
--- at DELETE /api/account also best-effort wipes known history table names.
+-- Follow-up: recommendation_history (P1-1 above) already cascades on auth
+-- user delete. DELETE /api/account also wipes that table explicitly first.

@@ -1982,6 +1982,26 @@ button {
   font-variant-numeric: tabular-nums;
 }
 
+.dna-develop {
+  margin-top: var(--space-5);
+  margin-bottom: 0;
+}
+
+.dna-develop .result-actions {
+  margin-top: var(--space-3);
+}
+
+.dna-develop-list {
+  list-style: none;
+  margin: 0 0 var(--space-3);
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-3);
+  color: var(--paper-muted);
+  font-size: 0.95rem;
+}
+
 /* Auth + account */
 
 .auth-form {
@@ -2298,6 +2318,14 @@ button {
   font-size: 0.85rem;
 }
 
+.history-filters {
+  margin-top: var(--space-4);
+}
+
+.history-empty-filter {
+  margin-top: var(--space-5);
+}
+
 .nearby-label {
   display: inline-flex;
   align-items: center;
@@ -2351,7 +2379,7 @@ button {
   padding: 0;
   display: flex;
   flex-direction: column;
-  gap: var(--space-2);
+  gap: var(--space-3);
 }
 
 .nearby-place {
@@ -2399,7 +2427,19 @@ button {
 }
 
 .nearby-role.is-best {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
   color: var(--ink);
+}
+
+.nearby-role.is-best::before {
+  content: "";
+  width: 0.45rem;
+  height: 0.45rem;
+  border-radius: var(--radius-pill);
+  background: var(--accent);
+  flex-shrink: 0;
 }
 
 .nearby-head {
@@ -2515,10 +2555,16 @@ button {
     object-fit: contain;
   }
 
+  /* Wraps rather than clips. The body clips horizontally, so a nowrap row
+     that outgrows the phone does not just look tight, it puts the last
+     destination past the edge where no thumb can reach it. Wrapping costs a
+     second header line only when the row genuinely does not fit, and it holds
+     however many destinations the nav ends up carrying. */
   .top nav {
     gap: 0.25rem;
     font-size: 0.8rem;
-    flex-wrap: nowrap;
+    flex-wrap: wrap;
+    justify-content: flex-end;
   }
 
   .top nav a.nav-primary {

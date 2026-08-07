@@ -54,6 +54,12 @@ export const QUIZ_OPTION_ICONS: Record<string, LucideIcon> = {
   barely: Zap,
   fifteen: Timer,
   cook: ChefHat,
+  peckish: Feather,
+  hungry: Utensils,
+  starving: Flame,
+  cozy: HandHeart,
+  bright: Sparkles,
+  bold: Zap,
 };
 
 /** One mark per quiz question step. */
@@ -64,7 +70,9 @@ export const QUIZ_STEP_ICONS: Record<
   | "heaviness"
   | "adventure"
   | "temperature"
-  | "cookEffort",
+  | "cookEffort"
+  | "hunger"
+  | "vibe",
   LucideIcon
 > = {
   intent: Utensils,
@@ -74,6 +82,8 @@ export const QUIZ_STEP_ICONS: Record<
   adventure: Dices,
   temperature: Thermometer,
   cookEffort: Clock,
+  hunger: Weight,
+  vibe: Sparkles,
 };
 
 /** DNA dimension labels share the same marks as quiz picks. */

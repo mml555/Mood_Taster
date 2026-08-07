@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { usernameSchema } from "@/lib/auth-schema";
+import { clientRateKey, rateLimitAllow } from "@/lib/rate-limit";
 import { createServiceClient } from "@/lib/supabase/admin";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { createClient } from "@/lib/supabase/server";
@@ -25,6 +26,10 @@ const loginSchema = z.object({
 });
 
 const INVALID = "Invalid email, username, or password";
+const TOO_MANY = "Too many sign-in attempts. Try again in a minute";
+
+/** 10 attempts, refilling at 10 a minute. Well clear of a person mistyping. */
+const LOGIN_BUCKET = { capacity: 10, refillPerMs: 10 / 60_000 };
 
 function invalid() {
   return NextResponse.json({ error: INVALID }, { status: 401 });
@@ -70,6 +75,12 @@ export async function POST(request: Request) {
       { error: "Accounts are not configured" },
       { status: 503 },
     );
+  }
+
+  // Best-effort per-instance throttle. It will not stop a distributed attack,
+  // but it caps how fast one caller can walk a password list.
+  if (!rateLimitAllow(clientRateKey(request, "login"), LOGIN_BUCKET)) {
+    return NextResponse.json({ error: TOO_MANY }, { status: 429 });
   }
 
   try {

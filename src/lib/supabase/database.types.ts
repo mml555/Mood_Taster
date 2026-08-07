@@ -84,7 +84,7 @@ export type Database = {
           created_at: string;
         };
         Insert: {
-          id?: string;
+          id: string;
           user_id: string;
           food_id: string;
           intent: string;

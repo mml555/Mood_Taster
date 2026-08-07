@@ -1,30 +1,21 @@
 import { NextResponse } from "next/server";
-import {
-  historyAppendSchema,
-  historyPatchSchema,
-} from "@/lib/api-schemas";
+import { failOnDbError, readJson, withUser } from "@/lib/api-route";
+import { historyAppendSchema, historyPatchSchema } from "@/lib/api-schemas";
 import {
   parseHistoryEntries,
   parseHistoryEntry,
   HISTORY_CAP,
 } from "@/lib/history";
-import { isSupabaseConfigured } from "@/lib/supabase/client";
-import { createClient } from "@/lib/supabase/server";
-import type { Json } from "@/lib/supabase/database.types";
+import type { Database } from "@/lib/supabase/database.types";
 
 const LOAD_FAILED = "Could not load your history";
 const SAVE_FAILED = "Could not save your history";
 const DELETE_FAILED = "Could not update your history";
 
-type HistoryRow = {
-  id: string;
-  food_id: string;
-  intent: string;
-  rating: string | null;
-  answers: Json | null;
-  place: Json | null;
-  created_at: string;
-};
+const ROW_COLUMNS = "id, food_id, intent, rating, answers, place, created_at";
+
+type HistoryRow =
+  Database["public"]["Tables"]["recommendation_history"]["Row"];
 
 function rowToEntry(row: HistoryRow) {
   return parseHistoryEntry({
@@ -38,83 +29,41 @@ function rowToEntry(row: HistoryRow) {
   });
 }
 
-export async function GET(request: Request) {
-  if (!isSupabaseConfigured()) {
-    return NextResponse.json(
-      { error: "Accounts are not configured" },
-      { status: 503 },
-    );
-  }
-
-  try {
-    const supabase = await createClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-
-    if (!user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    const url = new URL(request.url);
-    const rawLimit = Number(url.searchParams.get("limit") ?? HISTORY_CAP);
-    const limit = Number.isFinite(rawLimit)
-      ? Math.min(Math.max(1, Math.floor(rawLimit)), HISTORY_CAP)
-      : HISTORY_CAP;
-
-    const { data, error } = await supabase
-      .from("recommendation_history")
-      .select("id, food_id, intent, rating, answers, place, created_at")
-      .eq("user_id", user.id)
-      .order("created_at", { ascending: false })
-      .limit(limit);
-
-    if (error) {
-      console.error("[history] load failed:", error.message);
-      return NextResponse.json({ error: LOAD_FAILED }, { status: 500 });
-    }
-
-    const rows = (data ?? []) as HistoryRow[];
-    const entries = parseHistoryEntries(
-      rows.map((row) => rowToEntry(row)).filter(Boolean),
-    );
-
-    return NextResponse.json({
-      empty: entries.length === 0,
-      entries,
-    });
-  } catch (err) {
-    console.error("[history] load threw:", err);
-    return NextResponse.json({ error: LOAD_FAILED }, { status: 500 });
-  }
+/** Clamp ?limit to 1..HISTORY_CAP; anything unparseable means the full page. */
+function readLimit(request: Request): number {
+  const raw = Number(
+    new URL(request.url).searchParams.get("limit") ?? HISTORY_CAP,
+  );
+  if (!Number.isFinite(raw)) return HISTORY_CAP;
+  return Math.min(Math.max(1, Math.floor(raw)), HISTORY_CAP);
 }
 
-export async function POST(request: Request) {
-  if (!isSupabaseConfigured()) {
-    return NextResponse.json(
-      { error: "Accounts are not configured" },
-      { status: 503 },
+export const GET = withUser(
+  "history",
+  LOAD_FAILED,
+  async ({ request, supabase, user }) => {
+    const { data, error } = await supabase
+      .from("recommendation_history")
+      .select(ROW_COLUMNS)
+      .eq("user_id", user.id)
+      .order("created_at", { ascending: false })
+      .limit(readLimit(request));
+
+    failOnDbError(error, "history", "load", LOAD_FAILED);
+
+    const entries = parseHistoryEntries(
+      (data ?? []).map((row) => rowToEntry(row as HistoryRow)).filter(Boolean),
     );
-  }
 
-  try {
-    const supabase = await createClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
+    return NextResponse.json({ empty: entries.length === 0, entries });
+  },
+);
 
-    if (!user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    let body: unknown;
-    try {
-      body = await request.json();
-    } catch {
-      return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
-    }
-
-    const parsed = historyAppendSchema.safeParse(body);
+export const POST = withUser(
+  "history",
+  SAVE_FAILED,
+  async ({ request, supabase, user }) => {
+    const parsed = historyAppendSchema.safeParse(await readJson(request));
     if (!parsed.success) {
       return NextResponse.json(
         { error: parsed.error.issues[0]?.message ?? "Invalid history payload" },
@@ -147,12 +96,10 @@ export async function POST(request: Request) {
       { onConflict: "id" },
     );
 
-    if (error) {
-      console.error("[history] save failed:", error.message);
-      return NextResponse.json({ error: SAVE_FAILED }, { status: 500 });
-    }
+    failOnDbError(error, "history", "save", SAVE_FAILED);
 
-    // Cap: drop oldest beyond HISTORY_CAP for this user.
+    // Cap: drop oldest beyond HISTORY_CAP for this user. Best effort, so a
+    // failure here still leaves the row the caller asked us to store.
     const { data: overflow } = await supabase
       .from("recommendation_history")
       .select("id")
@@ -161,47 +108,25 @@ export async function POST(request: Request) {
       .range(HISTORY_CAP, HISTORY_CAP + 50);
 
     if (overflow && overflow.length > 0) {
-      const dropIds = overflow.map((row) => row.id as string);
       await supabase
         .from("recommendation_history")
         .delete()
         .eq("user_id", user.id)
-        .in("id", dropIds);
+        .in(
+          "id",
+          overflow.map((row) => row.id),
+        );
     }
 
     return NextResponse.json({ ok: true, entry });
-  } catch (err) {
-    console.error("[history] save threw:", err);
-    return NextResponse.json({ error: SAVE_FAILED }, { status: 500 });
-  }
-}
+  },
+);
 
-export async function PATCH(request: Request) {
-  if (!isSupabaseConfigured()) {
-    return NextResponse.json(
-      { error: "Accounts are not configured" },
-      { status: 503 },
-    );
-  }
-
-  try {
-    const supabase = await createClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-
-    if (!user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    let body: unknown;
-    try {
-      body = await request.json();
-    } catch {
-      return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
-    }
-
-    const parsed = historyPatchSchema.safeParse(body);
+export const PATCH = withUser(
+  "history",
+  SAVE_FAILED,
+  async ({ request, supabase, user }) => {
+    const parsed = historyPatchSchema.safeParse(await readJson(request));
     if (!parsed.success) {
       return NextResponse.json(
         { error: parsed.error.issues[0]?.message ?? "Invalid history patch" },
@@ -209,63 +134,38 @@ export async function PATCH(request: Request) {
       );
     }
 
+    const { id, rating } = parsed.data;
     const { error } = await supabase
       .from("recommendation_history")
-      .update({ rating: parsed.data.rating })
+      .update({ rating })
       .eq("user_id", user.id)
-      .eq("id", parsed.data.id);
+      .eq("id", id);
 
-    if (error) {
-      console.error("[history] patch failed:", error.message);
-      return NextResponse.json({ error: SAVE_FAILED }, { status: 500 });
-    }
+    failOnDbError(error, "history", "patch", SAVE_FAILED);
 
-    return NextResponse.json({ ok: true, id: parsed.data.id, rating: parsed.data.rating });
-  } catch (err) {
-    console.error("[history] patch threw:", err);
-    return NextResponse.json({ error: SAVE_FAILED }, { status: 500 });
-  }
-}
+    return NextResponse.json({ ok: true, id, rating });
+  },
+);
 
-export async function DELETE(request: Request) {
-  if (!isSupabaseConfigured()) {
-    return NextResponse.json(
-      { error: "Accounts are not configured" },
-      { status: 503 },
-    );
-  }
+export const DELETE = withUser(
+  "history",
+  DELETE_FAILED,
+  async ({ request, supabase, user }) => {
+    const params = new URL(request.url).searchParams;
 
-  try {
-    const supabase = await createClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-
-    if (!user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    const url = new URL(request.url);
-    const clearAll = url.searchParams.get("all") === "1";
-    const id = url.searchParams.get("id");
-
-    if (clearAll) {
+    if (params.get("all") === "1") {
       const { error } = await supabase
         .from("recommendation_history")
         .delete()
         .eq("user_id", user.id);
-      if (error) {
-        console.error("[history] clear failed:", error.message);
-        return NextResponse.json({ error: DELETE_FAILED }, { status: 500 });
-      }
+
+      failOnDbError(error, "history", "clear", DELETE_FAILED);
       return NextResponse.json({ ok: true, cleared: true });
     }
 
+    const id = params.get("id");
     if (!id || id.length > 80) {
-      return NextResponse.json(
-        { error: "Provide id or all=1" },
-        { status: 400 },
-      );
+      return NextResponse.json({ error: "Provide id or all=1" }, { status: 400 });
     }
 
     const { error } = await supabase
@@ -274,14 +174,8 @@ export async function DELETE(request: Request) {
       .eq("user_id", user.id)
       .eq("id", id);
 
-    if (error) {
-      console.error("[history] delete failed:", error.message);
-      return NextResponse.json({ error: DELETE_FAILED }, { status: 500 });
-    }
+    failOnDbError(error, "history", "delete", DELETE_FAILED);
 
     return NextResponse.json({ ok: true, id });
-  } catch (err) {
-    console.error("[history] delete threw:", err);
-    return NextResponse.json({ error: DELETE_FAILED }, { status: 500 });
-  }
-}
+  },
+);

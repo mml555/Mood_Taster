@@ -15,13 +15,14 @@ Tickets are ordered **P0 → P2**. Each ticket names the **live route or module*
 | — | Home entry | `/` |
 | — | Quiz (Eat out / Cook + 4 axes) | `/taste` |
 | — | Result + reject + rate | `/result/[id]` |
-| — | Places nearby | `/api/places` + result Eat out |
+| — | Places nearby (labeled cards) | `/api/places` + result Eat out |
 | — | Catalog recipes | `catalog.ts` + `recipes.ts` + Cook result |
 | — | Slim rank catalog | `catalog-data.ts` + `engine.ts` |
 | — | Local Taste DNA | `/dna` + `dna.ts` |
 | — | Optional accounts + DNA sync | `/signup`, `/login`, `/account`, `/api/dna` |
 | — | Deterministic rank | `engine.ts` |
 | — | Unit tests (rank / DNA) | `npm test` (vitest) |
+| — | Recommendation history | `/history` + `history.ts` |
 
 ---
 
@@ -99,17 +100,18 @@ deep link remains. Change place returns to the form.
 
 ## P1 — Memory, places quality, account depth
 
-### P1-1 · Recommendation history
-**Routes:** new `/history`  
+### P1-1 · Recommendation history · done
+**Routes:** `/history`  
+**Modules:** `history.ts`, `history-sync.ts`, `/api/history`  
 **PRD:** §52  
 
-Persist sessions (local first; cloud when authed). List food, date, match/intent, rating. Filters: All / Loved / Kinda / Nope / Restaurants / Recipes / Snacks. "Find again" reopens result or re-ranks with same craving.
+Persist sessions (local first; cloud when authed). List food, date, match/intent, rating. Filters: All / Loved / Kinda / Nope / Restaurants / Recipes / Snacks. "Find again" reopens result with the same craving when answers were saved.
 
 **Done when:** Guest and authed users can reopen past picks after a reload.
 
 ---
 
-### P1-2 · Richer restaurant cards — done
+### P1-2 · Richer restaurant cards · done
 **Routes:** `/result/[id]`, `/api/places`  
 **PRD:** §22  
 
@@ -119,7 +121,7 @@ Up to 3 results labeled Best match / Closest / Wildcard when data allows. Show d
 
 ---
 
-### P1-3 · Taste DNA preference vs experience
+### P1-3 · Taste DNA preference vs experience · done
 **Routes:** `/dna`  
 **Modules:** `dna.ts`, `/api/dna`  
 **PRD:** §27–30, §39  
@@ -130,11 +132,12 @@ Split preference_score and experience_score (or equivalent). Discovery % from co
 
 ---
 
-### P1-4 · Account preferences and deletion
-**Routes:** `/account`, `/privacy` alignment  
+### P1-4 · Account preferences and deletion — done
+**Routes:** `/account`, `/api/preferences`, `DELETE /api/account`  
 **PRD:** §26, §69  
 
-UI for dietary restrictions, disliked foods, default location. Clear history. Delete account + cloud DNA (and document how).
+Cloud sync for dietary prefs on `profiles.dietary`. Account delete wipes DNA,
+favorites, history, profile, and the auth user (self-serve from `/account`).
 
 **Done when:** User can set a hard restriction and delete cloud DNA without emailing support.
 
@@ -151,7 +154,7 @@ Save food (incl. recipes) locally + cloud when authed. List at `/favorites`. Sof
 
 ---
 
-### P1-6 · Analytics event spine
+### P1-6 · Analytics event spine · done
 **Modules:** client analytics helper (PostHog or equivalent)  
 **PRD:** §63–65  
 
@@ -159,15 +162,19 @@ Instrument: home, intent, question, abandon, recommendation, alternate, places c
 
 **Done when:** Funnel from home → recommendation → feedback is visible in the analytics tool for production.
 
+**Shipped:** Typed `track()` in `src/lib/analytics.ts` (PostHog capture when `NEXT_PUBLIC_POSTHOG_KEY` is set; no-op otherwise). Funnel events wired on home, quiz, result, places, recipe, signup. North star: `feedback_submitted` with `successful: true` (rating nailed). Build that funnel insight in PostHog for production.
+
 ---
 
-### P1-7 · Go Out question depth (fixed bank, not fully adaptive)
+### P1-7 · Go Out question depth (fixed bank, not fully adaptive) · done
 **Routes:** `/taste`  
 **PRD:** §13–14  
 
 Add optional vibe / hunger / direction questions when snack/clue are not in play. Still cap at ~6 questions. Full adaptive engine is P2.
 
 **Done when:** Eat out can ask 1–2 extra high-value questions without exceeding ~45s median.
+
+**Shipped:** Go Out asks hunger + vibe (both skippable via Any) before the four craving axes. Cap stays at 6. Wired into `rank()`; other intents default those fields to `any`.
 
 ---
 

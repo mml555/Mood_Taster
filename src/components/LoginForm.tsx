@@ -67,6 +67,7 @@ export function LoginForm() {
         loadDnaForUser(),
         loadDietaryForUser(),
         loadFavoritesForUser(),
+        loadHistoryForUser(),
       ]);
       router.push("/account");
       router.refresh();

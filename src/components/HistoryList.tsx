@@ -9,6 +9,7 @@ import {
   intentLabel,
   ratingLabel,
   type HistoryEntry,
+  type HistoryFilter,
 } from "@/lib/history";
 import { loadHistoryForUser } from "@/lib/history-sync";
 import { emptySession, writeSession } from "@/lib/session";
@@ -17,6 +18,16 @@ type HistoryItem = {
   entry: HistoryEntry;
   name: string;
 };
+
+const FILTERS: { id: HistoryFilter; label: string }[] = [
+  { id: "all", label: "All" },
+  { id: "nailed", label: "Loved" },
+  { id: "kinda", label: "Kinda" },
+  { id: "nope", label: "Nope" },
+  { id: "restaurant", label: "Restaurants" },
+  { id: "recipe", label: "Recipes" },
+  { id: "snack", label: "Snacks" },
+];
 
 function resolveItems(entries: HistoryEntry[]): HistoryItem[] {
   const items: HistoryItem[] = [];
@@ -44,6 +55,7 @@ function formatWhen(iso: string): string {
 export function HistoryList() {
   const router = useRouter();
   const [items, setItems] = useState<HistoryItem[] | null>(null);
+  const [filter, setFilter] = useState<HistoryFilter>("all");
 
   useEffect(() => {
     queueMicrotask(async () => {
@@ -51,6 +63,17 @@ export function HistoryList() {
       setItems(resolveItems(loaded.entries));
     });
   }, []);
+
+  const visible = !items
+    ? null
+    : filter === "all"
+      ? items
+      : items.filter(({ entry }) => {
+          if (filter === "nailed" || filter === "kinda" || filter === "nope") {
+            return entry.rating === filter;
+          }
+          return entry.intent === filter;
+        });
 
   const onFindAgain = useCallback(
     (entry: HistoryEntry) => {
@@ -65,7 +88,7 @@ export function HistoryList() {
     [router],
   );
 
-  if (items === null) {
+  if (items === null || visible === null) {
     return (
       <section className="favorites">
         <p className="eyebrow">Past picks</p>
@@ -103,38 +126,61 @@ export function HistoryList() {
       <p className="dna-lede">
         Reopen a pick. Same craving when we still have it.
       </p>
-      <ul className="favorites-list">
-        {items.map(({ entry, name }) => {
-          const when = formatWhen(entry.createdAt);
-          const rated = ratingLabel(entry.rating);
-          const mode = intentLabel(entry.intent);
-          const meta = [mode, rated, when].filter(Boolean).join(" · ");
-          return (
-            <li key={entry.id} className="favorites-item">
-              <div className="favorites-item-main">
-                <Link
-                  className="favorites-item-link"
-                  href={`/result/${entry.foodId}`}
-                >
-                  {name}
-                </Link>
-                {meta ? (
-                  <p className="favorites-item-meta">{meta}</p>
-                ) : null}
-              </div>
-              <button
-                type="button"
-                className="cta-secondary favorites-unsave"
-                onClick={() => onFindAgain(entry)}
-                aria-label={`Find ${name} again`}
-              >
-                <RotateCcw size={18} strokeWidth={1.5} aria-hidden />
-                Find again
-              </button>
-            </li>
-          );
-        })}
+
+      <ul className="feedback-chips history-filters" aria-label="Filter history">
+        {FILTERS.map((f) => (
+          <li key={f.id}>
+            <button
+              type="button"
+              className={`feedback-chip${filter === f.id ? " is-selected" : ""}`}
+              aria-pressed={filter === f.id}
+              onClick={() => setFilter(f.id)}
+            >
+              {f.label}
+            </button>
+          </li>
+        ))}
       </ul>
+
+      {visible.length === 0 ? (
+        <p className="dna-lede history-empty-filter">
+          Nothing in this filter. Try All.
+        </p>
+      ) : (
+        <ul className="favorites-list">
+          {visible.map(({ entry, name }) => {
+            const when = formatWhen(entry.createdAt);
+            const rated = ratingLabel(entry.rating);
+            const mode = intentLabel(entry.intent);
+            const meta = [mode, rated, when].filter(Boolean).join(" · ");
+            return (
+              <li key={entry.id} className="favorites-item">
+                <div className="favorites-item-main">
+                  <Link
+                    className="favorites-item-link"
+                    href={`/result/${entry.foodId}`}
+                  >
+                    {name}
+                  </Link>
+                  {meta ? (
+                    <p className="favorites-item-meta">{meta}</p>
+                  ) : null}
+                </div>
+                <button
+                  type="button"
+                  className="cta-secondary favorites-unsave"
+                  onClick={() => onFindAgain(entry)}
+                  aria-label={`Find ${name} again`}
+                >
+                  <RotateCcw size={18} strokeWidth={1.5} aria-hidden />
+                  Find again
+                </button>
+              </li>
+            );
+          })}
+        </ul>
+      )}
+
       <div className="result-actions">
         <Link className="cta" href="/taste">
           New craving

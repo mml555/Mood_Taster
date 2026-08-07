@@ -142,8 +142,8 @@ export function AccountPanel() {
           Delete account
         </h2>
         <p className="dietary-note">
-          Removes cloud Taste DNA, favorites, diet settings, and this login.
-          Guest quiz on this device is separate.
+          Removes cloud Taste DNA, favorites, history, diet settings, and this
+          login. Also clears taste data saved on this device.
         </p>
 
         {deleteStep === "idle" ? (

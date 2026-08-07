@@ -45,21 +45,54 @@ export async function recordRecommendationShown(
   return entry;
 }
 
-/** Persist a rating on the newest matching pick. */
+/**
+ * Persist a rating on the newest matching pick.
+ * If nothing is stored yet (race or cold open), create from context when given.
+ */
 export async function recordRecommendationRating(
   foodId: string,
   rating: Rating,
+  context?: Omit<AppendHistoryInput, "foodId" | "rating">,
 ): Promise<HistoryEntry | null> {
-  const { entry } = setHistoryRatingLocal(foodId, rating);
+  let { entry } = setHistoryRatingLocal(
+    foodId,
+    rating,
+    undefined,
+    context?.place,
+  );
+  if (!entry && context) {
+    const created = appendHistoryLocal({
+      foodId,
+      intent: context.intent,
+      answers: context.answers,
+      place: context.place,
+      rating,
+      dedupeOpen: false,
+    });
+    entry = created.entry;
+    if (!entry) return null;
+    if (!isSupabaseConfigured()) return entry;
+    try {
+      await postEntry(entry);
+    } catch {
+      /* best-effort */
+    }
+    return entry;
+  }
   if (!entry) return null;
   if (!isSupabaseConfigured()) return entry;
 
   try {
-    await fetch("/api/history", {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id: entry.id, rating }),
-    });
+    // Upsert when place may have been backfilled; otherwise patch rating only.
+    if (entry.place && context?.place) {
+      await postEntry(entry);
+    } else {
+      await fetch("/api/history", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: entry.id, rating }),
+      });
+    }
   } catch {
     /* best-effort */
   }

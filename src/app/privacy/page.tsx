@@ -238,10 +238,11 @@ export default function PrivacyPage() {
               prevent abuse, and bill partners.
             </p>
             <p>
-              If you ask us to delete your account or personal Taste DNA we
-              hold, we delete it. Aggregation after retention is not a
-              substitute for that deletion request. Use{" "}
-              <Link href="/contact">Contact</Link> for privacy requests.
+              If you create an account, you can delete it and the cloud Taste
+              DNA, favorites, history, and diet settings we hold from{" "}
+              <Link href="/account">Account</Link>. Aggregation after retention
+              is not a substitute for that deletion. Use{" "}
+              <Link href="/contact">Contact</Link> for other privacy requests.
             </p>
           </section>
 

@@ -3,12 +3,13 @@
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { loadDnaForUser, persistDna } from "@/lib/dna-sync";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { ANALYTICS_EVENTS, track } from "@/lib/analytics";
+import { persistDna } from "@/lib/dna-sync";
 import { applyQuizPrefs, readDna } from "@/lib/dna";
 import { readFavorites } from "@/lib/favorites";
 import { loadFavoritesForUser } from "@/lib/favorites-sync";
-import { readDietary } from "@/lib/dietary";
+import { loadHistoryForUser } from "@/lib/history-sync";
 import { loadDietaryForUser } from "@/lib/dietary-sync";
 import { NoDietaryMatchError, rank } from "@/lib/engine";
 import { QUIZ_OPTION_ICONS, QUIZ_STEP_ICONS } from "@/lib/mood-icons";
@@ -23,9 +24,11 @@ import {
   COOK_EFFORTS,
   FLAVORS,
   HEAVINESS,
+  HUNGERS,
   INTENTS,
   TEMPERATURES,
   TEXTURES,
+  VIBES,
 } from "@/lib/taste-types";
 
 type StepDef = {
@@ -34,6 +37,9 @@ type StepDef = {
   reaction?: string;
   options: { value: string; label: string }[];
 };
+
+/** Cancels a deferred abandon when Strict Mode remounts the quiz. */
+let pendingAbandonTimer: number | null = null;
 
 const INTENT_STEP: StepDef = {
   key: "intent",
@@ -98,6 +104,32 @@ const COOK_EFFORT_STEP: StepDef = {
     { value: "cook", label: "I can cook" },
   ],
 };
+
+/** Go Out depth: appetite + table vibe before sensory axes. Both skippable. */
+const GO_OUT_STEPS: StepDef[] = [
+  {
+    key: "hunger",
+    question: "How hungry?",
+    reaction: "Sets the size.",
+    options: [
+      { value: "peckish", label: "Peckish" },
+      { value: "hungry", label: "Hungry" },
+      { value: "starving", label: "Starving" },
+      { value: "any", label: "Any" },
+    ],
+  },
+  {
+    key: "vibe",
+    question: "What vibe?",
+    reaction: "Sets the mood.",
+    options: [
+      { value: "cozy", label: "Cozy" },
+      { value: "bright", label: "Bright" },
+      { value: "bold", label: "Bold" },
+      { value: "any", label: "Any" },
+    ],
+  },
+];
 
 /** Signature no-clue mode: broad pairs that map into Answers. */
 const CLUE_STEPS: StepDef[] = [
@@ -189,6 +221,14 @@ function isComplete(answers: PartialAnswers): answers is Answers {
       COOK_EFFORTS.includes(
         answers.cookEffort as (typeof COOK_EFFORTS)[number],
       ));
+  const hungerOk =
+    answers.hunger === "any" ||
+    (answers.hunger != null &&
+      HUNGERS.includes(answers.hunger as (typeof HUNGERS)[number]));
+  const vibeOk =
+    answers.vibe === "any" ||
+    (answers.vibe != null &&
+      VIBES.includes(answers.vibe as (typeof VIBES)[number]));
 
   return Boolean(
     answers.intent &&
@@ -198,6 +238,8 @@ function isComplete(answers: PartialAnswers): answers is Answers {
       answers.adventure &&
       answers.temperature &&
       effortOk &&
+      hungerOk &&
+      vibeOk &&
       INTENTS.includes(answers.intent) &&
       FLAVORS.includes(answers.flavor) &&
       TEXTURES.includes(answers.texture) &&
@@ -224,6 +266,7 @@ function stepsForIntent(intent: Intent | null): StepDef[] {
   if (!intent) return [INTENT_STEP, ...CRAVING_STEPS];
   if (intent === "clue") return CLUE_STEPS;
   if (intent === "recipe") return [COOK_EFFORT_STEP, ...CRAVING_STEPS];
+  if (intent === "restaurant") return [...GO_OUT_STEPS, ...CRAVING_STEPS];
   return CRAVING_STEPS;
 }
 
@@ -238,6 +281,12 @@ export function TasteQuiz() {
   const [answers, setAnswers] = useState<PartialAnswers>({});
   const [hydrated, setHydrated] = useState(false);
   const [dietError, setDietError] = useState(false);
+  const finishedRef = useRef(false);
+  const abandonMetaRef = useRef({
+    step,
+    intent: seededIntent as Intent | null,
+    question: null as string | null,
+  });
 
   useEffect(() => {
     queueMicrotask(() => {
@@ -255,6 +304,14 @@ export function TasteQuiz() {
             seededIntent === "recipe"
               ? draft.cookEffort
               : (draft.cookEffort ?? "any"),
+          hunger:
+            seededIntent === "restaurant"
+              ? draft.hunger
+              : (draft.hunger ?? "any"),
+          vibe:
+            seededIntent === "restaurant"
+              ? draft.vibe
+              : (draft.vibe ?? "any"),
         };
         setAnswers(next);
         writeDraft(next);
@@ -270,6 +327,39 @@ export function TasteQuiz() {
   const stepLabel = String(step).padStart(2, "0");
   const totalLabel = String(totalSteps).padStart(2, "0");
 
+  abandonMetaRef.current = {
+    step,
+    intent: (answers.intent as Intent | undefined) ?? seededIntent,
+    question: current?.key ?? null,
+  };
+
+  useEffect(() => {
+    if (pendingAbandonTimer != null) {
+      window.clearTimeout(pendingAbandonTimer);
+      pendingAbandonTimer = null;
+    }
+
+    const flushAbandon = () => {
+      if (finishedRef.current) return;
+      const meta = abandonMetaRef.current;
+      track(ANALYTICS_EVENTS.abandon, {
+        step: meta.step,
+        intent: meta.intent ?? undefined,
+        question: meta.question ?? undefined,
+      });
+    };
+
+    window.addEventListener("pagehide", flushAbandon);
+    return () => {
+      window.removeEventListener("pagehide", flushAbandon);
+      // Delay so React Strict Mode remount can cancel a false abandon.
+      pendingAbandonTimer = window.setTimeout(() => {
+        pendingAbandonTimer = null;
+        flushAbandon();
+      }, 80);
+    };
+  }, []);
+
   const goStep = useCallback(
     (next: number, intent: Intent | null = seededIntent) => {
       router.push(tasteHref(intent, next, fromHome && Boolean(intent)), {
@@ -284,14 +374,19 @@ export function TasteQuiz() {
       clearDraft();
       setDietError(false);
       const session = emptySession(finalAnswers);
-      const dna = readDna();
-      const dietary = readDietary();
+      const { dna } = applyQuizPrefs(readDna(), finalAnswers);
+      void persistDna(dna);
+      track(ANALYTICS_EVENTS.dnaUpdate, {
+        reason: "quiz",
+        intent: finalAnswers.intent,
+      });
 
       if (finalAnswers.intent === "restaurant") {
         warmGeolocation();
       }
 
       const go = (foodId: string) => {
+        finishedRef.current = true;
         writeSession({
           ...session,
           servedIds: [foodId],
@@ -300,12 +395,16 @@ export function TasteQuiz() {
           prefetchPlacesForFood(foodId);
         }
         router.push(`/result/${foodId}`);
-        void loadDnaForUser();
-        void loadHistoryForUser();
       };
 
       void (async () => {
-        const favs = await loadFavoritesForUser();
+        // Pull cloud history before the result page records a new pick.
+        // Doing it after navigate can overwrite the just-written local entry.
+        const [favs, dietary] = await Promise.all([
+          loadFavoritesForUser(),
+          loadDietaryForUser(),
+          loadHistoryForUser(),
+        ]);
         const favoriteIds = favs.foodIds.length
           ? favs.foodIds
           : readFavorites().foodIds;
@@ -363,19 +462,36 @@ export function TasteQuiz() {
           ...next,
           cookEffort: intent === "recipe" ? undefined : "any",
           temperature: intent === "clue" ? undefined : "any",
+          hunger: intent === "restaurant" ? undefined : "any",
+          vibe: intent === "restaurant" ? undefined : "any",
         };
         setAnswers(seeded);
         writeDraft(seeded);
+        track(ANALYTICS_EVENTS.intent, { intent, source: "quiz" });
         if (intent === "restaurant") warmGeolocation();
         goStep(1, intent);
         return;
       }
+
+      track(ANALYTICS_EVENTS.question, {
+        question: current.key,
+        value,
+        step,
+        intent:
+          (next.intent as Intent | undefined) ?? seededIntent ?? undefined,
+      });
 
       if (current.key !== "temperature" && !next.temperature) {
         next.temperature = seededIntent === "clue" ? undefined : "any";
       }
       if (current.key !== "cookEffort" && !next.cookEffort) {
         next.cookEffort = seededIntent === "recipe" ? undefined : "any";
+      }
+      if (current.key !== "hunger" && !next.hunger) {
+        next.hunger = seededIntent === "restaurant" ? undefined : "any";
+      }
+      if (current.key !== "vibe" && !next.vibe) {
+        next.vibe = seededIntent === "restaurant" ? undefined : "any";
       }
 
       setAnswers(next);
@@ -390,6 +506,8 @@ export function TasteQuiz() {
         ...next,
         temperature: next.temperature ?? "any",
         cookEffort: next.cookEffort ?? "any",
+        hunger: next.hunger ?? "any",
+        vibe: next.vibe ?? "any",
       };
       if (isComplete(complete)) {
         finish(complete);

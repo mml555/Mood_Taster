@@ -2,10 +2,12 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { FormEvent, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
+import { ANALYTICS_EVENTS, track } from "@/lib/analytics";
 import { loadDnaForUser } from "@/lib/dna-sync";
 import { loadDietaryForUser } from "@/lib/dietary-sync";
 import { loadFavoritesForUser } from "@/lib/favorites-sync";
+import { loadHistoryForUser } from "@/lib/history-sync";
 import { createClient, isSupabaseConfigured } from "@/lib/supabase/client";
 import { signupSchema } from "@/lib/auth-schema";
 
@@ -13,6 +15,10 @@ export function SignupForm() {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
+
+  useEffect(() => {
+    track(ANALYTICS_EVENTS.signupShown, { source: "signup_page" });
+  }, []);
 
   if (!isSupabaseConfigured()) {
     return (
@@ -63,6 +69,9 @@ export function SignupForm() {
       }
 
       if (!data.session) {
+        track(ANALYTICS_EVENTS.signupCompleted, {
+          confirmed: false,
+        });
         setError(
           "Check your email to confirm the account, then sign in. (You can turn off email confirm in Supabase Auth settings for local demos.)",
         );
@@ -82,7 +91,9 @@ export function SignupForm() {
         loadDnaForUser(),
         loadDietaryForUser(),
         loadFavoritesForUser(),
+        loadHistoryForUser(),
       ]);
+      track(ANALYTICS_EVENTS.signupCompleted, { confirmed: true });
       router.push("/account");
       router.refresh();
     } catch (err) {

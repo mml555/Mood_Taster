@@ -17,8 +17,9 @@ export default function AccountPage() {
             Your profile
           </h1>
           <p className="dna-lede">
-            Signed-in Taste DNA syncs to your account. Sign out anytime; guest
-            quiz still works on this device.
+            Signed-in Taste DNA and diet settings sync to your account. Sign out
+            anytime; guest quiz still works on this device. Delete account from
+            this page when you want cloud data gone.
           </p>
           <AccountPanel />
         </section>

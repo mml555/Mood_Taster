@@ -23,6 +23,7 @@ import {
   type DnaDelta,
 } from "@/lib/dna";
 import { persistDna } from "@/lib/dna-sync";
+import { ANALYTICS_EVENTS, track } from "@/lib/analytics";
 import { ProfileNudge } from "@/components/ProfileNudge";
 import type { PlacesState } from "@/components/result/NearbySection";
 import { readDietary } from "@/lib/dietary";
@@ -38,6 +39,7 @@ import {
   recordRecommendationShown,
 } from "@/lib/history-sync";
 import { capitalize } from "@/lib/explain";
+import { parsePlacesResponse } from "@/lib/api-schemas";
 import {
   mapsSearchUrl,
   readCachedGeo,
@@ -191,10 +193,25 @@ export function ResultView({ food }: ResultViewProps) {
       setHasSession(true);
       setSessionReady(true);
 
+      const isAlternate = rejectNote;
+      track(ANALYTICS_EVENTS.recommendation, {
+        food_id: food.id,
+        intent: active.answers.intent,
+        alternate: isAlternate,
+      });
+      if (isAlternate) {
+        track(ANALYTICS_EVENTS.alternate, {
+          food_id: food.id,
+          intent: active.answers.intent,
+        });
+      }
+
+      const prefetched = readPrefetchedPlaces(food.id);
       void recordRecommendationShown({
         foodId: food.id,
         intent: active.answers.intent,
         answers: active.answers,
+        place: prefetched?.[0] ?? null,
       });
 
       // Enhancement only. The explanation above is already correct and shown.
@@ -321,8 +338,8 @@ export function ResultView({ food }: ResultViewProps) {
           return;
         }
 
-        const data = (await res.json()) as { places?: NearbyPlace[] };
-        const found = data.places ?? [];
+        const data = parsePlacesResponse(await res.json());
+        const found = data.places;
 
         if (found.length === 0) {
           setPlacesState("fallback");
@@ -367,12 +384,7 @@ export function ResultView({ food }: ResultViewProps) {
         const res = await fetch(
           `/api/places?foodId=${encodeURIComponent(food.id)}&q=${encodeURIComponent(query)}`,
         );
-        const data = (await res.json()) as {
-          places?: NearbyPlace[];
-          geoError?: boolean;
-          lat?: number;
-          lng?: number;
-        };
+        const data = parsePlacesResponse(await res.json());
 
         if (data.geoError) {
           setPlaces([]);
@@ -381,7 +393,7 @@ export function ResultView({ food }: ResultViewProps) {
           return;
         }
 
-        const found = data.places ?? [];
+        const found = data.places;
         if (
           typeof data.lat === "number" &&
           typeof data.lng === "number"
@@ -547,14 +559,36 @@ export function ResultView({ food }: ResultViewProps) {
         detail,
       );
       void persistDna(next);
-      void recordRecommendationRating(food.id, rating);
+      const current = readSession();
+      track(ANALYTICS_EVENTS.feedback, {
+        food_id: food.id,
+        rating,
+        tag_count: tags.length,
+        successful: rating === "nailed",
+        intent: current?.answers.intent,
+      });
+      track(ANALYTICS_EVENTS.dnaUpdate, {
+        reason: "feedback",
+        rating,
+        intent: current?.answers.intent,
+      });
+      void recordRecommendationRating(
+        food.id,
+        rating,
+        current
+          ? {
+              intent: current.answers.intent,
+              answers: current.answers,
+              place: places[0] ?? null,
+            }
+          : undefined,
+      );
       setDeltas(changes.filter((d) => d.direction !== "flat"));
       setLastRating(rating);
       setPendingRating(null);
       setFeedbackTags([]);
 
       if (rating === "nope") {
-        const current = readSession();
         if (!current) {
           router.push("/taste");
           return;
@@ -565,7 +599,7 @@ export function ResultView({ food }: ResultViewProps) {
         });
       }
     },
-    [animateExitThen, food, goToNext, pendingRating, router],
+    [animateExitThen, food, goToNext, pendingRating, places, router],
   );
 
   const rated = lastRating !== null || pendingRating !== null;

@@ -16,7 +16,8 @@ A mood → match product with optional accounts:
 2. **Quiz** (`/taste`) starts with Eat out or Cook, then four craving taps (flavor, texture, heaviness, adventure)
 3. **Result** (`/result/[id]`) shows one dish and a why. Eat out shows nearby places. Cook shows ingredients and steps
 4. **Taste DNA** (`/dna`) shows a preference profile that updates from ratings
-5. **Accounts** (`/signup`, `/login`, `/account`) via Supabase: username + email + password, cloud-synced Taste DNA
+5. **History** (`/history`) keeps past picks so you can find them again (local first; cloud when signed in)
+6. **Accounts** (`/signup`, `/login`, `/account`) via Supabase: username + email + password, cloud-synced Taste DNA
 
 Guests still work with no account (localStorage only). Accounts need Supabase env vars.
 
@@ -45,7 +46,7 @@ score = 0.75 * quizMatch
       - recentPenalty
 ```
 
-Quiz answers live in `sessionStorage`. Taste DNA lives in `localStorage`, and syncs to Supabase when signed in.
+Quiz answers live in `sessionStorage`. Taste DNA, favorites, dietary prefs, and recommendation history live in `localStorage`, and sync to Supabase when signed in.
 
 ## Tech stack
 

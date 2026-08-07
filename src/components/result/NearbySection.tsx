@@ -2,6 +2,7 @@
 
 import { MapPin } from "lucide-react";
 import { useState, type FormEvent } from "react";
+import { ANALYTICS_EVENTS, track } from "@/lib/analytics";
 import { PLACE_LABEL_COPY } from "@/lib/places-rank";
 import { mapsSearchUrl } from "@/lib/places-prefetch";
 import type { Food, NearbyPlace } from "@/lib/taste-types";
@@ -22,6 +23,14 @@ function placeMeta(p: NearbyPlace): string {
 function PlaceCard({ place }: { place: NearbyPlace }) {
   const label = place.label ? PLACE_LABEL_COPY[place.label] : null;
   const meta = placeMeta(place);
+
+  const onPlaceClick = () => {
+    track(ANALYTICS_EVENTS.placesClick, {
+      has_maps: Boolean(place.mapsUri),
+      label: place.label ?? "none",
+      open_now: place.openNow ?? "unknown",
+    });
+  };
 
   const body = (
     <>
@@ -55,6 +64,7 @@ function PlaceCard({ place }: { place: NearbyPlace }) {
         href={place.mapsUri}
         target="_blank"
         rel="noopener noreferrer"
+        onClick={onPlaceClick}
       >
         {body}
       </a>
@@ -89,6 +99,15 @@ export function NearbySection({
         <p className="nearby-status" role="status">
           {state === "locating" ? "Finding you" : "Looking nearby"}
         </p>
+        {state === "locating" && onSearchLocation ? (
+          <button
+            type="button"
+            className="text-link nearby-change-place"
+            onClick={() => onSearchLocation("")}
+          >
+            Enter a city instead
+          </button>
+        ) : null}
       </div>
     );
   }
@@ -141,6 +160,13 @@ export function NearbySection({
           href={mapsSearchUrl(food)}
           target="_blank"
           rel="noopener noreferrer"
+          onClick={() =>
+            track(ANALYTICS_EVENTS.placesClick, {
+              has_maps: true,
+              label: "maps_fallback",
+              food_id: food.id,
+            })
+          }
         >
           <MapPin size={20} strokeWidth={1.5} aria-hidden />
           Search maps for {food.name}

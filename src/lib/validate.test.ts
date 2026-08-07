@@ -24,6 +24,24 @@ describe("parseAnswers", () => {
       adventure: "safe",
     });
     expect(parsed?.temperature).toBe("any");
+    expect(parsed?.hunger).toBe("any");
+    expect(parsed?.vibe).toBe("any");
+  });
+
+  it("accepts Go Out hunger and vibe", () => {
+    const parsed = parseAnswers({
+      intent: "restaurant",
+      flavor: "savory",
+      texture: "crunchy",
+      heaviness: "filling",
+      adventure: "curious",
+      temperature: "any",
+      cookEffort: "any",
+      hunger: "starving",
+      vibe: "bold",
+    });
+    expect(parsed?.hunger).toBe("starving");
+    expect(parsed?.vibe).toBe("bold");
   });
 
   it("rejects unknown flavor", () => {
