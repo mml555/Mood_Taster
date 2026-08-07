@@ -70,23 +70,6 @@ export function SiteHeader({ current = "home" }: SiteHeaderProps) {
             <AuthNav current={current} />
           </>
         )}
-        <span className="nav-docs" aria-label="Docs">
-          <Link href="/prd" aria-current={current === "prd" ? "page" : undefined}>
-            PRD
-          </Link>
-          <Link
-            href="/strategy"
-            aria-current={current === "strategy" ? "page" : undefined}
-          >
-            Strategy
-          </Link>
-          <Link
-            href="/brand"
-            aria-current={current === "brand" ? "page" : undefined}
-          >
-            Brand
-          </Link>
-        </span>
       </nav>
     </header>
   );

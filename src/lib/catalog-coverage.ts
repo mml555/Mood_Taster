@@ -13,11 +13,12 @@ import { rank } from "./engine";
 import { emptySession } from "./session";
 
 /**
- * Assert catalog coverage: every major quiz answer has ≥5 strong matches.
+ * Assert catalog coverage: every major quiz answer has enough strong matches.
  * Run: npx tsx src/lib/catalog-coverage.ts
  */
 const THRESHOLD = 0.55;
 const MIN_MATCHES = 5;
+const MIN_SNACK_MATCHES = 3;
 
 function baseAnswers(intent: Intent): Answers {
   return {
@@ -26,6 +27,7 @@ function baseAnswers(intent: Intent): Answers {
     texture: "soft",
     heaviness: "any",
     adventure: "curious",
+    temperature: intent === "clue" ? "hot" : "any",
   };
 }
 
@@ -61,7 +63,10 @@ function casesForIntent(intent: Intent): { label: string; answers: Answers }[] {
 
 function main() {
   const withRecipe = CATALOG.filter((f) => f.recipe != null).length;
-  console.log(`Catalog size: ${CATALOG.length} (${withRecipe} with recipes)`);
+  const snacks = CATALOG.filter((f) => f.snack === true).length;
+  console.log(
+    `Catalog size: ${CATALOG.length} (${withRecipe} with recipes, ${snacks} snacks)`,
+  );
 
   if (withRecipe !== CATALOG.length) {
     console.error(
@@ -70,13 +75,19 @@ function main() {
     process.exit(1);
   }
 
+  if (snacks < 8) {
+    console.error(`FAIL: need at least 8 snacks, found ${snacks}`);
+    process.exit(1);
+  }
+
   let failed = false;
   for (const intent of INTENTS) {
+    const min = intent === "snack" ? MIN_SNACK_MATCHES : MIN_MATCHES;
     for (const c of casesForIntent(intent)) {
       const count = countStrong(c.answers);
-      const ok = count >= MIN_MATCHES;
+      const ok = count >= min;
       console.log(
-        `${ok ? "OK" : "FAIL"} ${c.label}: ${count} foods ≥ ${THRESHOLD}`,
+        `${ok ? "OK" : "FAIL"} ${c.label}: ${count} foods ≥ ${THRESHOLD} (min ${min})`,
       );
       if (!ok) failed = true;
     }

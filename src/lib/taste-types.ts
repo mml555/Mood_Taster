@@ -3,12 +3,14 @@ export const FLAVORS = ["savory", "spicy", "sweet", "fresh"] as const;
 export const TEXTURES = ["crunchy", "creamy", "juicy", "soft"] as const;
 export const HEAVINESS = ["light", "medium", "filling"] as const;
 export const ADVENTURE = ["safe", "curious", "surprise"] as const;
+export const TEMPERATURES = ["hot", "cold", "any"] as const;
 
 export type Intent = (typeof INTENTS)[number];
 export type Flavor = (typeof FLAVORS)[number];
 export type Texture = (typeof TEXTURES)[number];
 export type Heaviness = (typeof HEAVINESS)[number];
 export type Adventure = (typeof ADVENTURE)[number];
+export type Temperature = (typeof TEMPERATURES)[number];
 
 export type Recipe = {
   servings: number;
@@ -33,7 +35,20 @@ export type Food = {
   reasonTemplate: string;
   /** Present when this dish can be cooked at home. */
   recipe?: Recipe;
+  /** Curated for Grab a snack intent. */
+  snack?: boolean;
 };
+
+/**
+ * Slim food used by the ranking engine. Ships in the client bundle without
+ * recipe bodies (those live in recipes.ts and attach on the server).
+ */
+export type RankFood = Omit<Food, "recipe"> & {
+  hasRecipe: boolean;
+};
+
+/** Ranking / DNA helpers accept full foods or slim rank foods. */
+export type FoodLike = Omit<Food, "recipe"> | RankFood;
 
 export type Answers = {
   intent: Intent;
@@ -41,6 +56,8 @@ export type Answers = {
   texture: Texture;
   heaviness: Heaviness | "any";
   adventure: Adventure;
+  /** "any" for standard quiz; hot/cold from no-clue mode. */
+  temperature: Temperature;
 };
 
 export type DnaDimension =
@@ -71,7 +88,7 @@ export type SessionState = {
 };
 
 export type ScoredFood = {
-  food: Food;
+  food: RankFood;
   score: number;
   matchedAttributes: string[];
   explanation: string;

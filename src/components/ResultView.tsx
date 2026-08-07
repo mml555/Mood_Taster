@@ -13,7 +13,11 @@ import {
 } from "react";
 import {
   applyRating,
-  labelDimension,
+  formatDnaChangeLine,
+  HIT_TAGS,
+  MISS_TAGS,
+  parseHitTags,
+  parseMissTags,
   readDna,
   type DnaDelta,
 } from "@/lib/dna";
@@ -29,7 +33,6 @@ import {
 import type { NearbyPlace } from "@/app/api/places/route";
 import type {
   Answers,
-  DnaProfile,
   Food,
   Intent,
   Rating,
@@ -42,12 +45,50 @@ type ResultViewProps = {
 };
 
 const SWIPE_THRESHOLD = 80;
+const GEO_CACHE_KEY = "mood-taster-geo";
+const GEO_CACHE_MS = 10 * 60 * 1000;
 
 /** Always available, needs no key and no permission. The floor under Places. */
 function mapsSearchUrl(food: Food): string {
   return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
     `${food.name} restaurant`,
   )}`;
+}
+
+function readCachedGeo(): { lat: number; lng: number } | null {
+  if (typeof window === "undefined") return null;
+  try {
+    const raw = sessionStorage.getItem(GEO_CACHE_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as {
+      lat?: unknown;
+      lng?: unknown;
+      at?: unknown;
+    };
+    if (
+      typeof parsed.lat !== "number" ||
+      typeof parsed.lng !== "number" ||
+      typeof parsed.at !== "number"
+    ) {
+      return null;
+    }
+    if (Date.now() - parsed.at > GEO_CACHE_MS) return null;
+    return { lat: parsed.lat, lng: parsed.lng };
+  } catch {
+    return null;
+  }
+}
+
+function writeCachedGeo(lat: number, lng: number): void {
+  if (typeof window === "undefined") return;
+  try {
+    sessionStorage.setItem(
+      GEO_CACHE_KEY,
+      JSON.stringify({ lat, lng, at: Date.now() }),
+    );
+  } catch {
+    /* quota / private mode */
+  }
 }
 
 function prefersReducedMotion(): boolean {
@@ -76,6 +117,8 @@ export function ResultView({ food }: ResultViewProps) {
   const [imgFailed, setImgFailed] = useState(false);
   const [deltas, setDeltas] = useState<DnaDelta[] | null>(null);
   const [lastRating, setLastRating] = useState<Rating | null>(null);
+  const [pendingRating, setPendingRating] = useState<Rating | null>(null);
+  const [feedbackTags, setFeedbackTags] = useState<string[]>([]);
   const [emptyAlts, setEmptyAlts] = useState(false);
 
   const [riff, setRiff] = useState<string | null>(null);
@@ -105,6 +148,7 @@ export function ResultView({ food }: ResultViewProps) {
   useEffect(() => {
     renderId.current += 1;
     const token = renderId.current;
+    const abort = new AbortController();
 
     queueMicrotask(() => {
       setImgFailed(false);
@@ -151,33 +195,43 @@ export function ResultView({ food }: ResultViewProps) {
       setSessionReady(true);
 
       // Enhancement only. The explanation above is already correct and shown.
-      void polish(food.id, active.answers, token);
+      void polish(food.id, active.answers, token, abort.signal);
     });
 
     /** Swaps in warmer copy once the model answers. Never blocks, never throws. */
-    async function polish(foodId: string, answers: Answers, token: number) {
+    async function polish(
+      foodId: string,
+      answers: Answers,
+      paintToken: number,
+      signal: AbortSignal,
+    ) {
       try {
         const res = await fetch("/api/explain", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ foodId, answers }),
+          signal,
         });
-        if (!res.ok || token !== renderId.current) return;
+        if (!res.ok || paintToken !== renderId.current || signal.aborted) return;
 
         const data = (await res.json()) as {
           why: string | null;
           riff: string | null;
           cookTip?: string | null;
         };
-        if (token !== renderId.current) return;
+        if (paintToken !== renderId.current || signal.aborted) return;
 
         if (data.why) setExplanation(data.why);
         if (data.riff) setRiff(data.riff);
         if (data.cookTip) setCookTip(data.cookTip);
       } catch {
-        // The deterministic line stays on screen. Nothing to recover.
+        // Abort or network failure: deterministic copy stays on screen.
       }
     }
+
+    return () => {
+      abort.abort();
+    };
   }, [food]);
 
   // Places only for Go out. Cook shows the recipe. Snack and no-clue stay dish-first.
@@ -189,11 +243,24 @@ export function ResultView({ food }: ResultViewProps) {
     }
 
     const token = renderId.current;
+    const abort = new AbortController();
     let cancelled = false;
+    const fallbackTimer = window.setTimeout(() => {
+      if (!cancelled) setPlacesState((s) => (s === "locating" ? "fallback" : s));
+    }, 2500);
 
     queueMicrotask(() => {
       setPlaces([]);
       setPlacesState("locating");
+
+      const cached = readCachedGeo();
+      if (cached) {
+        setPlacesState("loading");
+        void load(cached.lat, cached.lng);
+        // Refresh geo in the background for the next dish.
+        refreshGeo();
+        return;
+      }
 
       if (typeof navigator === "undefined" || !navigator.geolocation) {
         setPlacesState("fallback");
@@ -203,22 +270,39 @@ export function ResultView({ food }: ResultViewProps) {
       navigator.geolocation.getCurrentPosition(
         (pos) => {
           if (cancelled) return;
+          writeCachedGeo(pos.coords.latitude, pos.coords.longitude);
           setPlacesState("loading");
           void load(pos.coords.latitude, pos.coords.longitude);
         },
         () => {
           if (!cancelled) setPlacesState("fallback");
         },
-        { timeout: 8000, maximumAge: 300_000 },
+        { timeout: 5000, maximumAge: 300_000 },
       );
     });
+
+    function refreshGeo() {
+      if (typeof navigator === "undefined" || !navigator.geolocation) return;
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          writeCachedGeo(pos.coords.latitude, pos.coords.longitude);
+        },
+        () => {
+          /* keep cached coords */
+        },
+        { timeout: 8000, maximumAge: 60_000 },
+      );
+    }
 
     async function load(lat: number, lng: number) {
       try {
         const res = await fetch(
           `/api/places?foodId=${encodeURIComponent(food.id)}&lat=${lat}&lng=${lng}`,
+          { signal: abort.signal },
         );
-        if (cancelled || token !== renderId.current) return;
+        if (cancelled || token !== renderId.current || abort.signal.aborted) {
+          return;
+        }
 
         const data = (await res.json()) as { places?: NearbyPlace[] };
         const found = data.places ?? [];
@@ -230,12 +314,14 @@ export function ResultView({ food }: ResultViewProps) {
         setPlaces(found);
         setPlacesState("ready");
       } catch {
-        if (!cancelled) setPlacesState("fallback");
+        if (!cancelled && !abort.signal.aborted) setPlacesState("fallback");
       }
     }
 
     return () => {
       cancelled = true;
+      abort.abort();
+      window.clearTimeout(fallbackTimer);
     };
   }, [food, intent]);
 
@@ -538,7 +624,8 @@ export function ResultView({ food }: ResultViewProps) {
               width={800}
               height={800}
               priority
-              sizes="(max-width: 720px) 100vw, 640px"
+              quality={75}
+              sizes="(max-width: 720px) 92vw, 560px"
               className="result-image"
               onError={() => setImgFailed(true)}
               draggable={false}

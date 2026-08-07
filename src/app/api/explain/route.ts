@@ -76,12 +76,14 @@ export async function POST(request: Request) {
           : "eat out";
   const recipe = food.recipe;
 
+  // Keep the cook prompt short: full step lists add latency for a tip that is
+  // only one sentence. Catalog steps stay on screen either way.
   const recipeBlock =
     answers.intent === "recipe" && recipe
       ? [
           `Recipe time: ${recipe.timeMinutes} min. Servings: ${recipe.servings}.`,
-          `Ingredients: ${recipe.ingredients.join("; ")}.`,
-          `Steps: ${recipe.steps.join(" ")}`,
+          `Key ingredients: ${recipe.ingredients.slice(0, 5).join("; ")}.`,
+          `First steps: ${recipe.steps.slice(0, 2).join(" ")}`,
         ].join(" ")
       : "No recipe block for this mode.";
 
@@ -96,7 +98,7 @@ export async function POST(request: Request) {
       `Current line: ${buildExplanation(food, answers)}`,
       recipeBlock,
     ].join(" "),
-    maxOutputTokens: answers.intent === "recipe" ? 700 : 500,
+    maxOutputTokens: answers.intent === "recipe" ? 550 : 400,
     json: true,
   });
 

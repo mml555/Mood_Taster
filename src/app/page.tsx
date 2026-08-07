@@ -33,36 +33,37 @@ const PEEK_DISHES = [
   },
 ] as const;
 
-const INTENTS = [
+const PATH_INTENTS = [
   {
     intent: "restaurant",
     label: "Go out",
     href: "/taste?intent=restaurant&from=home",
     Icon: MapPin,
-    primary: true,
   },
   {
     intent: "recipe",
     label: "Make something",
     href: "/taste?intent=recipe&from=home",
     Icon: ChefHat,
-    primary: true,
   },
   {
     intent: "snack",
     label: "Grab a snack",
     href: "/taste?intent=snack&from=home",
     Icon: Candy,
-    primary: true,
   },
+] as const;
+
+const ABOUT_INTENTS = [
+  ...PATH_INTENTS.map((item) => ({ ...item, style: "primary" as const })),
   {
     intent: "clue",
     label: "I have no clue",
     href: "/taste?intent=clue&from=home",
     Icon: CircleHelp,
-    primary: false,
+    style: "secondary" as const,
   },
-] as const;
+];
 
 function IntentPicker({ id }: { id?: string }) {
   return (
@@ -72,10 +73,12 @@ function IntentPicker({ id }: { id?: string }) {
       aria-label="How do you want to eat"
       id={id}
     >
-      {INTENTS.map(({ intent, label, href, Icon, primary }) => (
+      {ABOUT_INTENTS.map(({ intent, label, href, Icon, style }) => (
         <Link
           key={intent}
-          className={primary ? "cta intent-cta" : "cta-secondary intent-cta"}
+          className={
+            style === "primary" ? "cta intent-cta" : "cta-secondary intent-cta"
+          }
           href={href}
         >
           <Icon size={20} strokeWidth={1.5} aria-hidden />
@@ -86,21 +89,46 @@ function IntentPicker({ id }: { id?: string }) {
   );
 }
 
+function HeroStart() {
+  return (
+    <div className="hero-start" role="group" aria-label="How do you want to eat">
+      <Link
+        className="cta-highlight hero-start-primary"
+        href="/taste?intent=clue&from=home"
+      >
+        Show me
+      </Link>
+      <p className="hero-start-hint">Four quick taps. No account needed.</p>
+      <p className="hero-start-divider">Or pick a path</p>
+      <div className="hero-paths">
+        {PATH_INTENTS.map(({ intent, label, href, Icon }) => (
+          <Link key={intent} className="cta-secondary hero-path" href={href}>
+            <Icon size={18} strokeWidth={1.5} aria-hidden />
+            {label}
+          </Link>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export default function HomePage() {
   return (
     <>
       <SiteHeader current="home" />
       <main id="top">
         <section className="hero" aria-labelledby="brand">
-          <p className="eyebrow">Taste by feeling</p>
-          <h1 id="brand">Hungry?</h1>
-          <p className="lede">
-            Let&apos;s figure out what you actually want.
-          </p>
-          <IntentPicker />
+          <div className="hero-copy">
+            <p className="eyebrow">Mood Taster</p>
+            <h1 id="brand">Hungry?</h1>
+            <p className="lede">
+              Let&apos;s figure out what you actually want.
+            </p>
+            <HeroStart />
+          </div>
 
           <ul className="hero-peek" aria-label="Dishes you might get">
-            {PEEK_DISHES.map((dish) => (
+            {PEEK_DISHES.map((dish, index) => (
               <li key={dish.id}>
                 <Image
                   src={dish.image}
@@ -109,6 +137,8 @@ export default function HomePage() {
                   height={240}
                   sizes="(max-width: 720px) 28vw, 140px"
                   className="hero-peek-image"
+                  priority={index < 2}
+                  style={{ width: "100%", height: "auto" }}
                 />
                 <span className="hero-peek-name">{dish.name}</span>
               </li>

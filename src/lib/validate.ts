@@ -3,12 +3,14 @@ import {
   FLAVORS,
   HEAVINESS,
   INTENTS,
+  TEMPERATURES,
   TEXTURES,
   type Adventure,
   type Answers,
   type Flavor,
   type Heaviness,
   type Intent,
+  type Temperature,
   type Texture,
 } from "./taste-types";
 
@@ -41,9 +43,24 @@ export function parseAnswers(raw: unknown): Answers | null {
       ? ("any" as const)
       : oneOf<Heaviness>(HEAVINESS, src.heaviness);
 
-  if (!intent || !flavor || !texture || !adventure || !heaviness) return null;
+  // Older sessions omit temperature; treat as any.
+  const temperature =
+    src.temperature === undefined || src.temperature === null
+      ? ("any" as const)
+      : oneOf<Temperature>(TEMPERATURES, src.temperature);
 
-  return { intent, flavor, texture, heaviness, adventure };
+  if (
+    !intent ||
+    !flavor ||
+    !texture ||
+    !adventure ||
+    !heaviness ||
+    !temperature
+  ) {
+    return null;
+  }
+
+  return { intent, flavor, texture, heaviness, adventure, temperature };
 }
 
 /**

@@ -82,10 +82,24 @@ video {
   pointer-events: none;
   position: fixed;
   inset: 0;
-  z-index: 50;
-  opacity: 0.04;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  z-index: 1;
+  opacity: 0.035;
+  /* Static tile beats live SVG turbulence on scroll and low-end phones. */
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Ccircle cx='12' cy='18' r='1' fill='%23510c85' opacity='.35'/%3E%3Ccircle cx='48' cy='8' r='1' fill='%23510c85' opacity='.25'/%3E%3Ccircle cx='86' cy='22' r='1' fill='%23510c85' opacity='.3'/%3E%3Ccircle cx='28' cy='52' r='1' fill='%23510c85' opacity='.2'/%3E%3Ccircle cx='70' cy='44' r='1' fill='%23510c85' opacity='.35'/%3E%3Ccircle cx='104' cy='60' r='1' fill='%23510c85' opacity='.25'/%3E%3Ccircle cx='16' cy='90' r='1' fill='%23510c85' opacity='.3'/%3E%3Ccircle cx='56' cy='96' r='1' fill='%23510c85' opacity='.2'/%3E%3Ccircle cx='92' cy='84' r='1' fill='%23510c85' opacity='.35'/%3E%3Ccircle cx='110' cy='108' r='1' fill='%23510c85' opacity='.25'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  background-size: 120px 120px;
   mix-blend-mode: multiply;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .grain {
+    display: none;
+  }
+
+  .hero-peek li:nth-child(2),
+  .hero-peek li:nth-child(4) {
+    transform: none;
+  }
 }
 
 a {
@@ -195,18 +209,22 @@ button {
 .hero {
   position: relative;
   z-index: 1;
+  display: grid;
+  gap: var(--space-6);
+  align-content: start;
   min-height: calc(100vh - 4.5rem);
   min-height: calc(100dvh - 4.5rem);
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
-  max-width: 52rem;
-  padding: var(--space-7) var(--page-inset) var(--space-8);
+  max-width: 64rem;
+  padding: var(--space-5) var(--page-inset) var(--space-7);
+}
+
+.hero-copy {
+  max-width: 28rem;
 }
 
 .hero-peek {
   list-style: none;
-  margin: var(--space-6) 0 0;
+  margin: 0;
   padding: 0;
   display: flex;
   gap: var(--space-3);
@@ -230,6 +248,7 @@ button {
 .hero-peek-image {
   display: block;
   width: 100%;
+  height: auto;
   aspect-ratio: 1;
   object-fit: cover;
   border-radius: var(--radius-card);
@@ -270,7 +289,7 @@ button {
 .hero h1 {
   margin: 0;
   font-family: var(--font-display);
-  font-size: clamp(3.4rem, 12vw, 7rem);
+  font-size: clamp(3.4rem, 12vw, 6.5rem);
   font-weight: 700;
   line-height: 0.95;
   letter-spacing: -0.02em;
@@ -279,7 +298,7 @@ button {
 }
 
 .lede {
-  margin: var(--space-5) 0 0;
+  margin: var(--space-4) 0 0;
   max-width: 28rem;
   font-size: clamp(1rem, 2.4vw, 1.2rem);
   color: var(--paper-muted);
@@ -289,6 +308,48 @@ button {
 .cta-row {
   margin-top: var(--space-6);
   animation: rise 1s var(--ease) 0.4s both;
+}
+
+/* One primary start path, then lighter path picks. */
+.hero-start {
+  margin-top: var(--space-5);
+  max-width: 22rem;
+  animation: rise 1s var(--ease) 0.4s both;
+}
+
+.hero-start-primary {
+  width: 100%;
+  min-height: 3.25rem;
+  font-size: 1.05rem;
+}
+
+.hero-start-hint {
+  margin: var(--space-2) 0 0;
+  color: var(--paper-quiet);
+  font-size: 0.85rem;
+  line-height: 1.4;
+}
+
+.hero-start-divider {
+  margin: var(--space-4) 0 var(--space-3);
+  color: var(--paper-quiet);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.hero-paths {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-2);
+}
+
+.hero-path {
+  width: 100%;
+  justify-content: flex-start;
+  padding-inline: 1.1rem;
+  font-size: 0.9rem;
 }
 
 .intent-picker {
@@ -308,6 +369,58 @@ button {
 .about .intent-picker {
   margin-top: var(--space-5);
 }
+
+@media (min-width: 900px) {
+  .hero {
+    grid-template-columns: minmax(0, 26rem) minmax(18rem, 1fr);
+    align-items: center;
+    gap: clamp(var(--space-5), 5vw, var(--space-8));
+    max-width: 72rem;
+    padding-top: clamp(var(--space-5), 6vh, var(--space-7));
+    padding-bottom: var(--space-7);
+  }
+
+  .hero-peek {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-3);
+    overflow: visible;
+    max-width: 26rem;
+    justify-self: end;
+  }
+
+  .hero-peek li {
+    width: auto;
+  }
+
+  .hero-peek li:nth-child(2),
+  .hero-peek li:nth-child(4) {
+    transform: translateY(var(--space-5));
+  }
+
+  .hero-peek-name {
+    font-size: 0.8rem;
+  }
+
+  .hero-paths {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .hero-path {
+    justify-content: center;
+    flex-direction: column;
+    gap: 0.35rem;
+    padding: 0.85rem 0.5rem;
+    font-size: 0.8rem;
+    text-align: center;
+    line-height: 1.2;
+  }
+
+  .hero-start {
+    max-width: none;
+  }
+}
+
 
 /* Primary: Indigo fill, light text. No border, no shadow. */
 .cta {
@@ -1098,6 +1211,13 @@ button {
   color: var(--ink);
 }
 
+.quiz-reaction {
+  margin: var(--space-2) 0 0;
+  max-width: 22rem;
+  font-size: 0.95rem;
+  color: var(--paper-muted);
+}
+
 .quiz-options {
   list-style: none;
   margin: var(--space-5) 0 0;
@@ -1231,7 +1351,6 @@ button {
   -webkit-touch-callout: none;
   -webkit-tap-highlight-color: transparent;
   cursor: grab;
-  will-change: transform;
   transition: box-shadow 0.2s var(--ease);
 }
 
@@ -1239,8 +1358,15 @@ button {
   cursor: grabbing;
 }
 
+.result-card.is-dragging,
+.result-card.is-exit-left,
+.result-card.is-exit-right {
+  will-change: transform;
+}
+
 .result-card.is-dragging {
   transition: none;
+  box-shadow: none;
 }
 
 .result-card.is-exit-left,
@@ -2177,8 +2303,8 @@ button {
 
   .hero {
     min-height: auto;
-    justify-content: flex-start;
-    padding: var(--space-5) var(--page-inset) var(--space-6);
+    gap: var(--space-5);
+    padding: var(--space-4) var(--page-inset) var(--space-6);
   }
 
   .hero h1 {
@@ -2188,7 +2314,6 @@ button {
   /* Bleeds to the right edge so the strip reads as scrollable, but a snapped
      tile still lands on the page inset rather than flush to the glass. */
   .hero-peek {
-    margin-top: var(--space-5);
     margin-right: calc(-1 * var(--page-inset));
     padding-right: var(--page-inset);
     scroll-padding-left: var(--page-inset);
@@ -2208,6 +2333,33 @@ button {
     margin-top: var(--space-4);
   }
 
+  .hero-start {
+    margin-top: var(--space-4);
+    max-width: none;
+  }
+
+  .hero-start-primary {
+    min-height: 3.25rem;
+  }
+
+  .hero-start-divider {
+    margin: var(--space-3) 0 var(--space-2);
+  }
+
+  .hero-paths {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .hero-path {
+    justify-content: center;
+    flex-direction: column;
+    gap: 0.35rem;
+    padding: 0.7rem 0.4rem;
+    font-size: 0.78rem;
+    text-align: center;
+    line-height: 1.2;
+  }
+
   .intent-picker {
     margin-top: var(--space-4);
     max-width: none;
@@ -2220,6 +2372,11 @@ button {
     width: 100%;
     max-width: 20rem;
     touch-action: manipulation;
+  }
+
+  .hero-start-primary,
+  .hero-path {
+    max-width: none;
   }
 
   .how,
@@ -2534,8 +2691,9 @@ button {
 @media (max-height: 520px) and (pointer: coarse) {
   .hero {
     min-height: auto;
-    padding-top: var(--space-5);
-    padding-bottom: var(--space-6);
+    gap: var(--space-4);
+    padding-top: var(--space-4);
+    padding-bottom: var(--space-5);
   }
 
   .hero h1 {
@@ -2543,15 +2701,16 @@ button {
   }
 
   .lede {
+    margin-top: var(--space-2);
+  }
+
+  .cta-row,
+  .hero-start {
     margin-top: var(--space-3);
   }
 
-  .cta-row {
-    margin-top: var(--space-4);
-  }
-
   .hero-peek {
-    margin-top: var(--space-4);
+    display: none;
   }
 
   .hero-peek li {

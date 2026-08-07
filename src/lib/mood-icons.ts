@@ -18,7 +18,9 @@ import {
   Scale,
   Search,
   Shield,
+  Snowflake,
   Sparkles,
+  Thermometer,
   Utensils,
   Weight,
 } from "lucide-react";
@@ -44,11 +46,13 @@ export const QUIZ_OPTION_ICONS: Record<string, LucideIcon> = {
   safe: Shield,
   curious: Compass,
   surprise: Dices,
+  hot: Flame,
+  cold: Snowflake,
 };
 
 /** One mark per quiz question step. */
 export const QUIZ_STEP_ICONS: Record<
-  "intent" | "flavor" | "texture" | "heaviness" | "adventure",
+  "intent" | "flavor" | "texture" | "heaviness" | "adventure" | "temperature",
   LucideIcon
 > = {
   intent: Utensils,
@@ -56,6 +60,7 @@ export const QUIZ_STEP_ICONS: Record<
   texture: Layers,
   heaviness: Scale,
   adventure: Dices,
+  temperature: Thermometer,
 };
 
 /** DNA dimension labels share the same marks as quiz picks. */

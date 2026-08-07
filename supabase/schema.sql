@@ -115,5 +115,11 @@ begin
 end;
 $$;
 
-revoke all on function public.email_for_username(text) from public;
+-- Revoking from PUBLIC is not enough. Supabase ships default privileges that
+-- GRANT EXECUTE on new functions to anon and authenticated directly, and an
+-- explicit grant survives a revoke aimed at PUBLIC. Leaving those in place lets
+-- anyone holding the anon key (it is public, it ships to every browser) call
+-- this over /rest/v1/rpc and read any account's email, which is exactly the
+-- disclosure /api/auth/login was written to prevent. Name the roles.
+revoke all on function public.email_for_username(text) from public, anon, authenticated;
 grant execute on function public.email_for_username(text) to service_role;
