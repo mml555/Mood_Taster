@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { RotateCcw, Search, Sparkles } from "lucide-react";
+import { Heart, RotateCcw, Search, Sparkles } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import {
   DNA_DIMENSIONS,
@@ -85,6 +85,10 @@ export function DnaDashboard() {
           <Link className="cta" href="/taste">
             Show me
             <Search size={20} strokeWidth={1.5} aria-hidden />
+          </Link>
+          <Link className="cta-secondary" href="/favorites">
+            <Heart size={20} strokeWidth={1.5} aria-hidden />
+            Favorites
           </Link>
         </div>
         <ProfileNudge context="dna" />
@@ -190,6 +194,13 @@ export function DnaDashboard() {
       </div>
 
       <ProfileNudge context="dna" />
+
+      <div className="result-actions">
+        <Link className="cta-secondary" href="/favorites">
+          <Heart size={20} strokeWidth={1.5} aria-hidden />
+          Favorites
+        </Link>
+      </div>
 
       <section className="account-dietary" aria-labelledby="diet-title">
         <h2 id="diet-title" className="dietary-section-title">

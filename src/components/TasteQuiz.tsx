@@ -7,6 +7,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { loadDnaForUser } from "@/lib/dna-sync";
 import { readDna } from "@/lib/dna";
 import { readFavorites } from "@/lib/favorites";
+import { loadFavoritesForUser } from "@/lib/favorites-sync";
 import { readDietary } from "@/lib/dietary";
 import { NoDietaryMatchError, rank } from "@/lib/engine";
 import { QUIZ_OPTION_ICONS, QUIZ_STEP_ICONS } from "@/lib/mood-icons";
@@ -259,7 +260,6 @@ export function TasteQuiz() {
       const session = emptySession(finalAnswers);
       const dna = readDna();
       const dietary = readDietary();
-      const favoriteIds = readFavorites().foodIds;
 
       if (finalAnswers.intent === "restaurant") {
         warmGeolocation();
@@ -278,6 +278,11 @@ export function TasteQuiz() {
       };
 
       void (async () => {
+        const favs = await loadFavoritesForUser();
+        const favoriteIds = favs.foodIds.length
+          ? favs.foodIds
+          : readFavorites().foodIds;
+
         try {
           const res = await fetch("/api/match", {
             method: "POST",

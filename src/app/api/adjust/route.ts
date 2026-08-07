@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { ask, isAiConfigured, parseJsonObject, sanitizeLine } from "@/lib/ai";
 import { adjustBodySchema } from "@/lib/api-schemas";
+import { clientRateKey, rateLimitAllow } from "@/lib/rate-limit";
 import {
   ADVENTURE,
   FLAVORS,
@@ -36,6 +37,10 @@ const RULES = [
 
 export async function POST(request: Request) {
   if (!isAiConfigured()) {
+    return NextResponse.json({ answers: null, note: null });
+  }
+
+  if (!rateLimitAllow(clientRateKey(request, "adjust"))) {
     return NextResponse.json({ answers: null, note: null });
   }
 

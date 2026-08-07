@@ -3,6 +3,7 @@ import { ask, isAiConfigured, parseJsonObject, sanitizeLine } from "@/lib/ai";
 import { explainBodySchema } from "@/lib/api-schemas";
 import { CATALOG } from "@/lib/catalog";
 import { buildExplanation } from "@/lib/explain";
+import { clientRateKey, rateLimitAllow } from "@/lib/rate-limit";
 import { parseAnswers } from "@/lib/validate";
 
 /**
@@ -44,6 +45,10 @@ const RULES = [
 
 export async function POST(request: Request) {
   if (!isAiConfigured()) {
+    return NextResponse.json({ why: null, riff: null, cookTip: null });
+  }
+
+  if (!rateLimitAllow(clientRateKey(request, "explain"))) {
     return NextResponse.json({ why: null, riff: null, cookTip: null });
   }
 

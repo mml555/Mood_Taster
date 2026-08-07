@@ -23,6 +23,8 @@ export function SiteFooter() {
         {" · "}
         <Link href="/dna">Taste DNA</Link>
         {" · "}
+        <Link href="/favorites">Favorites</Link>
+        {" · "}
         <Link href="/privacy">Privacy</Link>
         {" · "}
         <Link href="/terms">Terms</Link>
