@@ -2,8 +2,6 @@
 
 import { useEffect } from "react";
 import Link from "next/link";
-import { SiteFooter } from "@/components/SiteFooter";
-import { SiteHeader } from "@/components/SiteHeader";
 import { ANALYTICS_EVENTS, track } from "@/lib/analytics";
 
 /**
@@ -31,9 +29,11 @@ export default function Error({
 
   return (
     <div className="doc-page">
-      <SiteHeader current="home" />
       <main className="doc">
         <header className="doc-hero">
+          <p className="doc-back">
+            <Link href="/">Mood Taster</Link>
+          </p>
           <p className="eyebrow">Something broke</p>
           <h1>That did not go through</h1>
           <p className="lede">
@@ -56,7 +56,6 @@ export default function Error({
           ) : null}
         </article>
       </main>
-      <SiteFooter />
     </div>
   );
 }

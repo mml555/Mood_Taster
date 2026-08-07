@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
-import { SiteFooter } from "@/components/SiteFooter";
-import { SiteHeader } from "@/components/SiteHeader";
+import Link from "next/link";
 import { PrdArticle } from "@/content/prd-article";
 
 export const metadata: Metadata = {
@@ -12,9 +11,11 @@ export const metadata: Metadata = {
 export default function PrdPage() {
   return (
     <div className="doc-page">
-      <SiteHeader current="prd" />
       <main className="doc">
         <header className="doc-hero">
+          <p className="doc-back">
+            <Link href="/">Mood Taster</Link>
+          </p>
           <p className="eyebrow">Product requirements · v1.0</p>
           <h1>Mood Taster</h1>
           <p className="lede">
@@ -97,7 +98,6 @@ export default function PrdPage() {
 
         <PrdArticle />
       </main>
-      <SiteFooter />
     </div>
   );
 }

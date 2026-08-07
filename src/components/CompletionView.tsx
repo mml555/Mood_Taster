@@ -29,15 +29,15 @@ function primaryCta(
 ): { href: string; label: string; external?: boolean; Icon: typeof MapPin } {
   if (intent === "recipe" && food.recipe) {
     return {
-      href: `/result/${food.id}#recipe`,
-      label: "View recipe",
+      href: `/result/${food.id}/recipe`,
+      label: "View Recipe",
       Icon: ChefHat,
     };
   }
   if (intent === "restaurant") {
     return {
       href: mapsSearchUrl(food),
-      label: "Open directions",
+      label: "Open Directions",
       external: true,
       Icon: MapPin,
     };

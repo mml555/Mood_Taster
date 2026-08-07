@@ -88,7 +88,7 @@ function getServerSnapshot(): AuthSessionState {
 }
 
 /**
- * One shared getUser + profile lookup for AuthNav, ProfileNudge, and friends.
+ * One shared getUser + profile lookup for ProfileNudge and friends.
  */
 export function useAuthSession(): AuthSessionState {
   return useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);

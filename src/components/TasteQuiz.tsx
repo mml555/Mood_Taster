@@ -19,6 +19,7 @@ import { readFavorites } from "@/lib/favorites";
 import { loadFavoritesForUser } from "@/lib/favorites-sync";
 import { loadHistoryForUser } from "@/lib/history-sync";
 import { loadDietaryForUser } from "@/lib/dietary-sync";
+import { prefetchCopyForFood } from "@/lib/copy-prefetch";
 import { NoDietaryMatchError, rank } from "@/lib/engine";
 import { QUIZ_OPTION_ICONS, QUIZ_STEP_ICONS } from "@/lib/mood-icons";
 import {
@@ -426,6 +427,11 @@ export function TasteQuiz() {
       }
 
       const go = async (foodId: string) => {
+        // Start the model copy now, not on the result screen. It runs against
+        // the interstitial wait below instead of rewriting the line the user
+        // has already started reading.
+        prefetchCopyForFood(foodId, finalAnswers);
+
         // Keep the interstitial on screen long enough to read a couple beats.
         const wait = Math.max(0, 1600 - (Date.now() - matchStartedAt));
         if (wait > 0) {

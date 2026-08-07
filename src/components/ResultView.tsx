@@ -76,17 +76,6 @@ import type {
   SessionState,
 } from "@/lib/taste-types";
 
-function RecipeSectionSkeleton() {
-  return (
-    <div className="recipe recipe-skeleton" aria-hidden>
-      <div className="skeleton-block" style={{ width: "80px", height: "20px", marginBottom: "12px" }} />
-      <div className="skeleton-block" style={{ width: "160px", height: "16px", marginBottom: "20px" }} />
-      <div className="skeleton-block" style={{ width: "100%", height: "40px", marginBottom: "16px" }} />
-      <div className="skeleton-block" style={{ width: "100%", height: "120px" }} />
-    </div>
-  );
-}
-
 function NearbySectionSkeleton() {
   return (
     <div className="nearby nearby-skeleton" aria-hidden>
@@ -96,12 +85,6 @@ function NearbySectionSkeleton() {
     </div>
   );
 }
-
-const RecipeSection = dynamic(
-  () =>
-    import("@/components/result/RecipeSection").then((m) => m.RecipeSection),
-  { ssr: false, loading: () => <RecipeSectionSkeleton /> },
-);
 
 const NearbySection = dynamic(
   () =>
@@ -148,6 +131,8 @@ export function ResultView({ food }: ResultViewProps) {
 
   const [riff, setRiff] = useState<string | null>(null);
   const [cookTip, setCookTip] = useState<string | null>(null);
+  /** Model copy landed after this dish had already painted, so dissolve it in. */
+  const [polished, setPolished] = useState(false);
   const [places, setPlaces] = useState<NearbyPlace[]>([]);
   const [placesState, setPlacesState] = useState<PlacesState>("locating");
   const [locationError, setLocationError] = useState<string | null>(null);
@@ -172,7 +157,6 @@ export function ResultView({ food }: ResultViewProps) {
   useEffect(() => {
     renderId.current += 1;
     const token = renderId.current;
-    const abort = new AbortController();
 
     queueMicrotask(() => {
       setImgFailed(false);
@@ -180,15 +164,12 @@ export function ResultView({ food }: ResultViewProps) {
       setEmptyAlts(false);
       setRiff(null);
       setCookTip(null);
+      setPolished(false);
       setWhyPanelOpen(false);
       setRejectNoteText("");
-      setSwipeHint(null);
-      setDragging(false);
       setExitDir(null);
       setSaved(isFavorite(food.id));
       busyRef.current = false;
-      dragXRef.current = 0;
-      if (cardRef.current) cardRef.current.style.transform = "";
       setExplanation(food.description);
       setAttrs(
         [...food.flavorTags.map(capitalize), capitalize(food.heaviness)].slice(
@@ -239,43 +220,37 @@ export function ResultView({ food }: ResultViewProps) {
       });
 
       // Enhancement only. The explanation above is already correct and shown.
-      void polish(food.id, active.answers, token, abort.signal);
+      polish(food.id, active.answers, token);
     });
 
-    /** Swaps in warmer copy once the model answers. Never blocks, never throws. */
-    async function polish(
-      foodId: string,
-      answers: Answers,
-      paintToken: number,
-      signal: AbortSignal,
-    ) {
-      try {
-        const res = await fetch("/api/explain", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ foodId, answers }),
-          signal,
-        });
-        if (!res.ok || paintToken !== renderId.current || signal.aborted) return;
+    /**
+     * Swaps in warmer copy. The quiz starts this fetch during the interstitial,
+     * so in the normal flow it is already cached here and lands in this same
+     * paint with nothing visibly changing. Arriving late is the exception, and
+     * `polished` marks it so the line dissolves instead of snapping.
+     *
+     * Never awaited by the caller, never throws, never aborts: the request is
+     * shared with any prefetch still in flight, so cancelling it on unmount
+     * would throw away work another mount is waiting on. A stale reply is
+     * dropped by the paint token instead.
+     */
+    function polish(foodId: string, answers: Answers, paintToken: number) {
+      const paint = (copy: PolishedCopy | null, late: boolean) => {
+        if (!copy || paintToken !== renderId.current) return;
+        if (copy.why) setExplanation(copy.why);
+        if (copy.riff) setRiff(copy.riff);
+        if (copy.cookTip) setCookTip(copy.cookTip);
+        if (late) setPolished(true);
+      };
 
-        const data = (await res.json()) as {
-          why: string | null;
-          riff: string | null;
-          cookTip?: string | null;
-        };
-        if (paintToken !== renderId.current || signal.aborted) return;
-
-        if (data.why) setExplanation(data.why);
-        if (data.riff) setRiff(data.riff);
-        if (data.cookTip) setCookTip(data.cookTip);
-      } catch {
-        // Abort or network failure: deterministic copy stays on screen.
+      const { cached, pending } = loadCopyForFood(foodId, answers);
+      if (cached) {
+        paint(cached, false);
+        return;
       }
+      void pending.then((copy) => paint(copy, true));
     }
 
-    return () => {
-      abort.abort();
-    };
     // rejectNote only ever changes alongside food: rejecting routes to a new
     // food id carrying ?alt=1. Listed so the tracked alternate flag can never
     // go stale against the food it describes.
@@ -678,10 +653,6 @@ export function ResultView({ food }: ResultViewProps) {
     beginFeedback("nailed");
   }, [beginFeedback]);
 
-  const onNope = useCallback(() => {
-    beginFeedback("nope");
-  }, [beginFeedback]);
-
   const onTryAgain = useCallback(() => {
     if (busyRef.current || pendingRating) return;
     const current = readSession();
@@ -695,75 +666,8 @@ export function ResultView({ food }: ResultViewProps) {
     });
   }, [animateExitThen, goToNext, pendingRating, router]);
 
-  const onPointerDown = useCallback(
-    (e: ReactPointerEvent<HTMLDivElement>) => {
-      if (!hasSession || rated || busyRef.current || exitDir) return;
-      if (e.button !== 0) return;
-      pointerId.current = e.pointerId;
-      startX.current = e.clientX;
-      dragXRef.current = 0;
-      setDragging(true);
-      e.currentTarget.setPointerCapture(e.pointerId);
-    },
-    [exitDir, hasSession, rated],
-  );
-
-  const onPointerMove = useCallback(
-    (e: ReactPointerEvent<HTMLDivElement>) => {
-      if (!dragging || pointerId.current !== e.pointerId) return;
-      const next = e.clientX - startX.current;
-      dragXRef.current = next;
-
-      // Write the drag straight to the node. Routing every pointermove through
-      // state re-renders the card, its image and the whole nearby list on each
-      // frame, which is what makes the swipe stutter on a phone.
-      const node = cardRef.current;
-      if (node) {
-        node.style.transform = `translateX(${next}px) rotate(${next / 28}deg)`;
-      }
-
-      // State still drives the like / nope badge, but only on a band change,
-      // so a full swipe costs two renders instead of sixty.
-      const hint =
-        next > SWIPE_THRESHOLD / 2
-          ? "like"
-          : next < -SWIPE_THRESHOLD / 2
-            ? "nope"
-            : null;
-      setSwipeHint((prev) => (prev === hint ? prev : hint));
-    },
-    [dragging],
-  );
-
-  const endDrag = useCallback(
-    (e: ReactPointerEvent<HTMLDivElement>) => {
-      if (pointerId.current !== e.pointerId) return;
-      pointerId.current = null;
-      setDragging(false);
-      setSwipeHint(null);
-      const x = dragXRef.current;
-      dragXRef.current = 0;
-
-      // Hand the transform back to CSS so the release springs home, and so the
-      // exit rule (which is !important) is not fighting an inline value.
-      if (cardRef.current) cardRef.current.style.transform = "";
-
-      if (Math.abs(x) < SWIPE_THRESHOLD) return;
-
-      if (x > 0) {
-        onLike();
-        return;
-      }
-      onNope();
-    },
-    [onLike, onNope],
-  );
-
   const cardClass = [
     "result-card",
-    dragging ? "is-dragging" : "",
-    swipeHint === "like" ? "is-like" : "",
-    swipeHint === "nope" ? "is-nope" : "",
     exitDir === "left" ? "is-exit-left" : "",
     exitDir === "right" ? "is-exit-right" : "",
   ]
@@ -809,59 +713,32 @@ export function ResultView({ food }: ResultViewProps) {
                     : "Your mood tastes like"))}
           </p>
 
-          <div
-            ref={cardRef}
-            className={cardClass}
-            onPointerDown={hasSession ? onPointerDown : undefined}
-            onPointerMove={hasSession ? onPointerMove : undefined}
-            onPointerUp={hasSession ? endDrag : undefined}
-            onPointerCancel={hasSession ? endDrag : undefined}
-            role={hasSession ? "group" : undefined}
-            aria-roledescription={hasSession ? "Swipeable recommendation" : undefined}
-            aria-label={
-              hasSession
-                ? `${food.name}. Swipe right to like, left for not for me.`
-                : undefined
-            }
-          >
-            <span className="result-card-hint result-card-hint-like" aria-hidden>
-              <span className="result-card-hint-mark">
-                <Heart size={18} strokeWidth={1.5} />
-              </span>{" "}
-              Like
-            </span>
-            <span className="result-card-hint result-card-hint-nope" aria-hidden>
-              <span className="result-card-hint-mark">
-                <X size={18} strokeWidth={1.5} />
-              </span>{" "}
-              Nope
-            </span>
-
-            <div className="result-media">
-              {imgFailed ? (
-                <div
-                  className="result-fallback"
-                  role="img"
-                  aria-label={food.imageAlt}
-                >
-                  <span>{food.name}</span>
-                </div>
-              ) : (
-                <Image
-                  key={food.image}
-                  src={food.image}
-                  alt={food.imageAlt}
-                  width={800}
-                  height={800}
-                  priority
-                  quality={75}
-                  sizes="(max-width: 720px) 92vw, 560px"
-                  className="result-image"
-                  onError={() => setImgFailed(true)}
-                  draggable={false}
-                />
-              )}
+      <div className={cardClass}>
+        <div className="result-media">
+          {imgFailed ? (
+            <div
+              className="result-fallback"
+              role="img"
+              aria-label={food.imageAlt}
+            >
+              <span>{food.name}</span>
             </div>
+          ) : (
+            <Image
+              key={food.image}
+              src={food.image}
+              alt={food.imageAlt}
+              width={800}
+              height={800}
+              priority
+              quality={75}
+              sizes="(max-width: 720px) 92vw, 560px"
+              className="result-image"
+              onError={() => setImgFailed(true)}
+              draggable={false}
+            />
+          )}
+        </div>
 
             <div className="result-card-body">
               <h1 className="result-title">{food.name}</h1>
@@ -975,97 +852,92 @@ export function ResultView({ food }: ResultViewProps) {
                   </div>
                 </div>
               ) : (
-                <div className="reaction-dock">
-                  <div className="reaction-bar" role="group" aria-label="Reactions">
-                    <button
-                      type="button"
-                      className="reaction-btn reaction-btn-nope"
-                      onClick={onNope}
-                      disabled={adjusting || rated}
-                      aria-label="Not for me"
-                    >
-                      <span className="reaction-icon" aria-hidden>
-                        <X size={22} strokeWidth={1.5} />
-                      </span>
-                      <span className="reaction-label">Nope</span>
-                    </button>
-                    <button
-                      type="button"
-                      className="reaction-btn reaction-btn-again"
-                      onClick={onTryAgain}
-                      disabled={adjusting || rated}
-                      aria-label="Try again"
-                    >
-                      <span className="reaction-icon" aria-hidden>
-                        <RotateCcw size={22} strokeWidth={1.5} />
-                      </span>
-                      <span className="reaction-label">Again</span>
-                    </button>
-                    <button
-                      type="button"
-                      className="reaction-btn reaction-btn-like"
-                      onClick={onLike}
-                      disabled={rated || adjusting}
-                      aria-label={
-                        intent === "restaurant"
-                          ? "Let's go"
-                          : intent === "recipe"
-                            ? "Make this"
-                            : intent === "snack"
-                              ? "That's the one"
-                              : "I like it"
-                      }
-                    >
-                      <span className="reaction-icon" aria-hidden>
-                        <Heart size={22} strokeWidth={1.5} />
-                      </span>
-                      <span className="reaction-label">
-                        {intent === "restaurant"
-                          ? "Let's go"
-                          : intent === "recipe"
-                            ? "Make this"
-                            : intent === "snack"
-                              ? "That's the one"
-                              : "I like it"}
-                      </span>
-                    </button>
-                  </div>
+            <div className="reaction-dock">
+              <div className="reaction-bar" role="group" aria-label="Reactions">
+                <button
+                  type="button"
+                  className="reaction-btn reaction-btn-nope"
+                  onClick={onTryAgain}
+                  disabled={adjusting || rated}
+                  aria-label="Not for me"
+                >
+                  <span className="reaction-icon" aria-hidden>
+                    <X size={28} strokeWidth={2} />
+                  </span>
+                </button>
+                <button
+                  type="button"
+                  className="reaction-btn reaction-btn-like"
+                  onClick={onLike}
+                  disabled={rated || adjusting}
+                  aria-label={
+                    intent === "restaurant"
+                      ? "Let's go"
+                      : intent === "recipe"
+                        ? "Make this"
+                        : intent === "snack"
+                          ? "That's the one"
+                          : "I like it"
+                  }
+                >
+                  <span className="reaction-icon" aria-hidden>
+                    <Heart size={26} strokeWidth={2} fill="currentColor" />
+                  </span>
+                  <span className="reaction-label">
+                    {intent === "restaurant"
+                      ? "Let's go"
+                      : intent === "recipe"
+                        ? "Make this"
+                        : intent === "snack"
+                          ? "That's the one"
+                          : "I like it"}
+                  </span>
+                </button>
+              </div>
 
-                  <div className="reaction-quiet">
-                    <button
-                      type="button"
-                      className="text-link"
-                      onClick={() => beginFeedback("kinda")}
-                      disabled={rated || adjusting}
-                    >
-                      Kinda
-                    </button>
-                    <button
-                      type="button"
-                      className="text-link"
-                      onClick={() => {
-                        setWhyOpen((v) => !v);
-                        setWhyPanelOpen(false);
-                      }}
-                      aria-expanded={whyOpen}
-                      disabled={adjusting || rated}
-                    >
-                      Why this?
-                    </button>
-                    <button
-                      type="button"
-                      className="text-link"
-                      onClick={() => {
-                        setWhyPanelOpen((v) => !v);
-                        setWhyOpen(false);
-                      }}
-                      aria-expanded={whyPanelOpen}
-                      disabled={adjusting || rated}
-                    >
-                      Off?
-                    </button>
-                  </div>
-                </div>
+              <div className="reaction-quiet">
+                <button
+                  type="button"
+                  className="text-link"
+                  onClick={() => beginFeedback("kinda")}
+                  disabled={rated || adjusting}
+                >
+                  Kinda
+                </button>
+                <button
+                  type="button"
+                  className="text-link"
+                  onClick={() => beginFeedback("nope")}
+                  disabled={rated || adjusting}
+                >
+                  Not for me
+                </button>
+                <button
+                  type="button"
+                  className="text-link"
+                  onClick={() => {
+                    setWhyOpen((v) => !v);
+                    setWhyPanelOpen(false);
+                  }}
+                  aria-expanded={whyOpen}
+                  disabled={adjusting || rated}
+                >
+                  Why this?
+                </button>
+                <button
+                  type="button"
+                  className="text-link"
+                  onClick={() => {
+                    setWhyPanelOpen((v) => !v);
+                    setWhyOpen(false);
+                  }}
+                  aria-expanded={whyPanelOpen}
+                  disabled={adjusting || rated}
+                >
+                  Off?
+                </button>
+              </div>
+            </div>
               )}
 
               {!leaving && !showFeedback && whyOpen ? (
@@ -1133,12 +1005,12 @@ export function ResultView({ food }: ResultViewProps) {
         <div className="result-side-col">
           {intent === "recipe" ? (
             food.recipe ? (
-              <RecipeSection
-                foodId={food.id}
-                foodName={food.name}
-                recipe={food.recipe}
-                cookTip={cookTip}
-              />
+              <p className="result-act-link">
+                <Link href={`/result/${food.id}/recipe`}>
+                  <ChefHat size={16} strokeWidth={1.5} aria-hidden />
+                  View recipe
+                </Link>
+              </p>
             ) : (
               <div className="recipe" id="recipe">
                 <p className="recipe-label">

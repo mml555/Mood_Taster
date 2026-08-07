@@ -812,6 +812,23 @@ button {
   animation: rise 0.9s var(--ease) both;
 }
 
+.doc-back {
+  margin: 0 0 var(--space-3);
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.doc-back a {
+  color: var(--paper-muted);
+  text-decoration: none;
+}
+
+.doc-back a:hover,
+.doc-back a:focus-visible {
+  color: var(--ink);
+  text-decoration: underline;
+}
+
 .doc-hero h1 {
   margin: 0;
   font-family: var(--font-display);
@@ -3259,12 +3276,6 @@ button {
     background: var(--paper);
   }
 
-  .product-main-with-nav .reaction-dock {
-    /* Sit just above the fixed Taste · Stats · Profile bar. */
-    bottom: 4.25rem;
-    padding-bottom: var(--space-3);
-  }
-
   .reaction-quiet {
     margin-top: var(--space-2);
     gap: var(--space-3);
@@ -3822,73 +3833,75 @@ button {
 }
 
 .product-bottom-nav {
-  display: none;
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 40;
+  background: #fff;
+  border-top: 2px solid color-mix(in srgb, var(--ink) 10%, transparent);
+  padding: 0.4rem var(--page-inset) 0;
+  padding-bottom: max(0.5rem, env(safe-area-inset-bottom));
 }
 
-@media (max-width: 720px) {
-  .product-bottom-nav {
-    display: block;
-    position: fixed;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    z-index: 40;
-    background: var(--paper);
-    padding: 0.4rem var(--page-inset) 0;
-    padding-bottom: max(0.5rem, env(safe-area-inset-bottom));
-  }
+.product-bottom-nav-list {
+  list-style: none;
+  margin: 0 auto;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.25rem;
+  width: 100%;
+  max-width: var(--measure);
+}
 
-  .product-bottom-nav-list {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 0.25rem;
-  }
+.product-bottom-nav-link {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.15rem;
+  min-height: 3.5rem;
+  padding: 0.25rem 0.2rem;
+  border-radius: var(--radius-btn);
+  color: var(--paper-muted);
+  text-decoration: none;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  -webkit-tap-highlight-color: transparent;
+}
 
-  .product-bottom-nav-link {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 0.15rem;
-    min-height: 3.5rem;
-    padding: 0.25rem 0.2rem;
-    border-radius: var(--radius-btn);
-    color: var(--paper-muted);
-    text-decoration: none;
-    font-size: 0.7rem;
-    font-weight: 600;
-    letter-spacing: 0.01em;
-    -webkit-tap-highlight-color: transparent;
-  }
+.product-bottom-nav-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem;
+  border-radius: var(--radius-lg);
+}
 
-  .product-bottom-nav-icon {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    padding: 0.35rem 0.65rem;
-    border-radius: var(--radius-btn);
-  }
+.product-bottom-nav-icon.is-active {
+  background: color-mix(in srgb, var(--ink) 10%, transparent);
+}
 
-  .product-bottom-nav-icon.is-active {
-    background: var(--ink-raised);
-  }
+.product-bottom-nav-link.is-active {
+  color: var(--ink);
+  background: transparent;
+}
 
-  .product-bottom-nav-link.is-active {
-    color: var(--ink);
-    background: transparent;
-  }
+.product-bottom-nav-link:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 2px;
+}
 
-  .product-bottom-nav-link:focus-visible {
-    outline: 2px solid var(--ink);
-    outline-offset: 2px;
-  }
+.product-main-with-nav {
+  padding-bottom: max(5.5rem, calc(env(safe-area-inset-bottom) + 4.5rem));
+}
 
-  .product-main-with-nav {
-    padding-bottom: max(5.5rem, calc(env(safe-area-inset-bottom) + 4.5rem));
-  }
+.product-main-with-nav .reaction-dock {
+  /* Sit just above the fixed Taste · Stats · Profile bar. */
+  bottom: 4.25rem;
+  padding-bottom: var(--space-3);
 }
 
 /* Skeletons to prevent visual whiplash & layout shifts */
@@ -4126,31 +4139,6 @@ button {
 
 .nav-brand-row svg {
   color: var(--accent);
-}
-
-.product-bottom-nav {
-  background: #fff;
-  border-top: 2px solid color-mix(in srgb, var(--ink) 10%, transparent);
-}
-
-@media (max-width: 720px) {
-  .product-bottom-nav {
-    background: #fff;
-    border-top: 2px solid color-mix(in srgb, var(--ink) 10%, transparent);
-  }
-
-  .product-bottom-nav-icon {
-    padding: 0.5rem;
-    border-radius: var(--radius-lg);
-  }
-
-  .product-bottom-nav-icon.is-active {
-    background: color-mix(in srgb, var(--ink) 10%, transparent);
-  }
-
-  .product-bottom-nav-link {
-    font-weight: 700;
-  }
 }
 
 /* Stats dashboard */

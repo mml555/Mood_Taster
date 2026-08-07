@@ -1,7 +1,5 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { SiteFooter } from "@/components/SiteFooter";
-import { SiteHeader } from "@/components/SiteHeader";
 
 export const metadata: Metadata = {
   title: "Terms",
@@ -12,9 +10,11 @@ export const metadata: Metadata = {
 export default function TermsPage() {
   return (
     <div className="doc-page">
-      <SiteHeader current="legal" />
       <main className="doc">
         <header className="doc-hero">
+          <p className="doc-back">
+            <Link href="/">Mood Taster</Link>
+          </p>
           <p className="eyebrow">Trust · Terms</p>
           <h1>Terms of use</h1>
           <p className="lede">
@@ -191,7 +191,6 @@ export default function TermsPage() {
           </section>
         </article>
       </main>
-      <SiteFooter />
     </div>
   );
 }

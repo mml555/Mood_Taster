@@ -16,6 +16,20 @@ export const adjustBodySchema = z.object({
   note: z.unknown(),
 });
 
+export const recipeChatBodySchema = z.object({
+  foodId: z.string().trim().min(1).max(120),
+  message: z.string().trim().min(1).max(500),
+  history: z
+    .array(
+      z.object({
+        role: z.enum(["user", "model"]),
+        text: z.string().trim().min(1).max(2000),
+      }),
+    )
+    .max(20)
+    .default([]),
+});
+
 /** Ids the session has already burned through. Capped so a crafted body cannot
  * hand the ranker an unbounded list to filter against. */
 const sessionIdListSchema = z

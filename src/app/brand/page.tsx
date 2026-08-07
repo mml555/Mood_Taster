@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
-import { SiteFooter } from "@/components/SiteFooter";
-import { SiteHeader } from "@/components/SiteHeader";
+import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "Brand Guide",
@@ -11,9 +10,11 @@ export const metadata: Metadata = {
 export default function BrandPage() {
   return (
     <div className="doc-page">
-      <SiteHeader current="brand" />
       <main className="doc">
         <header className="doc-hero">
+          <p className="doc-back">
+            <Link href="/">Mood Taster</Link>
+          </p>
           <p className="eyebrow">Brand guide · v1</p>
           <h1>Don&apos;t make me think. Let me react.</h1>
           <p className="lede">
@@ -440,7 +441,6 @@ export default function BrandPage() {
           </section>
         </article>
       </main>
-      <SiteFooter />
     </div>
   );
 }

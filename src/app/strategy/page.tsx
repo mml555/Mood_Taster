@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
-import { SiteFooter } from "@/components/SiteFooter";
-import { SiteHeader } from "@/components/SiteHeader";
+import Link from "next/link";
 import { StrategyArticle } from "@/content/strategy-article";
 
 export const metadata: Metadata = {
@@ -12,9 +11,11 @@ export const metadata: Metadata = {
 export default function StrategyPage() {
   return (
     <div className="doc-page">
-      <SiteHeader current="strategy" />
       <main className="doc">
         <header className="doc-hero">
+          <p className="doc-back">
+            <Link href="/">Mood Taster</Link>
+          </p>
           <p className="eyebrow">Public strategy · v1.1</p>
           <h1>Go-to-Market, Growth &amp; Monetization</h1>
           <p className="lede">
@@ -108,7 +109,6 @@ export default function StrategyPage() {
 
         <StrategyArticle />
       </main>
-      <SiteFooter />
     </div>
   );
 }
