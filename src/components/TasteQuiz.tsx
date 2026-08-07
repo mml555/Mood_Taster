@@ -290,7 +290,7 @@ export function TasteQuiz() {
 
       {showBack ? (
         step === 1 && seededIntent ? (
-          <Link className="quiz-back" href="/">
+          <Link className="quiz-back" href={fromHome ? "/" : "/taste"}>
             <ArrowLeft size={20} strokeWidth={1.5} aria-hidden />
             Back
           </Link>

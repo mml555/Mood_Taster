@@ -1,6 +1,6 @@
-import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight } from "lucide-react";
+import Image from "next/image";
+import { Candy, ChefHat, CircleHelp, MapPin } from "lucide-react";
 import { SiteFooter } from "@/components/SiteFooter";
 import { SiteHeader } from "@/components/SiteHeader";
 import { ProfileNudge } from "@/components/ProfileNudge";
@@ -33,6 +33,59 @@ const PEEK_DISHES = [
   },
 ] as const;
 
+const INTENTS = [
+  {
+    intent: "restaurant",
+    label: "Go out",
+    href: "/taste?intent=restaurant&from=home",
+    Icon: MapPin,
+    primary: true,
+  },
+  {
+    intent: "recipe",
+    label: "Make something",
+    href: "/taste?intent=recipe&from=home",
+    Icon: ChefHat,
+    primary: true,
+  },
+  {
+    intent: "snack",
+    label: "Grab a snack",
+    href: "/taste?intent=snack&from=home",
+    Icon: Candy,
+    primary: true,
+  },
+  {
+    intent: "clue",
+    label: "I have no clue",
+    href: "/taste?intent=clue&from=home",
+    Icon: CircleHelp,
+    primary: false,
+  },
+] as const;
+
+function IntentPicker({ id }: { id?: string }) {
+  return (
+    <div
+      className="intent-picker"
+      role="group"
+      aria-label="How do you want to eat"
+      id={id}
+    >
+      {INTENTS.map(({ intent, label, href, Icon, primary }) => (
+        <Link
+          key={intent}
+          className={primary ? "cta intent-cta" : "cta-secondary intent-cta"}
+          href={href}
+        >
+          <Icon size={20} strokeWidth={1.5} aria-hidden />
+          {label}
+        </Link>
+      ))}
+    </div>
+  );
+}
+
 export default function HomePage() {
   return (
     <>
@@ -42,15 +95,9 @@ export default function HomePage() {
           <p className="eyebrow">Taste by feeling</p>
           <h1 id="brand">Hungry?</h1>
           <p className="lede">
-            Eat out or cook. Five quick taps. One dish. Swipe if it is not
-            right.
+            Let&apos;s figure out what you actually want.
           </p>
-          <div className="cta-row">
-            <Link className="cta" href="/taste">
-              Show me
-              <ArrowRight size={20} strokeWidth={1.5} aria-hidden />
-            </Link>
-          </div>
+          <IntentPicker />
 
           <ul className="hero-peek" aria-label="Dishes you might get">
             {PEEK_DISHES.map((dish) => (
@@ -80,8 +127,7 @@ export default function HomePage() {
               <span className="step">01</span>
               <h3>Feel</h3>
               <p>
-                Pick eat out or cook, then how you want food to feel. Five
-                taps.
+                Pick how you want to eat, then how you want food to feel.
               </p>
             </li>
             <li>
@@ -91,7 +137,7 @@ export default function HomePage() {
               <span className="step">02</span>
               <h3>Match</h3>
               <p>
-                Get one dish and a short why. Eat out finds nearby. Cook shows
+                Get one dish and a short why. Go out finds nearby. Cook shows
                 the recipe.
               </p>
             </li>
@@ -115,12 +161,7 @@ export default function HomePage() {
             Not a therapist. Not delivery. Not a calorie counter. Just the
             dish that fits how you feel.
           </p>
-          <div className="cta-row">
-            <Link className="cta" href="/taste">
-              Show me
-              <ArrowRight size={20} strokeWidth={1.5} aria-hidden />
-            </Link>
-          </div>
+          <IntentPicker />
           <ProfileNudge context="home" />
         </section>
       </main>

@@ -31,11 +31,13 @@ const RULES = [
   '"riff": one sentence with a practical tip.',
   "If mode is cook: tip how to cook, shop, or plate it at home.",
   "If mode is eat out: tip how to order or what to look for.",
+  "If mode is snack: tip how to find or enjoy the snack.",
+  "If mode is unsure: tip something concrete about eating it.",
   "Do not repeat the why. Do not use the word 'perfect'. Under 20 words.",
   '"cookTip": only when mode is cook. One short chef tip tied to THIS recipe',
   "(timing, heat, or a simple swap). Under 18 words. Else omit or use null.",
   "No em dashes anywhere.",
-  "Respect mode: eat out vs cook. Never suggest a restaurant when mode is cook.",
+  "Respect mode: eat out, cook, snack, or unsure.",
   "Never invent new ingredient lists or replace the given steps.",
 ].join(" ");
 
@@ -64,7 +66,14 @@ export async function POST(request: Request) {
 
   const heaviness =
     answers.heaviness === "any" ? "no preference" : answers.heaviness;
-  const mode = answers.intent === "recipe" ? "cook" : "eat out";
+  const mode =
+    answers.intent === "recipe"
+      ? "cook"
+      : answers.intent === "snack"
+        ? "snack"
+        : answers.intent === "clue"
+          ? "unsure"
+          : "eat out";
   const recipe = food.recipe;
 
   const recipeBlock =

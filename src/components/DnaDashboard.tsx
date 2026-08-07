@@ -97,6 +97,14 @@ export function DnaDashboard() {
         <Sparkles size={16} strokeWidth={1.5} aria-hidden /> Your Taste
       </p>
       <h1 className="dna-title">Taste DNA</h1>
+      <div className="dna-meter" aria-label={`${discovery}% discovered`}>
+        <div
+          className={
+            discovery > 0 ? "dna-meter-fill has-tip" : "dna-meter-fill"
+          }
+          style={{ width: `${discovery}%` }}
+        />
+      </div>
       <p className="dna-discovery">
         <span className="dna-discovery-value">{discovery}%</span> discovered
       </p>

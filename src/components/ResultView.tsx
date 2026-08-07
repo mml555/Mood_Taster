@@ -180,7 +180,7 @@ export function ResultView({ food }: ResultViewProps) {
     }
   }, [food]);
 
-  // Places only for Eat out. Cook mode shows the recipe instead.
+  // Places only for Go out. Cook shows the recipe. Snack and no-clue stay dish-first.
   useEffect(() => {
     if (intent !== "restaurant") {
       setPlaces([]);
@@ -493,8 +493,10 @@ export function ResultView({ food }: ResultViewProps) {
               : intent === "recipe"
                 ? "Cook this"
                 : intent === "restaurant"
-                  ? "Eat out"
-                  : "Your match"))}
+                  ? "Go out"
+                  : intent === "snack"
+                    ? "Snack"
+                    : "Your match"))}
       </p>
 
       <div
@@ -600,7 +602,7 @@ export function ResultView({ food }: ResultViewProps) {
                       <ArrowRight size={20} strokeWidth={1.5} aria-hidden />
                     </Link>
                   )
-                ) : (
+                ) : intent === "restaurant" ? (
                   <a
                     className="cta"
                     href={mapsSearchUrl(food)}
@@ -610,9 +612,14 @@ export function ResultView({ food }: ResultViewProps) {
                     <MapPin size={20} strokeWidth={1.5} aria-hidden />
                     Find nearby
                   </a>
+                ) : (
+                  <Link className="cta" href="/">
+                    New craving
+                    <ArrowRight size={20} strokeWidth={1.5} aria-hidden />
+                  </Link>
                 )}
-                <Link className="cta-secondary" href="/taste">
-                  New craving
+                <Link className="cta-secondary" href="/">
+                  Start over
                   <ArrowRight size={20} strokeWidth={1.5} aria-hidden />
                 </Link>
               </div>
@@ -773,9 +780,9 @@ export function ResultView({ food }: ResultViewProps) {
                 ) : null}
               </div>
             )
-          ) : (
+          ) : intent === "restaurant" ? (
             <NearbySection food={food} places={places} state={placesState} />
-          )}
+          ) : null}
 
           {showDone ? <ProfileNudge context="result" /> : null}
         </>
@@ -784,8 +791,8 @@ export function ResultView({ food }: ResultViewProps) {
           <p className="result-desc">
             Start a session to match how you feel right now.
           </p>
-          <Link className="cta" href="/taste">
-            Show me
+          <Link className="cta" href="/">
+            Hungry?
             <Search size={20} strokeWidth={1.5} aria-hidden />
           </Link>
         </div>
