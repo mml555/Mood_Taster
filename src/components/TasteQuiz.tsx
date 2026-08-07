@@ -20,7 +20,7 @@ import { loadFavoritesForUser } from "@/lib/favorites-sync";
 import { loadHistoryForUser } from "@/lib/history-sync";
 import { loadDietaryForUser } from "@/lib/dietary-sync";
 import { NoDietaryMatchError, rank } from "@/lib/engine";
-import { QUIZ_OPTION_ICONS } from "@/lib/mood-icons";
+import { QUIZ_OPTION_ICONS, QUIZ_STEP_ICONS } from "@/lib/mood-icons";
 import {
   prefetchPlacesForFood,
   warmGeolocation,
@@ -426,8 +426,8 @@ export function TasteQuiz() {
       }
 
       const go = async (foodId: string) => {
-        // Keep the interstitial on screen long enough to read one beat.
-        const wait = Math.max(0, 900 - (Date.now() - matchStartedAt));
+        // Keep the interstitial on screen long enough to read a couple beats.
+        const wait = Math.max(0, 1600 - (Date.now() - matchStartedAt));
         if (wait > 0) {
           await new Promise((resolve) => window.setTimeout(resolve, wait));
         }
@@ -691,7 +691,17 @@ export function TasteQuiz() {
       <div className="quiz-question-block">
         <div className="quiz-question-copy">
           {STEP_CATEGORY[current.key] ? (
-            <p className="quiz-category">{STEP_CATEGORY[current.key]}</p>
+            <p className="quiz-category">
+              {QUIZ_STEP_ICONS[current.key] ? (
+                <span className="quiz-category-icon" aria-hidden>
+                  {(() => {
+                    const StepIcon = QUIZ_STEP_ICONS[current.key];
+                    return <StepIcon size={14} strokeWidth={1.5} />;
+                  })()}
+                </span>
+              ) : null}
+              {STEP_CATEGORY[current.key]}
+            </p>
           ) : null}
           <h1 id="quiz-question" className="quiz-question">
             {current.question}

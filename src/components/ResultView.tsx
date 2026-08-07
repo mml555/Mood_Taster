@@ -10,7 +10,6 @@ import {
   ChefHat,
   Heart,
   MapPin,
-  Plus,
   RotateCcw,
   Utensils,
   X,
@@ -31,7 +30,6 @@ import {
   parseHitTags,
   parseMissTags,
   readDna,
-  type DnaDelta,
 } from "@/lib/dna";
 import { persistDna } from "@/lib/dna-sync";
 import { ANALYTICS_EVENTS, track } from "@/lib/analytics";
@@ -47,6 +45,7 @@ import {
 } from "@/lib/favorites";
 import { persistFavorites } from "@/lib/favorites-sync";
 import { persistGamification } from "@/lib/gamification-sync";
+import { writeDoneMeta } from "@/lib/done-meta";
 import {
   recordRecommendationRating,
   recordRecommendationShown,
@@ -57,7 +56,6 @@ import { awardRatingXp, overallTasteLabel, readXp, writeXp } from "@/lib/xp";
 import { capitalize } from "@/lib/explain";
 import { parsePlacesResponse } from "@/lib/api-schemas";
 import {
-  mapsSearchUrl,
   readCachedGeo,
   readPrefetchedPlaces,
   writeCachedGeo,
@@ -125,9 +123,7 @@ export function ResultView({ food }: ResultViewProps) {
   const [sessionReady, setSessionReady] = useState(false);
   const [whyOpen, setWhyOpen] = useState(false);
   const [imgFailed, setImgFailed] = useState(false);
-  const [deltas, setDeltas] = useState<DnaDelta[] | null>(null);
   const [lastRating, setLastRating] = useState<Rating | null>(null);
-  const [levelLabel, setLevelLabel] = useState<string | null>(null);
   const [pendingRating, setPendingRating] = useState<Rating | null>(null);
   const [feedbackTags, setFeedbackTags] = useState<string[]>([]);
   const [emptyAlts, setEmptyAlts] = useState(false);
@@ -167,8 +163,6 @@ export function ResultView({ food }: ResultViewProps) {
 
     queueMicrotask(() => {
       setImgFailed(false);
-      setDeltas(null);
-      setLevelLabel(null);
       setLastRating(null);
       setEmptyAlts(false);
       setRiff(null);
@@ -618,11 +612,23 @@ export function ResultView({ food }: ResultViewProps) {
             }
           : undefined,
       );
-      setDeltas(changes.filter((d) => d.direction !== "flat"));
       setLastRating(rating);
       setPendingRating(null);
       setFeedbackTags([]);
-      setLevelLabel(overallTasteLabel(xpResult.state));
+
+      if (rating === "nailed" || rating === "kinda") {
+        const meaningful = changes.filter((d) => d.direction !== "flat");
+        writeDoneMeta({
+          foodId: food.id,
+          levelLabel: overallTasteLabel(xpResult.state),
+          deltasLine:
+            meaningful.length > 0
+              ? formatDnaChangeLine(meaningful)
+              : undefined,
+        });
+        router.push(`/result/${food.id}/done`);
+        return;
+      }
 
       if (rating === "nope") {
         if (!current) {
@@ -656,6 +662,10 @@ export function ResultView({ food }: ResultViewProps) {
 
   const onLike = useCallback(() => {
     beginFeedback("nailed");
+  }, [beginFeedback]);
+
+  const onNope = useCallback(() => {
+    beginFeedback("nope");
   }, [beginFeedback]);
 
   const onTryAgain = useCallback(() => {
@@ -730,9 +740,9 @@ export function ResultView({ food }: ResultViewProps) {
         onLike();
         return;
       }
-      onTryAgain();
+      onNope();
     },
-    [onLike, onTryAgain],
+    [onLike, onNope],
   );
 
   const cardClass = [
@@ -906,85 +916,12 @@ export function ResultView({ food }: ResultViewProps) {
       {!sessionReady ? null : hasSession ? (
         <>
           {showDone ? (
-            <div className="result-done" role="status" aria-live="polite">
+            <div className="result-done result-done-handoff" role="status" aria-live="polite">
               <p className="result-done-mark" aria-hidden>
                 <Check size={28} strokeWidth={1.5} />
               </p>
               <h2 className="result-done-title">Decision made.</h2>
-              <p className="result-done-copy">Your only job now is to eat.</p>
-              <div className="result-done-pick">
-                <Image
-                  src={food.image}
-                  alt=""
-                  width={64}
-                  height={64}
-                  className="result-done-thumb"
-                />
-                <div className="result-done-pick-copy">
-                  <p className="result-done-pick-name">{food.name}</p>
-                  {levelLabel ? (
-                    <p className="result-done-level">{levelLabel}</p>
-                  ) : deltas && deltas.length > 0 ? (
-                    <p className="result-done-level">
-                      {formatDnaChangeLine(deltas)}
-                    </p>
-                  ) : null}
-                </div>
-              </div>
-              <div className="result-done-actions">
-                {intent === "recipe" ? (
-                  food.recipe ? (
-                    <a className="cta" href="#recipe">
-                      <ChefHat size={20} strokeWidth={1.5} aria-hidden />
-                      View recipe
-                    </a>
-                  ) : (
-                    <Link className="cta" href="/taste">
-                      <ArrowRight size={20} strokeWidth={1.5} aria-hidden />
-                      Try again
-                    </Link>
-                  )
-                ) : intent === "restaurant" ? (
-                  <a
-                    className="cta"
-                    href={mapsSearchUrl(food)}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    <MapPin size={20} strokeWidth={1.5} aria-hidden />
-                    Open directions
-                  </a>
-                ) : (
-                  <Link className="cta" href="/">
-                    <ArrowRight size={20} strokeWidth={1.5} aria-hidden />
-                    New craving
-                  </Link>
-                )}
-                <Link className="cta-secondary" href="/">
-                  <ArrowRight size={20} strokeWidth={1.5} aria-hidden />
-                  Start over
-                </Link>
-              </div>
-              {intent === "recipe" ? (
-                <p className="result-done-save">
-                  <button
-                    type="button"
-                    className="text-link"
-                    onClick={onToggleSave}
-                    aria-pressed={saved}
-                  >
-                    {saved ? (
-                      <Heart size={16} strokeWidth={1.5} aria-hidden />
-                    ) : (
-                      <Plus size={16} strokeWidth={1.5} aria-hidden />
-                    )}
-                    {saved ? "Saved" : "Save"}
-                  </button>
-                </p>
-              ) : null}
-              <p className="result-done-dna">
-                <Link href="/dna">Your Taste DNA</Link>
-              </p>
+              <p className="result-done-copy">One moment…</p>
             </div>
           ) : showFeedback && pendingRating ? (
             <div className="feedback-panel" role="group" aria-label="Feedback">
@@ -1040,13 +977,26 @@ export function ResultView({ food }: ResultViewProps) {
                 <button
                   type="button"
                   className="reaction-btn reaction-btn-nope"
-                  onClick={onTryAgain}
+                  onClick={onNope}
                   disabled={adjusting || rated}
                   aria-label="Not for me"
                 >
                   <span className="reaction-icon" aria-hidden>
-                    <X size={28} strokeWidth={2} />
+                    <X size={22} strokeWidth={1.5} />
                   </span>
+                  <span className="reaction-label">Nope</span>
+                </button>
+                <button
+                  type="button"
+                  className="reaction-btn reaction-btn-again"
+                  onClick={onTryAgain}
+                  disabled={adjusting || rated}
+                  aria-label="Try again"
+                >
+                  <span className="reaction-icon" aria-hidden>
+                    <RotateCcw size={22} strokeWidth={1.5} />
+                  </span>
+                  <span className="reaction-label">Again</span>
                 </button>
                 <button
                   type="button"
@@ -1064,7 +1014,7 @@ export function ResultView({ food }: ResultViewProps) {
                   }
                 >
                   <span className="reaction-icon" aria-hidden>
-                    <Heart size={24} strokeWidth={2} />
+                    <Heart size={22} strokeWidth={1.5} />
                   </span>
                   <span className="reaction-label">
                     {intent === "restaurant"
@@ -1086,14 +1036,6 @@ export function ResultView({ food }: ResultViewProps) {
                   disabled={rated || adjusting}
                 >
                   Kinda
-                </button>
-                <button
-                  type="button"
-                  className="text-link"
-                  onClick={() => beginFeedback("nope")}
-                  disabled={rated || adjusting}
-                >
-                  Not for me
                 </button>
                 <button
                   type="button"
@@ -1212,7 +1154,7 @@ export function ResultView({ food }: ResultViewProps) {
             />
           ) : null}
 
-          {showDone ? <ProfileNudge context="result" /> : null}
+          {showDone ? null : <ProfileNudge context="result" />}
         </>
       ) : (
         <div className="result-actions">

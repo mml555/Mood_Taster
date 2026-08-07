@@ -1465,11 +1465,21 @@ button {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: var(--space-4);
+  gap: var(--space-5);
   min-height: min(42vh, 18rem);
   padding: var(--space-5) 0;
   text-align: center;
   animation: rise 0.7s var(--ease) both;
+}
+
+.quiz-loading-screen {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  min-height: 100dvh;
+  padding: var(--space-6) var(--page-inset);
+  padding-bottom: max(var(--space-6), env(safe-area-inset-bottom));
+  background: var(--paper);
 }
 
 .quiz-loading-brand {
@@ -1480,15 +1490,15 @@ button {
 }
 
 .quiz-loading-mark {
-  width: 4rem;
-  height: 4rem;
+  width: 4.5rem;
+  height: 4.5rem;
   object-fit: contain;
 }
 
 .quiz-loading-wordmark {
   margin: 0;
   font-family: var(--font-display);
-  font-size: 1.35rem;
+  font-size: 1.5rem;
   font-weight: 700;
   letter-spacing: -0.02em;
   text-transform: lowercase;
@@ -1499,7 +1509,7 @@ button {
   margin: 0;
   min-height: 1.5em;
   color: var(--paper-muted);
-  font-size: 1.15rem;
+  font-size: 1.2rem;
   font-weight: 700;
   animation: rise 0.45s var(--ease) both;
 }
@@ -2904,14 +2914,24 @@ button {
     padding: 0 0.45rem;
   }
 
-  /* Icon teaches Sign in / Account; DNA keeps its short word. */
+  /* Icon teaches Account; DNA keeps its short word. Sign in keeps its label
+     so the LogIn glyph is not read as an exit control. */
   .top nav a.nav-with-icon .nav-label {
     display: none;
+  }
+
+  .top nav a.nav-signin .nav-label {
+    display: inline;
   }
 
   .top nav a.nav-with-icon {
     gap: 0.3rem;
     padding: 0 0.4rem;
+  }
+
+  .top nav a.nav-signin {
+    gap: 0.35rem;
+    padding: 0 0.75rem;
   }
 
   .top nav a.nav-with-icon .nav-dna-label {
@@ -3484,6 +3504,143 @@ button {
   margin: 0;
   color: var(--paper-muted);
   font-size: 0.95rem;
+}
+
+/* Completion screen (own route after accept) */
+.completion {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-5);
+  min-height: min(70vh, 36rem);
+  padding: var(--space-4) 0 var(--space-5);
+  text-align: center;
+  animation: rise 0.7s var(--ease) both;
+}
+
+.completion-body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3);
+  width: 100%;
+  flex: 1;
+  justify-content: center;
+}
+
+.completion-mark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 4.5rem;
+  height: 4.5rem;
+  margin: 0;
+  background: var(--accent);
+  color: var(--ink);
+  border-radius: var(--radius-pill);
+}
+
+.completion-title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(1.75rem, 6vw, 2.35rem);
+  font-weight: 700;
+  line-height: 1.1;
+  color: var(--ink);
+}
+
+.completion-copy {
+  margin: 0;
+  max-width: 18rem;
+  color: var(--paper-muted);
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.completion-pick {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  width: 100%;
+  max-width: 22rem;
+  margin-top: var(--space-3);
+  padding: var(--space-3);
+  background: var(--ink-raised);
+  border-radius: var(--radius-card);
+  text-align: left;
+}
+
+.completion-thumb {
+  width: 4.5rem;
+  height: 4.5rem;
+  object-fit: cover;
+  border-radius: var(--radius-btn);
+  flex-shrink: 0;
+}
+
+.completion-pick-copy {
+  min-width: 0;
+}
+
+.completion-pick-name {
+  margin: 0;
+  font-weight: 700;
+  color: var(--ink);
+  line-height: 1.2;
+}
+
+.completion-pick-meta {
+  margin: 0.2rem 0 0;
+  color: var(--paper-muted);
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.completion-level {
+  margin: 0.35rem 0 0;
+  color: var(--ink);
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.completion-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: var(--space-3);
+  width: 100%;
+  max-width: 24rem;
+}
+
+.completion-actions .cta {
+  width: 100%;
+}
+
+.completion-secondary {
+  display: flex;
+  gap: var(--space-3);
+  width: 100%;
+}
+
+.completion-secondary .cta-secondary {
+  flex: 1;
+  min-width: 0;
+}
+
+.completion-dna {
+  margin: 0;
+}
+
+.completion-dna a {
+  color: var(--paper-muted);
+  font-weight: 500;
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
+
+.completion-dna a:hover,
+.completion-dna a:focus-visible {
+  color: var(--ink);
 }
 
 .explore-balance {

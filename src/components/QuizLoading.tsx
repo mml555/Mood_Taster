@@ -11,8 +11,8 @@ const MESSAGES = [
 ] as const;
 
 /**
- * Brief interstitial between the last quiz tap and the result.
- * Message rotates. No looping logo motion (design system: rise only).
+ * Full-screen interstitial between the last quiz tap and the result.
+ * Message rotates with rise only. No looping logo motion.
  */
 export function QuizLoading() {
   const [msgIndex, setMsgIndex] = useState(0);
@@ -25,14 +25,19 @@ export function QuizLoading() {
   }, []);
 
   return (
-    <section className="quiz-loading" aria-live="polite" aria-busy="true">
+    <section
+      className="quiz-loading quiz-loading-screen"
+      aria-live="polite"
+      aria-busy="true"
+      aria-label="Finding your match"
+    >
       <div className="quiz-loading-brand">
         <Image
           className="quiz-loading-mark"
           src="/brand/mark-purple.png"
           alt=""
-          width={64}
-          height={64}
+          width={72}
+          height={72}
           priority
         />
         <p className="quiz-loading-wordmark">mood taster</p>

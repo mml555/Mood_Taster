@@ -117,14 +117,16 @@ describe("enforceRateLimit", () => {
     vi.stubEnv("UPSTASH_REDIS_REST_URL", "https://redis.test/");
     vi.stubEnv("UPSTASH_REDIS_REST_TOKEN", "token");
 
-    const spy = vi.fn(async () =>
+    // Typed as fetch so the recorded call's init is inspectable below.
+    const spy = vi.fn<typeof fetch>(async () =>
       Response.json([{ result: 1 }, { result: 1 }]),
     );
     vi.stubGlobal("fetch", spy);
 
     await enforceRateLimit("ttl", { capacity: 10, refillPerMs: 10 / 60_000 });
 
-    const body = JSON.parse(spy.mock.calls[0]![1]!.body as string);
+    const init = spy.mock.calls[0]?.[1];
+    const body = JSON.parse(String(init?.body));
     // NX is what stops a steady stream of requests from pushing the expiry
     // out forever and holding one window open indefinitely.
     expect(body).toEqual([
