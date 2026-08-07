@@ -96,13 +96,10 @@ function HeroStart() {
         className="cta-highlight hero-start-primary"
         href="/taste?intent=clue&from=home"
       >
-        <CircleHelp size={20} strokeWidth={1.5} aria-hidden />
         Show me
       </Link>
       <p className="hero-start-hint">Four quick taps. No account needed.</p>
-      <p className="hero-start-divider">
-        <span>Or pick a path</span>
-      </p>
+      <p className="hero-start-divider">Or pick a path</p>
       <div className="hero-paths">
         {PATH_INTENTS.map(({ intent, label, href, Icon }) => (
           <Link key={intent} className="cta-secondary hero-path" href={href}>

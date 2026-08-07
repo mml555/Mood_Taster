@@ -63,6 +63,12 @@ const nextConfig: NextConfig = {
   turbopack: {
     root: process.cwd(),
   },
+  experimental: {
+    optimizePackageImports: ["lucide-react"],
+  },
+  images: {
+    formats: ["image/avif", "image/webp"],
+  },
   async headers() {
     return [
       { source: "/:path*", headers: securityHeaders },

@@ -95,6 +95,11 @@ video {
   .grain {
     display: none;
   }
+
+  .hero-peek li:nth-child(2),
+  .hero-peek li:nth-child(4) {
+    transform: none;
+  }
 }
 
 a {
@@ -367,9 +372,10 @@ button {
 
 @media (min-width: 900px) {
   .hero {
-    grid-template-columns: minmax(0, 28rem) minmax(0, 1fr);
+    grid-template-columns: minmax(0, 26rem) minmax(18rem, 1fr);
     align-items: center;
-    gap: var(--space-7);
+    gap: clamp(var(--space-5), 5vw, var(--space-8));
+    max-width: 72rem;
     padding-top: var(--space-7);
     padding-bottom: var(--space-7);
   }
@@ -379,6 +385,8 @@ button {
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: var(--space-3);
     overflow: visible;
+    max-width: 26rem;
+    justify-self: end;
   }
 
   .hero-peek li {
@@ -388,6 +396,10 @@ button {
   .hero-peek li:nth-child(2),
   .hero-peek li:nth-child(4) {
     transform: translateY(var(--space-5));
+  }
+
+  .hero-peek-name {
+    font-size: 0.8rem;
   }
 
   .hero-paths {
@@ -406,6 +418,13 @@ button {
 
   .hero-start {
     max-width: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-peek li:nth-child(2),
+  .hero-peek li:nth-child(4) {
+    transform: none;
   }
 }
 
