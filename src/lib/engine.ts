@@ -3,6 +3,7 @@ import type { DietaryPrefs } from "./dietary";
 import { EMPTY_DIETARY, passesHardConstraints } from "./dietary";
 import { foodDimensions } from "./dna";
 import { buildExplanation, matchedAttributes } from "./explain";
+import { favoriteIdSet } from "./favorites";
 import type {
   Adventure,
   Answers,
@@ -16,6 +17,9 @@ import type {
   Temperature,
   Texture,
 } from "./taste-types";
+
+/** Soft nudge for saved foods. Matches novelty weight so quiz still leads. */
+export const FAVORITE_BOOST = 0.05;
 
 const NEAR_FLAVOR: Record<Flavor, Flavor[]> = {
   savory: ["spicy"],
@@ -155,6 +159,7 @@ function scoreOnly(
   answers: Answers,
   dna: DnaProfile,
   ctx: ScoreContext,
+  favorites: ReadonlySet<string>,
 ): { food: RankFood; score: number } {
   const q = quizMatch(answers, food);
   const d = dnaMatch(dna, food);
@@ -162,7 +167,8 @@ function scoreOnly(
   const score =
     0.75 * q +
     0.2 * d +
-    0.05 * n -
+    0.05 * n +
+    (favorites.has(food.id) ? FAVORITE_BOOST : 0) -
     rejectionPenalty(food.id, ctx) -
     recentPenalty(food.id, ctx);
 
@@ -208,6 +214,7 @@ export function rank(
   dna: DnaProfile,
   session: SessionState,
   dietary: DietaryPrefs = EMPTY_DIETARY,
+  favoriteIds: ReadonlySet<string> | readonly string[] = [],
 ): Recommendation {
   const pool = candidatePool(answers, dietary);
 
@@ -215,9 +222,10 @@ export function rank(
     throw new NoDietaryMatchError();
   }
 
+  const favorites = favoriteIdSet(favoriteIds);
   const ctx = buildScoreContext(session);
   const scored = pool
-    .map((food) => scoreOnly(food, answers, dna, ctx))
+    .map((food) => scoreOnly(food, answers, dna, ctx, favorites))
     .sort((a, b) => {
       if (b.score !== a.score) return b.score - a.score;
       return a.food.id.localeCompare(b.food.id);
@@ -244,6 +252,7 @@ export function nextAfterReject(
   session: SessionState,
   currentId: string,
   dietary: DietaryPrefs = EMPTY_DIETARY,
+  favoriteIds: ReadonlySet<string> | readonly string[] = [],
 ): ScoredFood | null {
   const withReject = {
     ...session,
@@ -251,7 +260,7 @@ export function nextAfterReject(
       ? session.rejectedIds
       : [...session.rejectedIds, currentId],
   };
-  const rec = rank(answers, dna, withReject, dietary);
+  const rec = rank(answers, dna, withReject, dietary, favoriteIds);
   if (rec.primary.food.id === currentId) {
     const alt = rec.alternates.find((s) => s.food.id !== currentId);
     return alt ?? null;

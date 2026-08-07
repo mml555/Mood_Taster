@@ -6,6 +6,7 @@ import { ArrowLeft } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { loadDnaForUser } from "@/lib/dna-sync";
 import { readDna } from "@/lib/dna";
+import { readFavorites } from "@/lib/favorites";
 import { readDietary } from "@/lib/dietary";
 import { NoDietaryMatchError, rank } from "@/lib/engine";
 import { QUIZ_OPTION_ICONS, QUIZ_STEP_ICONS } from "@/lib/mood-icons";
@@ -258,6 +259,7 @@ export function TasteQuiz() {
       const session = emptySession(finalAnswers);
       const dna = readDna();
       const dietary = readDietary();
+      const favoriteIds = readFavorites().foodIds;
 
       if (finalAnswers.intent === "restaurant") {
         warmGeolocation();
@@ -284,6 +286,7 @@ export function TasteQuiz() {
               answers: finalAnswers,
               dna,
               dietary,
+              favoriteIds,
               rejectedIds: session.rejectedIds,
               servedIds: session.servedIds,
             }),
@@ -303,7 +306,7 @@ export function TasteQuiz() {
           /* local fallback below */
         }
         try {
-          const rec = rank(finalAnswers, dna, session, dietary);
+          const rec = rank(finalAnswers, dna, session, dietary, favoriteIds);
           go(rec.primary.food.id);
         } catch (err) {
           if (err instanceof NoDietaryMatchError) {

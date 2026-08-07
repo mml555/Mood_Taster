@@ -2750,6 +2750,34 @@ button {
   }
 }
 
+/* --- Touch, at any width -------------------------------------------------- */
+
+/* Tablets are touch devices that never match the phone width rules, so the
+   targets that a mouse can hit at 18px tall are sized here instead. */
+@media (pointer: coarse) {
+  /* The lockup is the way back home. Give it a row, not just its glyph. */
+  .mark {
+    min-height: 2.5rem;
+  }
+
+  .top nav a.nav-primary {
+    display: inline-flex;
+    align-items: center;
+    min-height: 2.5rem;
+  }
+
+  .quiz-back {
+    min-height: 2.75rem;
+    touch-action: manipulation;
+  }
+
+  /* Eight links on one wrapped line need vertical room to be tappable. */
+  .foot-meta a {
+    display: inline-block;
+    padding: 0.3rem 0;
+  }
+}
+
 /* --- Tablet -------------------------------------------------------------- */
 
 /* Between the phone rules and the full desktop grid the product surfaces are
@@ -2758,6 +2786,27 @@ button {
 @media (min-width: 721px) and (max-width: 999px) {
   .product-main {
     max-width: 44rem;
+  }
+}
+
+/* --- Small phones ---------------------------------------------------------
+   At 320px the lockup plus four nav items overrun the row, and because the
+   body clips horizontally the last one is silently unreachable rather than
+   merely ugly. Buy the width back from the lockup and the item padding. */
+
+@media (max-width: 360px) {
+  .mark-lockup {
+    max-width: 7rem;
+  }
+
+  .top nav {
+    gap: 0.1rem;
+  }
+
+  .top nav a.nav-primary,
+  .top nav a.nav-with-icon,
+  .nav-save {
+    padding: 0 0.25rem;
   }
 }
 

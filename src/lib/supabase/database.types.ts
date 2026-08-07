@@ -51,6 +51,24 @@ export type Database = {
         };
         Relationships: [];
       };
+      favorites: {
+        Row: {
+          user_id: string;
+          food_ids: Json;
+          updated_at: string;
+        };
+        Insert: {
+          user_id: string;
+          food_ids?: Json;
+          updated_at?: string;
+        };
+        Update: {
+          user_id?: string;
+          food_ids?: Json;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
     };
     Views: Record<string, never>;
     Functions: {

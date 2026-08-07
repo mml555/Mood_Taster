@@ -1,15 +1,70 @@
 "use client";
 
-import { ChefHat, Clock } from "lucide-react";
+import { Check, ChefHat, Clock, Copy, Heart } from "lucide-react";
+import { useCallback, useEffect, useState } from "react";
+import {
+  formatRecipeText,
+  isFavorite,
+  readFavorites,
+  toggleFavorite,
+} from "@/lib/favorites";
+import { persistFavorites } from "@/lib/favorites-sync";
 import type { Recipe } from "@/lib/taste-types";
 
 export function RecipeSection({
+  foodId,
+  foodName,
   recipe,
   cookTip,
 }: {
+  foodId: string;
+  foodName: string;
   recipe: Recipe;
   cookTip: string | null;
 }) {
+  const [saved, setSaved] = useState(false);
+  const [copyStatus, setCopyStatus] = useState<"idle" | "copied" | "failed">(
+    "idle",
+  );
+
+  useEffect(() => {
+    queueMicrotask(() => {
+      setSaved(isFavorite(foodId));
+    });
+  }, [foodId]);
+
+  const onCopy = useCallback(async () => {
+    const text = formatRecipeText(foodName, recipe);
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopyStatus("copied");
+    } catch {
+      setCopyStatus("failed");
+    }
+  }, [foodName, recipe]);
+
+  const onToggleSave = useCallback(() => {
+    const next = toggleFavorite(foodId);
+    setSaved(isFavorite(foodId, next));
+    void persistFavorites(next);
+  }, [foodId]);
+
+  useEffect(() => {
+    if (copyStatus === "idle") return;
+    const t = window.setTimeout(() => setCopyStatus("idle"), 2000);
+    return () => window.clearTimeout(t);
+  }, [copyStatus]);
+
+  // Keep localStorage as source of truth if another tab toggles.
+  useEffect(() => {
+    function onStorage(e: StorageEvent) {
+      if (e.key !== "mood-taster-favorites") return;
+      setSaved(isFavorite(foodId, readFavorites()));
+    }
+    window.addEventListener("storage", onStorage);
+    return () => window.removeEventListener("storage", onStorage);
+  }, [foodId]);
+
   return (
     <div className="recipe" id="recipe">
       <p className="recipe-label">
@@ -23,6 +78,44 @@ export function RecipeSection({
         </span>
         <span>{recipe.servings} servings</span>
       </p>
+
+      <div className="recipe-actions">
+        <button
+          type="button"
+          className="cta-secondary"
+          onClick={() => void onCopy()}
+        >
+          {copyStatus === "copied" ? (
+            <Check size={18} strokeWidth={1.5} aria-hidden />
+          ) : (
+            <Copy size={18} strokeWidth={1.5} aria-hidden />
+          )}
+          {copyStatus === "copied" ? "Copied" : "Copy"}
+        </button>
+        <button
+          type="button"
+          className={saved ? "cta-secondary is-saved" : "cta-secondary"}
+          onClick={onToggleSave}
+          aria-pressed={saved}
+        >
+          <Heart
+            size={18}
+            strokeWidth={1.5}
+            aria-hidden
+            fill={saved ? "currentColor" : "none"}
+          />
+          {saved ? "Saved" : "Save"}
+        </button>
+      </div>
+      {copyStatus === "failed" ? (
+        <p className="recipe-action-status" role="status">
+          Could not copy
+        </p>
+      ) : copyStatus === "copied" ? (
+        <p className="recipe-action-status" role="status">
+          Copied
+        </p>
+      ) : null}
 
       {cookTip ? <p className="recipe-tip">{cookTip}</p> : null}
 

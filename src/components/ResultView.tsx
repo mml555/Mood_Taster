@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import dynamic from "next/dynamic";
 import { useRouter, useSearchParams } from "next/navigation";
-import { ArrowRight, ChefHat, MapPin, Search, Sparkles } from "lucide-react";
+import { ArrowRight, ChefHat, Heart, MapPin, Search, Sparkles } from "lucide-react";
 import {
   useCallback,
   useEffect,
@@ -27,6 +27,12 @@ import { ProfileNudge } from "@/components/ProfileNudge";
 import type { PlacesState } from "@/components/result/NearbySection";
 import { readDietary } from "@/lib/dietary";
 import { nextAfterReject, rank } from "@/lib/engine";
+import {
+  isFavorite,
+  readFavorites,
+  toggleFavorite,
+} from "@/lib/favorites";
+import { persistFavorites } from "@/lib/favorites-sync";
 import { capitalize } from "@/lib/explain";
 import {
   mapsSearchUrl,
@@ -117,6 +123,7 @@ export function ResultView({ food }: ResultViewProps) {
   const [dragging, setDragging] = useState(false);
   const [exitDir, setExitDir] = useState<"left" | "right" | null>(null);
   const [swipeHint, setSwipeHint] = useState<"like" | "nope" | null>(null);
+  const [saved, setSaved] = useState(false);
 
   // Identifies the current dish render, so a slow reply about a previous dish
   // cannot overwrite the copy for the one now on screen.
@@ -145,6 +152,7 @@ export function ResultView({ food }: ResultViewProps) {
       setSwipeHint(null);
       setDragging(false);
       setExitDir(null);
+      setSaved(isFavorite(food.id));
       busyRef.current = false;
       dragXRef.current = 0;
       if (cardRef.current) cardRef.current.style.transform = "";
@@ -336,6 +344,7 @@ export function ResultView({ food }: ResultViewProps) {
         session,
         food.id,
         readDietary(),
+        readFavorites().foodIds,
       );
       if (!next) {
         setEmptyAlts(true);
@@ -350,6 +359,12 @@ export function ResultView({ food }: ResultViewProps) {
     },
     [food.id, router],
   );
+
+  const onToggleSave = useCallback(() => {
+    const next = toggleFavorite(food.id);
+    setSaved(isFavorite(food.id, next));
+    void persistFavorites(next);
+  }, [food.id]);
 
   const onReject = useCallback(() => {
     if (busyRef.current) return;
@@ -741,6 +756,24 @@ export function ResultView({ food }: ResultViewProps) {
                   <ArrowRight size={20} strokeWidth={1.5} aria-hidden />
                 </Link>
               </div>
+              {intent === "recipe" ? (
+                <p className="result-done-save">
+                  <button
+                    type="button"
+                    className="text-link"
+                    onClick={onToggleSave}
+                    aria-pressed={saved}
+                  >
+                    <Heart
+                      size={16}
+                      strokeWidth={1.5}
+                      aria-hidden
+                      fill={saved ? "currentColor" : "none"}
+                    />
+                    {saved ? "Saved" : "Save"}
+                  </button>
+                </p>
+              ) : null}
               <p className="result-done-dna">
                 <Link href="/dna">
                   <Sparkles size={16} strokeWidth={1.5} aria-hidden />
@@ -923,7 +956,12 @@ export function ResultView({ food }: ResultViewProps) {
 
           {intent === "recipe" ? (
             food.recipe ? (
-              <RecipeSection recipe={food.recipe} cookTip={cookTip} />
+              <RecipeSection
+                foodId={food.id}
+                foodName={food.name}
+                recipe={food.recipe}
+                cookTip={cookTip}
+              />
             ) : (
               <div className="recipe" id="recipe">
                 <p className="recipe-label">
@@ -973,7 +1011,13 @@ function applySessionView(
   setExplanation: (s: string) => void,
   setAttrs: (a: string[]) => void,
 ) {
-  const rec = rank(session.answers, dna, session, readDietary());
+  const rec = rank(
+    session.answers,
+    dna,
+    session,
+    readDietary(),
+    readFavorites().foodIds,
+  );
   const match =
     rec.primary.food.id === food.id
       ? rec.primary

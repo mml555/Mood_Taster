@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { parseDietary } from "@/lib/dietary";
 import { createNeutralDna } from "@/lib/dna";
 import { NoDietaryMatchError, rank } from "@/lib/engine";
+import { parseFavoriteIds } from "@/lib/favorites";
 import { emptySession } from "@/lib/session";
 import type { DnaProfile, SessionState } from "@/lib/taste-types";
 import { parseAnswers } from "@/lib/validate";
@@ -34,6 +35,7 @@ export async function POST(request: Request) {
 
   const dna: DnaProfile = parseDnaProfile(src.dna) ?? createNeutralDna();
   const dietary = parseDietary(src.dietary);
+  const favoriteIds = parseFavoriteIds(src.favoriteIds);
   const session: SessionState = {
     ...emptySession(answers),
     rejectedIds: parseIdList(src.rejectedIds),
@@ -41,7 +43,7 @@ export async function POST(request: Request) {
   };
 
   try {
-    const rec = rank(answers, dna, session, dietary);
+    const rec = rank(answers, dna, session, dietary, favoriteIds);
     return NextResponse.json({
       foodId: rec.primary.food.id,
       explanation: rec.primary.explanation,
