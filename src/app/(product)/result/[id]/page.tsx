@@ -1,6 +1,5 @@
 import { Suspense } from "react";
 import { notFound } from "next/navigation";
-import { SiteHeader } from "@/components/SiteHeader";
 import { ResultView } from "@/components/ResultView";
 import { getFoodById } from "@/lib/catalog";
 
@@ -26,20 +25,15 @@ export default async function ResultPage({ params }: PageProps) {
   if (!food) notFound();
 
   return (
-    <>
-      <SiteHeader current="result" />
-      <main className="product-main">
-        <Suspense
-          fallback={
-            <section className="result">
-              <p className="eyebrow">Finding it</p>
-              <h1 className="result-title">One moment…</h1>
-            </section>
-          }
-        >
-          <ResultView key={food.id} food={food} />
-        </Suspense>
-      </main>
-    </>
+    <Suspense
+      fallback={
+        <section className="result">
+          <p className="eyebrow">Finding it</p>
+          <h1 className="result-title">One moment…</h1>
+        </section>
+      }
+    >
+      <ResultView key={food.id} food={food} />
+    </Suspense>
   );
 }

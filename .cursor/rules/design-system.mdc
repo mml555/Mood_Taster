@@ -1,12 +1,16 @@
 ---
-description: Visual design system for Mood Taster. Brand Guide v1
+description: Visual design system for Mood Taster. Product chrome matches AI Studio prototype.
 alwaysApply: true
 ---
 
 # Design system
 
-Mood Taster should feel minimal, playful, fast, premium, and simple.
+Mood Taster should feel playful, pressable, fast, and clear.
 Content first, controls second. Don't make me think. Let me react.
+
+Product surfaces use a **gamified pressable** language (thick bottom borders,
+outlined cards, soft shadows on primary cards). Marketing/docs pages may stay
+quieter, but product chrome follows this file.
 
 ## Palette
 
@@ -15,6 +19,7 @@ Content first, controls second. Don't make me think. Let me react.
 | `--paper` | `#fdfaff` | Ghost White. Main canvas ~80%. |
 | `--ink` | `#510c85` | Indigo Purple. Primary brand / actions ~20%. |
 | `--accent` | `#ffdf6e` | Royal Gold. Highlight, sparingly. |
+| `--ink-deep` | `#310752` | Darker indigo for pressable bottom edges. |
 
 Every neutral is a **mix of paper and ink**, never a new hue:
 
@@ -30,16 +35,21 @@ Rules:
 - Indigo for primary CTAs, active states, selected items, and brand moments
 - Gold for a great match, special highlight, or tiny mark. Never a second primary
 - If a screen feels colorful, we used too much color
-- No status greens or semantic reds. Feedback reads through copy and placement
+- No status greens as a fourth brand hue. Reject hover may use a soft red tint
+  on the X control only
 
 ## Shape language
 
 ```css
 --radius-sm: 12px;
---radius-btn: 14px;
---radius-card: 20px;
+--radius-btn: 16px;
+--radius-card: 24px;
 --radius-lg: 24px;
+--radius-xl: 32px;
 --radius-pill: 999px;
+--press-border: 2px;
+--press-depth: 6px;
+--press-depth-sm: 4px;
 ```
 
 ## Spacing (8px system)
@@ -56,12 +66,16 @@ Rules:
 
 Most component spacing uses 16px or 24px. Give content room to breathe.
 
-## Buttons
+## Buttons (pressable)
 
-- **Primary:** indigo fill, light text. No border. No shadow normally
-- **Secondary:** soft purple tint, indigo text. No border
+- **Primary:** indigo fill, ghost text, thick bottom border `--ink-deep`,
+  compress on `:active`
+- **Secondary:** white fill, indigo text, indigo border + thick bottom edge
+- **Icon:** white square, same press language, smaller depth
 - **Highlight:** gold fill, indigo text. Special actions only
-- Avoid outlined buttons. Keep copy tiny (Show me, Try again, I like it)
+- Keep copy tiny (Show me, Taste my mood, Let's go)
+
+Use `.cta` / `.cta-secondary` / `.press-btn` / `PressButton`.
 
 ## Icons
 
@@ -69,31 +83,38 @@ Teach the interaction. Prefer icon + 1–3 words. No emojis in product UI.
 
 ♡ like · × not for me · ↻ try again · ← → browse · ＋ add · ✓ confirm · ⌕ search
 
-## Cards and swipe
+## Cards and result reactions
 
-Cards are large, clean, content-driven. Avoid nested cards and heavy metadata.
-Shadows are rare. If used, they mean: look here (main recommendation only).
+Cards are large, content-driven, often white with indigo border and a thick
+bottom edge. Soft shadows are allowed on the main result card and key stat cards.
 
-Result reactions: swipe right / ♡ like, swipe left / × nope, ↻ try again.
-Favor swipes and taps over forms. Honor `prefers-reduced-motion: reduce`.
+Result reactions: **X** reject / next, **♡ + CTA** accept (Let's go / Make this /
+That's the one). No swipe required. Favor taps over forms.
+Honor `prefers-reduced-motion: reduce`.
+
+## Quiz
+
+Intent: full-width stacked pressable cards with descriptions.
+Craving steps: **2-column icon grid** on all widths.
+
+## Decorative motion
+
+Floating decorative icons on landing / stats / profile are allowed.
+Disable looping motion when `prefers-reduced-motion: reduce`.
+Screen entrance may use spring/fade via Motion. Prefer intentional motion
+over ambient noise.
 
 ## Never
 
-- No gradients
-- No decorative borders or outlined buttons/pills
-- No constant drop shadows or card grids
+- No gradients as the main visual idea
 - No emojis in UI
-- No fourth hue for status
+- No fourth brand hue for generic status
+- Do not invent recipe content in Sous Chef chat
 
 ## Copy
 
 Write for a third grader. Headlines 2–6 words. Body rarely over two short
 sentences. No em dashes. User words: mood, taste, match, pick.
-
-## Motion
-
-Entrance `rise` only, plus intentional swipe exit on the result card. One shared
-`--ease`. No spinning, pulsing, or looping ambient animation.
 
 ## Required exceptions
 
@@ -110,8 +131,9 @@ style. Never quieter than the organic label beside it.
 ## Checklist before shipping UI
 
 - [ ] Ghost White dominates; indigo drives actions; gold is sparse
-- [ ] Radii and spacing come from the system
+- [ ] Pressable borders/depth come from the system
 - [ ] No emoji; icons explain actions
 - [ ] One clear primary CTA per screen
 - [ ] Copy stays short
 - [ ] Focus states still visible on keyboard nav
+- [ ] Reduced motion disables looping decorations

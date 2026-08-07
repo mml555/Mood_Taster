@@ -1,9 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
 import { AnalyticsBeacon } from "@/components/AnalyticsBeacon";
-import { SiteFooter } from "@/components/SiteFooter";
-import { SiteHeader } from "@/components/SiteHeader";
-import { ProductBottomNav } from "@/components/ProductBottomNav";
 import { ProfileNudge } from "@/components/ProfileNudge";
 import { ANALYTICS_EVENTS } from "@/lib/analytics";
 
@@ -11,8 +8,7 @@ export default function HomePage() {
   return (
     <>
       <AnalyticsBeacon event={ANALYTICS_EVENTS.home} />
-      <SiteHeader current="home" />
-      <main id="top" className="product-main-with-nav">
+      <div id="top">
         <section className="hero" aria-labelledby="hero-brand brand">
           <div className="hero-body">
             <div className="hero-logo">
@@ -67,9 +63,7 @@ export default function HomePage() {
           </p>
           <ProfileNudge context="home" />
         </section>
-      </main>
-      <ProductBottomNav current="taste" />
-      <SiteFooter />
+      </div>
     </>
   );
 }

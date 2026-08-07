@@ -1,14 +1,15 @@
 /*
  * Mood Taster design system. See .cursor/rules/design-system.mdc
  * Ghost White canvas, Indigo primary, Royal Gold highlight.
- * Content first. Rounded language. Almost no shadows.
+ * Product chrome: pressable borders, thick bottom edges, soft card shadows.
  */
 
 :root {
-  /* Brand Guide v1 */
+  /* Brand Guide + pressable chrome */
   --paper: #fdfaff; /* Ghost White — canvas ~80% */
   --ink: #510c85; /* Indigo Purple — brand / actions ~20% */
   --accent: #ffdf6e; /* Royal Gold — highlight, sparingly */
+  --ink-deep: #310752; /* Pressable bottom edge */
 
   /* Logo aliases (aligned to UI tokens) */
   --grape: var(--ink);
@@ -38,17 +39,28 @@
      where the content starts. Widen this and the whole site widens together. */
   --measure: min(48rem, 100%);
 
-  /* Shape language */
+  /* Shape language - pressable product chrome */
   --radius-sm: 12px;
-  --radius-btn: 14px;
-  --radius-card: 20px;
+  --radius-btn: 16px;
+  --radius-card: 24px;
   --radius-lg: 24px;
+  --radius-xl: 32px;
   --radius-pill: 999px;
+  --press-border: 2px;
+  --press-depth: 6px;
+  --press-depth-sm: 4px;
+  --shadow-card: 0 12px 32px color-mix(in srgb, var(--ink) 12%, transparent);
 
   /* Comfortaa Regular (400) is the brand face; heavier weights for hierarchy */
   --font-display: var(--font-comfortaa), "Comfortaa", system-ui, sans-serif;
   --font-body: var(--font-comfortaa), "Comfortaa", system-ui, sans-serif;
   --ease: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@media (min-width: 960px) {
+  :root {
+    --measure: min(68rem, 92vw);
+  }
 }
 
 *,
@@ -146,7 +158,6 @@ button {
   margin-inline: auto;
   padding: var(--space-3) var(--page-inset);
   padding-top: max(var(--space-3), env(safe-area-inset-top));
-  animation: rise 0.9s var(--ease) both;
 }
 
 /* Home: nav only. Brand lives in the hero, not a second lockup. */
@@ -166,6 +177,16 @@ button {
 .mark-lockup {
   width: auto;
   height: 1.2rem;
+  aspect-ratio: 200 / 26;
+  object-fit: contain;
+}
+
+.nav-auth-slot {
+  display: inline-block;
+  flex-shrink: 0;
+  height: 2.5rem;
+  border-radius: var(--radius-btn);
+  background: var(--ink-raised);
 }
 
 .top nav {
@@ -381,52 +402,72 @@ button {
 }
 
 
-/* Primary: Indigo fill, light text. No border, no shadow. */
-.cta {
+/* Primary: indigo fill, pressable bottom edge. */
+.cta,
+.press-btn-primary {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: var(--space-2);
-  padding: 0.75rem 1.5rem;
+  padding: 1rem 1.75rem;
   background: var(--ink);
   color: var(--paper);
-  font-size: 0.95rem;
-  font-weight: 600;
+  font-size: 1.05rem;
+  font-weight: 700;
   text-decoration: none;
   border: 0;
+  border-bottom: var(--press-depth) solid var(--ink-deep);
   border-radius: var(--radius-btn);
   cursor: pointer;
-  transition: transform 0.25s var(--ease), background 0.2s ease;
+  transition: transform 0.15s var(--ease), border-bottom-width 0.15s var(--ease),
+    background 0.2s ease;
 }
 
 .cta:hover,
-.cta:focus-visible {
-  background: color-mix(in srgb, var(--ink) 88%, var(--paper));
-  transform: translateY(-2px);
+.cta:focus-visible,
+.press-btn-primary:hover,
+.press-btn-primary:focus-visible {
+  background: color-mix(in srgb, var(--ink) 92%, var(--paper));
 }
 
-/* Secondary: soft purple tint, indigo text. */
-.cta-secondary {
+.cta:active,
+.press-btn-primary:active {
+  transform: translateY(4px);
+  border-bottom-width: 2px;
+}
+
+/* Secondary: white, indigo border, pressable. */
+.cta-secondary,
+.press-btn-secondary {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: var(--space-2);
-  padding: 0.75rem 1.5rem;
-  background: var(--ink-soft);
+  padding: 1rem 1.75rem;
+  background: #fff;
   color: var(--ink);
-  font-size: 0.95rem;
-  font-weight: 600;
+  font-size: 1.05rem;
+  font-weight: 700;
   text-decoration: none;
-  border: 0;
+  border: var(--press-border) solid color-mix(in srgb, var(--ink) 20%, transparent);
+  border-bottom: var(--press-depth) solid color-mix(in srgb, var(--ink) 20%, transparent);
   border-radius: var(--radius-btn);
   cursor: pointer;
-  transition: transform 0.25s var(--ease), background 0.2s ease;
+  transition: transform 0.15s var(--ease), border-bottom-width 0.15s var(--ease),
+    background 0.2s ease;
 }
 
 .cta-secondary:hover,
-.cta-secondary:focus-visible {
-  background: color-mix(in srgb, var(--ink) 18%, var(--paper));
-  transform: translateY(-2px);
+.cta-secondary:focus-visible,
+.press-btn-secondary:hover,
+.press-btn-secondary:focus-visible {
+  background: color-mix(in srgb, var(--ink) 5%, #fff);
+}
+
+.cta-secondary:active,
+.press-btn-secondary:active {
+  transform: translateY(4px);
+  border-bottom-width: 2px;
 }
 
 /* Highlight: gold fill, indigo text. Special actions only. */
@@ -435,22 +476,69 @@ button {
   align-items: center;
   justify-content: center;
   gap: var(--space-2);
-  padding: 0.75rem 1.5rem;
+  padding: 1rem 1.75rem;
   background: var(--accent);
   color: var(--ink);
-  font-size: 0.95rem;
-  font-weight: 600;
+  font-size: 1.05rem;
+  font-weight: 700;
   text-decoration: none;
   border: 0;
+  border-bottom: var(--press-depth) solid color-mix(in srgb, var(--accent) 70%, var(--ink));
   border-radius: var(--radius-btn);
   cursor: pointer;
-  transition: transform 0.25s var(--ease), background 0.2s ease;
+  transition: transform 0.15s var(--ease), border-bottom-width 0.15s var(--ease),
+    background 0.2s ease;
 }
 
 .cta-highlight:hover,
 .cta-highlight:focus-visible {
   background: color-mix(in srgb, var(--accent) 85%, var(--ink));
-  transform: translateY(-2px);
+}
+
+.cta-highlight:active {
+  transform: translateY(4px);
+  border-bottom-width: 2px;
+}
+
+.press-btn {
+  font-family: var(--font-display);
+}
+
+.press-btn-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.75rem;
+  background: #fff;
+  color: var(--ink);
+  border: var(--press-border) solid color-mix(in srgb, var(--ink) 10%, transparent);
+  border-bottom: var(--press-depth-sm) solid color-mix(in srgb, var(--ink) 10%, transparent);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: transform 0.15s var(--ease), border-bottom-width 0.15s var(--ease),
+    background 0.2s ease;
+}
+
+.press-btn-icon:hover,
+.press-btn-icon:focus-visible {
+  background: color-mix(in srgb, var(--ink) 5%, #fff);
+}
+
+.press-btn-icon:active {
+  transform: translateY(2px);
+  border-bottom-width: 2px;
+}
+
+.press-btn-full {
+  width: 100%;
+}
+
+.cta:focus-visible,
+.cta-secondary:focus-visible,
+.cta-highlight:focus-visible,
+.press-btn:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 3px;
 }
 
 .how,
@@ -1168,7 +1256,6 @@ button {
 }
 
 /* Product surfaces: quiz, result, Taste DNA */
-
 .product-main {
   position: relative;
   z-index: 1;
@@ -1177,6 +1264,15 @@ button {
   margin: 0 auto;
   padding: var(--space-3) var(--page-inset) var(--space-5);
   min-height: auto;
+}
+
+.product-main:has(.hero) {
+  padding-inline: 0;
+  padding-top: 0;
+}
+
+.product-main:has(.hero) .how {
+  padding-inline: var(--page-inset);
 }
 
 .quiz-progress {
@@ -1327,49 +1423,56 @@ button {
 
 .quiz-options-grid,
 .quiz-options-stack {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
   gap: var(--space-2);
 }
 
-@media (min-width: 720px) {
-  .quiz-options-grid,
-  .quiz-options-stack {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: var(--space-2);
-  }
-
-  /* Intent cards keep a single column so descriptions stay scannable. */
-  .quiz-options-stack:has(.quiz-option-desc) {
-    grid-template-columns: 1fr;
-  }
+/* Intent cards keep a single column so descriptions stay scannable. */
+.quiz-options-stack:has(.quiz-option-desc),
+.quiz-options-intent {
+  grid-template-columns: 1fr;
 }
 
 .quiz-option {
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
   align-items: center;
-  gap: var(--space-3);
+  justify-content: center;
+  gap: var(--space-2);
+  position: relative;
   width: 100%;
-  text-align: left;
-  min-height: 3.5rem;
-  padding: var(--space-3) var(--space-4);
-  background: var(--ink-raised);
+  text-align: center;
+  min-height: 7rem;
+  padding: var(--space-3);
+  background: #fff;
   color: var(--ink);
   font-family: var(--font-display);
-  font-size: 1.05rem;
+  font-size: 0.9rem;
   font-weight: 700;
   cursor: pointer;
-  border: 0;
-  border-radius: var(--radius-lg);
-  transition: background 0.2s ease, color 0.2s ease, transform 0.15s var(--ease);
+  border: var(--press-border) solid color-mix(in srgb, var(--ink) 20%, transparent);
+  border-bottom: var(--press-depth) solid color-mix(in srgb, var(--ink) 20%, transparent);
+  border-radius: var(--radius-card);
+  box-shadow: none;
+  transition: background 0.2s ease, color 0.2s ease, transform 0.15s var(--ease),
+    border-bottom-width 0.15s var(--ease), box-shadow 0.2s ease;
   -webkit-tap-highlight-color: transparent;
   touch-action: manipulation;
 }
 
+.quiz-options-intent .quiz-option,
+.quiz-options-stack:has(.quiz-option-desc) .quiz-option {
+  flex-direction: row;
+  text-align: left;
+  min-height: 5.5rem;
+  padding: var(--space-4);
+  gap: var(--space-3);
+}
+
 .quiz-option:active {
-  transform: scale(0.98);
+  transform: translateY(4px);
+  border-bottom-width: 2px;
 }
 
 .quiz-option-icon {
@@ -1377,15 +1480,21 @@ button {
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  width: 2.5rem;
-  height: 2.5rem;
-  border-radius: var(--radius-pill);
-  background: color-mix(in srgb, var(--ink) 8%, var(--paper));
-  color: inherit;
+  width: 3rem;
+  height: 3rem;
+  border-radius: var(--radius-lg);
+  background: color-mix(in srgb, var(--accent) 20%, transparent);
+  color: var(--ink);
+  transition: transform 0.25s var(--ease);
+}
+
+.quiz-option:hover .quiz-option-icon,
+.quiz-option:focus-visible .quiz-option-icon {
+  transform: scale(1.08) rotate(-3deg);
 }
 
 .quiz-option.is-selected .quiz-option-icon {
-  background: color-mix(in srgb, var(--paper) 16%, transparent);
+  background: color-mix(in srgb, #fff 16%, transparent);
   color: var(--accent);
 }
 
@@ -1395,6 +1504,13 @@ button {
   gap: 0.2rem;
   min-width: 0;
   flex: 1;
+  align-items: center;
+  justify-content: center;
+}
+
+.quiz-options-intent .quiz-option-text,
+.quiz-options-stack:has(.quiz-option-desc) .quiz-option-text {
+  align-items: flex-start;
 }
 
 .quiz-option-label {
@@ -1405,13 +1521,13 @@ button {
 .quiz-option-desc {
   font-family: var(--font-body);
   font-size: 0.85rem;
-  font-weight: 500;
+  font-weight: 700;
   line-height: 1.35;
-  color: var(--paper-muted);
+  color: color-mix(in srgb, var(--ink) 60%, transparent);
 }
 
 .quiz-option.is-selected .quiz-option-desc {
-  color: color-mix(in srgb, var(--paper) 72%, transparent);
+  color: color-mix(in srgb, var(--paper) 80%, transparent);
 }
 
 .quiz-option-check {
@@ -1422,14 +1538,25 @@ button {
   line-height: 1;
 }
 
+.quiz-options-grid .quiz-option-check {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+}
+
 .quiz-option:hover,
 .quiz-option:focus-visible {
-  background: var(--ink-soft);
+  background: color-mix(in srgb, var(--ink) 5%, #fff);
+  box-shadow: var(--shadow-card);
+  transform: translateY(-2px);
 }
 
 .quiz-option.is-selected {
   background: var(--ink);
   color: var(--paper);
+  border-color: var(--ink-deep);
+  border-bottom-color: var(--ink-deep);
+  box-shadow: var(--shadow-card);
 }
 
 .quiz-back {
@@ -1441,14 +1568,15 @@ button {
   height: 2.75rem;
   margin: 0;
   padding: 0;
-  background: transparent;
+  background: #fff;
   color: var(--ink);
   font-size: 0.95rem;
   font-weight: 500;
   text-decoration: none;
   cursor: pointer;
-  border: 0;
-  border-radius: var(--radius-pill);
+  border: var(--press-border) solid color-mix(in srgb, var(--ink) 10%, transparent);
+  border-bottom: var(--press-depth-sm) solid color-mix(in srgb, var(--ink) 10%, transparent);
+  border-radius: var(--radius-sm);
 }
 
 .quiz-back-label {
@@ -1466,7 +1594,12 @@ button {
 .quiz-back:hover,
 .quiz-back:focus-visible {
   color: var(--ink);
-  background: var(--ink-raised);
+  background: color-mix(in srgb, var(--ink) 5%, #fff);
+}
+
+.quiz-back:active {
+  transform: translateY(2px);
+  border-bottom-width: 2px;
 }
 
 .quiz-loading {
@@ -1482,12 +1615,11 @@ button {
 }
 
 .quiz-loading-screen {
-  position: fixed;
+  position: absolute;
   inset: 0;
-  z-index: 50;
-  min-height: 100dvh;
+  z-index: 20;
+  min-height: min(70vh, 28rem);
   padding: var(--space-6) var(--page-inset);
-  padding-bottom: max(var(--space-6), env(safe-area-inset-bottom));
   background: var(--paper);
 }
 
@@ -2056,13 +2188,10 @@ button {
   font-weight: 500;
 }
 
-.result-done {
+.result-leaving {
   margin-top: var(--space-4);
-  padding: var(--space-4) var(--space-3);
-  background: transparent;
-  border-radius: 0;
+  padding: var(--space-4) 0;
   text-align: center;
-  animation: rise 0.7s var(--ease) both;
 }
 
 .result-done-mark {
@@ -3087,6 +3216,11 @@ button {
     padding-bottom: max(5.75rem, calc(env(safe-area-inset-bottom) + 4.75rem));
   }
 
+  .product-main-with-nav:has(.result) {
+    /* Room for sticky reactions above the fixed bottom nav. */
+    padding-bottom: max(11rem, calc(env(safe-area-inset-bottom) + 9.5rem));
+  }
+
   .quiz-progress {
     margin-bottom: var(--space-3);
   }
@@ -3197,6 +3331,12 @@ button {
     padding: var(--space-3) var(--page-inset);
     padding-bottom: max(var(--space-3), env(safe-area-inset-bottom));
     background: var(--paper);
+  }
+
+  .product-main-with-nav .reaction-dock {
+    /* Sit just above the fixed Taste · Stats · Profile bar. */
+    bottom: 4.25rem;
+    padding-bottom: var(--space-3);
   }
 
   .reaction-quiet {
@@ -3537,7 +3677,6 @@ button {
   min-height: min(70vh, 36rem);
   padding: var(--space-4) 0 var(--space-5);
   text-align: center;
-  animation: rise 0.7s var(--ease) both;
 }
 
 .completion-body {
@@ -3823,5 +3962,119 @@ button {
 
   .product-main-with-nav {
     padding-bottom: max(5.5rem, calc(env(safe-area-inset-bottom) + 4.5rem));
+  }
+}
+
+/* Skeletons to prevent visual whiplash & layout shifts */
+.skeleton-block {
+  background: var(--ink-raised);
+  border-radius: var(--radius-sm);
+  animation: pulse-soft 1.8s ease-in-out infinite;
+}
+
+.skeleton-text {
+  height: 1em;
+  background: var(--ink-raised);
+  border-radius: 4px;
+  animation: pulse-soft 1.8s ease-in-out infinite;
+  display: inline-block;
+}
+
+.skeleton-card {
+  background: var(--paper);
+  border-radius: var(--radius-card);
+  padding: var(--space-4);
+  margin-bottom: var(--space-4);
+  border: 1px solid var(--ink-raised);
+  animation: pulse-soft 1.8s ease-in-out infinite;
+}
+
+.recipe-skeleton {
+  min-height: 280px;
+  border-radius: var(--radius-card);
+  background: var(--paper-quiet);
+  opacity: 0.6;
+}
+
+.nearby-skeleton {
+  min-height: 200px;
+  border-radius: var(--radius-card);
+  background: var(--paper-quiet);
+  opacity: 0.6;
+}
+
+@keyframes pulse-soft {
+  0%, 100% {
+    opacity: 0.45;
+  }
+  50% {
+    opacity: 0.85;
+  }
+}
+
+/* Desktop Responsive Grid Layouts (≥960px) */
+@media (min-width: 960px) {
+  .result-grid {
+    display: grid;
+    grid-template-columns: 1.05fr 0.95fr;
+    gap: var(--space-5);
+    align-items: start;
+  }
+
+  .result-main-col {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+  }
+
+  .result-side-col {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+    position: sticky;
+    top: var(--space-4);
+  }
+
+  .dna-grid {
+    display: grid;
+    grid-template-columns: 1.1fr 0.9fr;
+    gap: var(--space-5);
+    align-items: start;
+  }
+
+  .dna-main-col,
+  .dna-side-col {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+  }
+
+  .explore-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-5);
+    align-items: start;
+  }
+
+  .explore-main-col,
+  .explore-side-col {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+  }
+
+  .quiz-options-stack:has(.quiz-option-desc) {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--space-3);
+  }
+}
+
+@media (min-width: 768px) {
+  .history-list,
+  .favorites-list-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-3);
   }
 }

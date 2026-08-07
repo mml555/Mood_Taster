@@ -195,9 +195,11 @@ export function ExploreDashboard() {
 
   if (!dna || !passport || !streak || !xp) {
     return (
-      <section className="explore">
+      <section className="explore" aria-busy="true" aria-label="Loading Explore">
         <p className="eyebrow">Explore</p>
-        <h1 className="dna-title">Loading…</h1>
+        <div className="skeleton-block" style={{ width: "160px", height: "32px", marginBottom: "16px" }} />
+        <div className="skeleton-card" style={{ height: "140px" }} />
+        <div className="skeleton-card" style={{ height: "180px" }} />
       </section>
     );
   }
@@ -217,136 +219,142 @@ export function ExploreDashboard() {
         {level}. {formatStreak(streak)}.
       </p>
 
-      <aside className="explore-block callout" aria-labelledby="quest-title">
-        <p className="callout-label" id="quest-title">
-          Today&apos;s quest
-        </p>
-        {quest ? (
-          <>
-            <h2 className="explore-block-title">{quest.title}</h2>
-            <p>{quest.description}</p>
-            {questNote ? <p className="explore-note">{questNote}</p> : null}
+      <div className="explore-grid">
+        <div className="explore-main-col">
+          <aside className="explore-block callout" aria-labelledby="quest-title">
+            <p className="callout-label" id="quest-title">
+              Today&apos;s quest
+            </p>
+            {quest ? (
+              <>
+                <h2 className="explore-block-title">{quest.title}</h2>
+                <p>{quest.description}</p>
+                {questNote ? <p className="explore-note">{questNote}</p> : null}
+                <div className="result-actions">
+                  {quest.status === "available" ? (
+                    <button
+                      type="button"
+                      className="cta"
+                      onClick={onStartQuest}
+                    >
+                      Start
+                    </button>
+                  ) : null}
+                  {quest.status === "active" || quest.status === "available" ? (
+                    <button
+                      type="button"
+                      className="cta-secondary"
+                      onClick={onCompleteQuest}
+                    >
+                      <Check size={20} strokeWidth={1.5} aria-hidden />
+                      I did it
+                    </button>
+                  ) : null}
+                  <Link className="cta-highlight" href="/taste">
+                    <Utensils size={20} strokeWidth={1.5} aria-hidden />
+                    Find a dish
+                  </Link>
+                </div>
+              </>
+            ) : (
+              <p>No quest right now. Rate a dish to unlock one.</p>
+            )}
+          </aside>
+
+          {develop ? (
+            <aside
+              className="explore-block callout"
+              aria-labelledby="develop-explore-title"
+            >
+              <p className="callout-label" id="develop-explore-title">
+                Develop your taste
+              </p>
+              <p>
+                You like{" "}
+                <strong>{labelDimension(develop.dimension)}</strong>. Start a
+                quest to live it.
+              </p>
+              <div className="result-actions">
+                <Link className="cta-highlight" href="#quest-title">
+                  Start a Taste Quest
+                </Link>
+              </div>
+            </aside>
+          ) : null}
+
+          <aside className="explore-block callout" aria-labelledby="qb-title">
+            <p className="callout-label" id="qb-title">
+              Quick Bite
+            </p>
+            {bite ? (
+              <>
+                <h2 className="explore-block-title">Which do you prefer?</h2>
+                {biteNote ? <p className="explore-note">{biteNote}</p> : null}
+                <ul className="quiz-options quiz-options-stack" role="list">
+                  <li>
+                    <button
+                      type="button"
+                      className="quiz-option"
+                      onClick={() => onQuickBite(bite.left.dimension)}
+                    >
+                      <span className="quiz-option-label">{bite.left.label}</span>
+                    </button>
+                  </li>
+                  <li>
+                    <button
+                      type="button"
+                      className="quiz-option"
+                      onClick={() => onQuickBite(bite.right.dimension)}
+                    >
+                      <span className="quiz-option-label">{bite.right.label}</span>
+                    </button>
+                  </li>
+                </ul>
+              </>
+            ) : (
+              <p>You&apos;re caught up. Rate dishes to open new gaps.</p>
+            )}
+          </aside>
+        </div>
+
+        <div className="explore-side-col">
+          <div className="explore-block">
+            <h2 className="dna-heading">Passport progress</h2>
+            <p className="dna-discovery">
+              <span className="dna-discovery-value">
+                {progress.explored}
+              </span>{" "}
+              / {progress.total} cuisines
+            </p>
+            {missing.length > 0 ? (
+              <p className="dna-lede">Still open: {missing.join(", ")}.</p>
+            ) : (
+              <p className="dna-lede">Every cuisine stamped. Nice.</p>
+            )}
             <div className="result-actions">
-              {quest.status === "available" ? (
-                <button
-                  type="button"
-                  className="cta"
-                  onClick={onStartQuest}
-                >
-                  Start
-                </button>
-              ) : null}
-              {quest.status === "active" || quest.status === "available" ? (
-                <button
-                  type="button"
-                  className="cta-secondary"
-                  onClick={onCompleteQuest}
-                >
-                  <Check size={20} strokeWidth={1.5} aria-hidden />
-                  I did it
-                </button>
-              ) : null}
-              <Link className="cta-highlight" href="/taste">
-                <Utensils size={20} strokeWidth={1.5} aria-hidden />
-                Find a dish
+              <Link className="cta-secondary" href="/passport">
+                Open passport
               </Link>
             </div>
-          </>
-        ) : (
-          <p>No quest right now. Rate a dish to unlock one.</p>
-        )}
-      </aside>
-
-      {develop ? (
-        <aside
-          className="explore-block callout"
-          aria-labelledby="develop-explore-title"
-        >
-          <p className="callout-label" id="develop-explore-title">
-            Develop your taste
-          </p>
-          <p>
-            You like{" "}
-            <strong>{labelDimension(develop.dimension)}</strong>. Start a
-            quest to live it.
-          </p>
-          <div className="result-actions">
-            <Link className="cta-highlight" href="#quest-title">
-              Start a Taste Quest
-            </Link>
           </div>
-        </aside>
-      ) : null}
 
-      <aside className="explore-block callout" aria-labelledby="qb-title">
-        <p className="callout-label" id="qb-title">
-          Quick Bite
-        </p>
-        {bite ? (
-          <>
-            <h2 className="explore-block-title">Which do you prefer?</h2>
-            {biteNote ? <p className="explore-note">{biteNote}</p> : null}
-            <ul className="quiz-options quiz-options-stack" role="list">
-              <li>
-                <button
-                  type="button"
-                  className="quiz-option"
-                  onClick={() => onQuickBite(bite.left.dimension)}
-                >
-                  <span className="quiz-option-label">{bite.left.label}</span>
-                </button>
-              </li>
-              <li>
-                <button
-                  type="button"
-                  className="quiz-option"
-                  onClick={() => onQuickBite(bite.right.dimension)}
-                >
-                  <span className="quiz-option-label">{bite.right.label}</span>
-                </button>
-              </li>
-            </ul>
-          </>
-        ) : (
-          <p>You&apos;re caught up. Rate dishes to open new gaps.</p>
-        )}
-      </aside>
-
-      <div className="explore-block">
-        <h2 className="dna-heading">Passport progress</h2>
-        <p className="dna-discovery">
-          <span className="dna-discovery-value">
-            {progress.explored}
-          </span>{" "}
-          / {progress.total} cuisines
-        </p>
-        {missing.length > 0 ? (
-          <p className="dna-lede">Still open: {missing.join(", ")}.</p>
-        ) : (
-          <p className="dna-lede">Every cuisine stamped. Nice.</p>
-        )}
-        <div className="result-actions">
-          <Link className="cta-secondary" href="/passport">
-            Open passport
-          </Link>
+          {achievements.length > 0 ? (
+            <div className="explore-block">
+              <h2 className="dna-heading">Recent achievements</h2>
+              <ul className="dna-list">
+                {achievements.map((line) => (
+                  <li key={line}>
+                    <span className="dna-dim">
+                      <Sparkles size={20} strokeWidth={1.5} aria-hidden />
+                      {line}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ) : null}
         </div>
       </div>
-
-      {achievements.length > 0 ? (
-        <div className="explore-block">
-          <h2 className="dna-heading">Recent achievements</h2>
-          <ul className="dna-list">
-            {achievements.map((line) => (
-              <li key={line}>
-                <span className="dna-dim">
-                  <Sparkles size={20} strokeWidth={1.5} aria-hidden />
-                  {line}
-                </span>
-              </li>
-            ))}
-          </ul>
-        </div>
-      ) : null}
     </section>
   );
 }

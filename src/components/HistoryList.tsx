@@ -90,9 +90,11 @@ export function HistoryList() {
 
   if (items === null || visible === null) {
     return (
-      <section className="favorites">
+      <section className="favorites" aria-busy="true" aria-label="Loading History">
         <p className="eyebrow">Past picks</p>
-        <h1 className="dna-title">Loading…</h1>
+        <div className="skeleton-block" style={{ width: "140px", height: "32px", marginBottom: "16px" }} />
+        <div className="skeleton-card" style={{ height: "80px" }} />
+        <div className="skeleton-card" style={{ height: "80px" }} />
       </section>
     );
   }
@@ -147,7 +149,7 @@ export function HistoryList() {
           Nothing in this filter. Try All.
         </p>
       ) : (
-        <ul className="favorites-list">
+        <ul className="favorites-list history-list">
           {visible.map(({ entry, name }) => {
             const when = formatWhen(entry.createdAt);
             const rated = ratingLabel(entry.rating);

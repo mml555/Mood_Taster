@@ -70,9 +70,11 @@ export function DnaDashboard() {
 
   if (!dna) {
     return (
-      <section className="dna">
+      <section className="dna" aria-busy="true" aria-label="Loading Taste DNA">
         <p className="eyebrow">Your Taste</p>
-        <h1 className="dna-title">Loading…</h1>
+        <div className="skeleton-block" style={{ width: "200px", height: "32px", marginBottom: "16px" }} />
+        <div className="skeleton-card" style={{ height: "120px" }} />
+        <div className="skeleton-card" style={{ height: "240px" }} />
       </section>
     );
   }
@@ -131,190 +133,194 @@ export function DnaDashboard() {
         <Sparkles size={16} strokeWidth={1.5} aria-hidden /> Your Stats
       </p>
       <h1 className="dna-title">Taste DNA</h1>
-      <div className="dna-meter" aria-label={`${discovery}% discovered`}>
-        <div
-          className={
-            discovery > 0 ? "dna-meter-fill has-tip" : "dna-meter-fill"
-          }
-          style={{ width: `${discovery}%` }}
-        />
-      </div>
-      <p className="dna-discovery">
-        <span className="dna-discovery-value">{discovery}%</span> discovered
-        {xp ? (
-          <>
-            {" "}
-            · <span className="dna-level">{overallTasteLabel(xp)}</span>
-          </>
-        ) : null}
-      </p>
-      {streak && streak.count > 0 ? (
-        <p className="dna-streak">{formatStreak(streak)}</p>
-      ) : null}
-      <p className="dna-lede">{lede}</p>
 
-      {leadDevelop ? (
-        <aside className="dna-develop callout" aria-labelledby="develop-title">
-          <p className="callout-label" id="develop-title">
-            Develop your taste
-          </p>
-          <p>
-            You like{" "}
-            <strong>{labelDimension(leadDevelop.dimension)}</strong>. Try it
-            next.
-          </p>
-          {develop.length > 1 ? (
-            <ul className="dna-develop-list">
-              {develop.slice(1).map(({ dimension }) => (
-                <li key={dimension}>{labelDimension(dimension)}</li>
-              ))}
-            </ul>
-          ) : null}
-          <div className="result-actions">
-            <Link className="cta-highlight" href="/explore">
-              Start a Taste Quest
-            </Link>
-            <Link className="cta-secondary" href="/taste">
-              <Utensils size={20} strokeWidth={1.5} aria-hidden />
-              Show me
-            </Link>
+      <div className="dna-grid">
+        <div className="dna-main-col">
+          <div className="dna-meter" aria-label={`${discovery}% discovered`}>
+            <div
+              className={
+                discovery > 0 ? "dna-meter-fill has-tip" : "dna-meter-fill"
+              }
+              style={{ width: `${discovery}%` }}
+            />
           </div>
-        </aside>
-      ) : null}
+          <p className="dna-discovery">
+            <span className="dna-discovery-value">{discovery}%</span> discovered
+            {xp ? (
+              <>
+                {" "}
+                · <span className="dna-level">{overallTasteLabel(xp)}</span>
+              </>
+            ) : null}
+          </p>
+          {streak && streak.count > 0 ? (
+            <p className="dna-streak">{formatStreak(streak)}</p>
+          ) : null}
+          <p className="dna-lede">{lede}</p>
 
-      {xp && DNA_DIMENSIONS.some((d) => xp.byDimension[d] > 0) ? (
-        <div className="dna-block">
-          <h2 className="dna-heading">Flavor XP</h2>
-          <ul className="dna-list">
-            {DNA_DIMENSIONS.filter((d) => xp.byDimension[d] > 0)
-              .sort((a, b) => xp.byDimension[b] - xp.byDimension[a])
-              .slice(0, 5)
-              .map((dimension) => (
-                <li key={dimension}>
-                  <span className="dna-dim">
-                    {labelDimension(dimension)}
-                  </span>
-                  <span className="dna-meta">
-                    {dimensionLevelLabel(xp.byDimension[dimension])} ·{" "}
-                    {xp.byDimension[dimension]} XP
-                  </span>
-                </li>
-              ))}
-          </ul>
-        </div>
-      ) : null}
+          {leadDevelop ? (
+            <aside className="dna-develop callout" aria-labelledby="develop-title">
+              <p className="callout-label" id="develop-title">
+                Develop your taste
+              </p>
+              <p>
+                You like{" "}
+                <strong>{labelDimension(leadDevelop.dimension)}</strong>. Try it
+                next.
+              </p>
+              {develop.length > 1 ? (
+                <ul className="dna-develop-list">
+                  {develop.slice(1).map(({ dimension }) => (
+                    <li key={dimension}>{labelDimension(dimension)}</li>
+                  ))}
+                </ul>
+              ) : null}
+              <div className="result-actions">
+                <Link className="cta-highlight" href="/explore">
+                  Start a Taste Quest
+                </Link>
+                <Link className="cta-secondary" href="/taste">
+                  <Utensils size={20} strokeWidth={1.5} aria-hidden />
+                  Show me
+                </Link>
+              </div>
+            </aside>
+          ) : null}
 
-      <section className="account-dietary" aria-labelledby="balance-title">
-        <ExploreBalanceControl />
-      </section>
-
-      {flavors.length > 0 ? (
-        <div className="dna-block">
-          <h2 className="dna-heading">Lived flavors</h2>
-          <ul className="dna-list">
-            {flavors.map(({ dimension, entry }) => {
-              const Icon = DNA_DIMENSION_ICONS[dimension];
-              return (
-                <li key={dimension}>
-                  <span className="dna-dim">
-                    {Icon ? (
-                      <span className="dna-dim-icon" aria-hidden>
-                        <Icon size={20} strokeWidth={1.5} />
+          {xp && DNA_DIMENSIONS.some((d) => xp.byDimension[d] > 0) ? (
+            <div className="dna-block">
+              <h2 className="dna-heading">Flavor XP</h2>
+              <ul className="dna-list">
+                {DNA_DIMENSIONS.filter((d) => xp.byDimension[d] > 0)
+                  .sort((a, b) => xp.byDimension[b] - xp.byDimension[a])
+                  .slice(0, 5)
+                  .map((dimension) => (
+                    <li key={dimension}>
+                      <span className="dna-dim">
+                        {labelDimension(dimension)}
                       </span>
-                    ) : null}
-                    {labelDimension(dimension)}
-                  </span>
-                  <span className="dna-meta">
-                    {Math.round(entry.score * 100)} · {entry.samples} tries
-                  </span>
-                </li>
-              );
-            })}
-          </ul>
-        </div>
-      ) : null}
-
-      {textures.length > 0 ? (
-        <div className="dna-block">
-          <h2 className="dna-heading">Lived textures</h2>
-          <ul className="dna-list">
-            {textures.map(({ dimension, entry }) => {
-              const Icon = DNA_DIMENSION_ICONS[dimension];
-              return (
-                <li key={dimension}>
-                  <span className="dna-dim">
-                    {Icon ? (
-                      <span className="dna-dim-icon" aria-hidden>
-                        <Icon size={20} strokeWidth={1.5} />
+                      <span className="dna-meta">
+                        {dimensionLevelLabel(xp.byDimension[dimension])} ·{" "}
+                        {xp.byDimension[dimension]} XP
                       </span>
-                    ) : null}
-                    {labelDimension(dimension)}
-                  </span>
-                  <span className="dna-meta">
-                    {Math.round(entry.score * 100)} · {entry.samples} tries
-                  </span>
-                </li>
-              );
-            })}
-          </ul>
-        </div>
-      ) : null}
+                    </li>
+                  ))}
+              </ul>
+            </div>
+          ) : null}
 
-      <div className="dna-block">
-        <h2 className="dna-heading">Preference vs experience</h2>
-        <ul className="dna-list">
-          {evidenced.map((dimension) => {
-            const pref = dna.prefs[dimension];
-            const exp = dna.experience[dimension];
-            const Icon = DNA_DIMENSION_ICONS[dimension];
-            return (
-              <li key={dimension}>
-                <span className="dna-dim">
-                  {Icon ? (
-                    <span className="dna-dim-icon" aria-hidden>
-                      <Icon size={20} strokeWidth={1.5} />
+          {flavors.length > 0 ? (
+            <div className="dna-block">
+              <h2 className="dna-heading">Lived flavors</h2>
+              <ul className="dna-list">
+                {flavors.map(({ dimension, entry }) => {
+                  const Icon = DNA_DIMENSION_ICONS[dimension];
+                  return (
+                    <li key={dimension}>
+                      <span className="dna-dim">
+                        {Icon ? (
+                          <span className="dna-dim-icon" aria-hidden>
+                            <Icon size={20} strokeWidth={1.5} />
+                          </span>
+                        ) : null}
+                        {labelDimension(dimension)}
+                      </span>
+                      <span className="dna-meta">
+                        {Math.round(entry.score * 100)} · {entry.samples} tries
+                      </span>
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
+          ) : null}
+
+          {textures.length > 0 ? (
+            <div className="dna-block">
+              <h2 className="dna-heading">Lived textures</h2>
+              <ul className="dna-list">
+                {textures.map(({ dimension, entry }) => {
+                  const Icon = DNA_DIMENSION_ICONS[dimension];
+                  return (
+                    <li key={dimension}>
+                      <span className="dna-dim">
+                        {Icon ? (
+                          <span className="dna-dim-icon" aria-hidden>
+                            <Icon size={20} strokeWidth={1.5} />
+                          </span>
+                        ) : null}
+                        {labelDimension(dimension)}
+                      </span>
+                      <span className="dna-meta">
+                        {Math.round(entry.score * 100)} · {entry.samples} tries
+                      </span>
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
+          ) : null}
+
+          <div className="dna-block">
+            <h2 className="dna-heading">Preference vs experience</h2>
+            <ul className="dna-list">
+              {evidenced.map((dimension) => {
+                const pref = dna.prefs[dimension];
+                const exp = dna.experience[dimension];
+                const Icon = DNA_DIMENSION_ICONS[dimension];
+                return (
+                  <li key={dimension}>
+                    <span className="dna-dim">
+                      {Icon ? (
+                        <span className="dna-dim-icon" aria-hidden>
+                          <Icon size={20} strokeWidth={1.5} />
+                        </span>
+                      ) : null}
+                      {labelDimension(dimension)}
                     </span>
-                  ) : null}
-                  {labelDimension(dimension)}
-                </span>
-                <span className="dna-meta">
-                  like{" "}
-                  {pref.samples > 0 ? Math.round(pref.score * 100) : "-"} ·
-                  lived{" "}
-                  {exp.samples > 0 ? Math.round(exp.score * 100) : "-"} ·{" "}
-                  {exp.samples} tries
-                </span>
-              </li>
-            );
-          })}
-        </ul>
-      </div>
+                    <span className="dna-meta">
+                      like{" "}
+                      {pref.samples > 0 ? Math.round(pref.score * 100) : "-"} ·
+                      lived{" "}
+                      {exp.samples > 0 ? Math.round(exp.score * 100) : "-"} ·{" "}
+                      {exp.samples} tries
+                    </span>
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+        </div>
 
-      <ProfileNudge context="dna" />
+        <div className="dna-side-col">
+          <section className="account-dietary" aria-labelledby="balance-title">
+            <ExploreBalanceControl />
+          </section>
 
-      <div className="result-actions">
-        <Link className="cta-secondary" href="/favorites">
-          <Heart size={18} strokeWidth={1.5} aria-hidden />
-          Favorites
-        </Link>
-      </div>
+          <ProfileNudge context="dna" />
 
-      <section className="account-dietary" aria-labelledby="diet-title">
-        <h2 id="diet-title" className="dietary-section-title">
-          Diet and allergies
-        </h2>
-        <DietaryPrefsEditor compact />
-      </section>
+          <section className="account-dietary" aria-labelledby="diet-title">
+            <h2 id="diet-title" className="dietary-section-title">
+              Diet and allergies
+            </h2>
+            <DietaryPrefsEditor compact />
+          </section>
 
-      <div className="result-actions">
-        <Link className="cta" href="/taste">
-          <RotateCcw size={18} strokeWidth={1.5} aria-hidden />
-          Try again
-        </Link>
-        <button type="button" className="reject-btn" onClick={onReset}>
-          <X size={16} strokeWidth={1.5} aria-hidden />
-          Reset
-        </button>
+          <div className="result-actions">
+            <Link className="cta-secondary" href="/favorites">
+              <Heart size={18} strokeWidth={1.5} aria-hidden />
+              Favorites
+            </Link>
+            <Link className="cta" href="/taste">
+              <RotateCcw size={18} strokeWidth={1.5} aria-hidden />
+              Try again
+            </Link>
+            <button type="button" className="reject-btn" onClick={onReset}>
+              <X size={16} strokeWidth={1.5} aria-hidden />
+              Reset
+            </button>
+          </div>
+        </div>
       </div>
     </section>
   );

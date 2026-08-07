@@ -51,9 +51,11 @@ export function FavoritesList() {
 
   if (items === null) {
     return (
-      <section className="favorites">
+      <section className="favorites" aria-busy="true" aria-label="Loading Saved">
         <p className="eyebrow">Saved</p>
-        <h1 className="dna-title">Loading…</h1>
+        <div className="skeleton-block" style={{ width: "120px", height: "32px", marginBottom: "16px" }} />
+        <div className="skeleton-card" style={{ height: "80px" }} />
+        <div className="skeleton-card" style={{ height: "80px" }} />
       </section>
     );
   }
@@ -87,7 +89,7 @@ export function FavoritesList() {
       <p className="dna-lede">
         Soft boost in matches. Never locks you into one dish.
       </p>
-      <ul className="favorites-list">
+      <ul className="favorites-list favorites-list-grid">
         {items.map((item) => (
           <li key={item.id} className="favorites-item">
             <div className="favorites-item-main">

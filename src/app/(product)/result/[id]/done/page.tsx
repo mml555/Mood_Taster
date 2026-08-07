@@ -1,6 +1,4 @@
 import { notFound } from "next/navigation";
-import { SiteHeader } from "@/components/SiteHeader";
-import { ProductBottomNav } from "@/components/ProductBottomNav";
 import { CompletionView } from "@/components/CompletionView";
 import { getFoodById } from "@/lib/catalog";
 
@@ -22,13 +20,5 @@ export default async function CompletionPage({ params }: PageProps) {
   const food = getFoodById(id);
   if (!food) notFound();
 
-  return (
-    <>
-      <SiteHeader current="result" />
-      <main className="product-main product-main-with-nav">
-        <CompletionView food={food} />
-      </main>
-      <ProductBottomNav current="taste" />
-    </>
-  );
+  return <CompletionView food={food} />;
 }

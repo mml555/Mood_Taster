@@ -1,6 +1,8 @@
+"use client";
+
 import Link from "next/link";
 import Image from "next/image";
-import { Clock, Compass, Heart, Sparkles, Utensils } from "lucide-react";
+import { LayoutDashboard, UserRound, Utensils } from "lucide-react";
 import { AuthNav } from "@/components/AuthNav";
 
 type SiteHeaderProps = {
@@ -19,17 +21,46 @@ type SiteHeaderProps = {
     | "legal";
 };
 
+const PRODUCT_LINKS = [
+  { id: "taste", href: "/taste", label: "Taste", Icon: Utensils },
+  { id: "stats", href: "/dna", label: "Stats", Icon: LayoutDashboard },
+  { id: "profile", href: "/account", label: "Profile", Icon: UserRound },
+] as const;
+
+function productActive(
+  current: SiteHeaderProps["current"],
+): "taste" | "stats" | "profile" | null {
+  if (current === "dna") return "stats";
+  if (current === "account") return "profile";
+  if (
+    current === "home" ||
+    current === "taste" ||
+    current === "result" ||
+    current === "explore" ||
+    current === "favorites" ||
+    current === "history"
+  ) {
+    return "taste";
+  }
+  return null;
+}
+
+/**
+ * Product chrome stays visually stable. Home skips the lockup (hero owns brand).
+ * Everywhere else: lockup + desktop product tabs + auth. Mobile tabs live in
+ * ProductBottomNav; header product links use .nav-tab and hide ≤720px.
+ */
 export function SiteHeader({ current = "home" }: SiteHeaderProps) {
-  const inLoop = current === "taste" || current === "result";
   const onHome = current === "home";
+  const onDocs =
+    current === "prd" ||
+    current === "strategy" ||
+    current === "brand" ||
+    current === "legal";
+  const active = productActive(current);
 
   return (
-    <header
-      className={
-        onHome ? "top top-home" : inLoop ? "top top-compact" : "top"
-      }
-    >
-      {/* Home hero already owns the brand mark; skip the lockup there. */}
+    <header className={onHome ? "top top-home" : "top top-compact"}>
       {!onHome ? (
         <Link className="mark" href="/">
           <Image
@@ -45,66 +76,33 @@ export function SiteHeader({ current = "home" }: SiteHeaderProps) {
       <nav aria-label="Primary">
         {onHome ? (
           <>
-            <Link className="nav-primary nav-with-icon nav-tab" href="/taste">
-              <Utensils size={16} strokeWidth={1.5} aria-hidden />
-              Start
-            </Link>
             <a className="nav-secondary" href="#how">
               How it works
             </a>
-            <Link className="nav-primary nav-with-icon nav-tab" href="/dna">
-              <Sparkles size={16} strokeWidth={1.5} aria-hidden />
-              <span className="nav-dna-label">DNA</span>
-            </Link>
-            <AuthNav current={current} />
+            <AuthNav current={current} compact />
           </>
-        ) : inLoop ? (
+        ) : onDocs ? (
           <>
-            <Link className="nav-primary nav-with-icon nav-tab" href="/dna">
-              <Sparkles size={16} strokeWidth={1.5} aria-hidden />
-              <span className="nav-dna-label">DNA</span>
+            <Link className="nav-primary nav-with-icon" href="/taste">
+              <Utensils size={16} strokeWidth={1.5} aria-hidden />
+              Taste
             </Link>
             <AuthNav current={current} compact />
           </>
         ) : (
           <>
-            <Link className="nav-primary nav-with-icon nav-tab" href="/taste">
-              <Utensils size={16} strokeWidth={1.5} aria-hidden />
-              Quiz
-            </Link>
-            <Link
-              className="nav-primary nav-with-icon nav-tab"
-              href="/explore"
-              aria-current={current === "explore" ? "page" : undefined}
-            >
-              <Compass size={16} strokeWidth={1.5} aria-hidden />
-              <span className="nav-dna-label">Explore</span>
-            </Link>
-            <Link
-              className="nav-primary nav-with-icon nav-tab"
-              href="/favorites"
-              aria-current={current === "favorites" ? "page" : undefined}
-            >
-              <Heart size={16} strokeWidth={1.5} aria-hidden />
-              <span className="nav-dna-label">Saved</span>
-            </Link>
-            <Link
-              className="nav-primary nav-with-icon nav-tab"
-              href="/history"
-              aria-current={current === "history" ? "page" : undefined}
-            >
-              <Clock size={16} strokeWidth={1.5} aria-hidden />
-              <span className="nav-dna-label">History</span>
-            </Link>
-            <Link
-              className="nav-primary nav-with-icon nav-tab"
-              href="/dna"
-              aria-current={current === "dna" ? "page" : undefined}
-            >
-              <Sparkles size={16} strokeWidth={1.5} aria-hidden />
-              <span className="nav-dna-label">DNA</span>
-            </Link>
-            <AuthNav current={current} />
+            {PRODUCT_LINKS.map(({ id, href, label, Icon }) => (
+              <Link
+                key={id}
+                className="nav-primary nav-with-icon nav-tab"
+                href={href}
+                aria-current={active === id ? "page" : undefined}
+              >
+                <Icon size={16} strokeWidth={1.5} aria-hidden />
+                <span className="nav-dna-label">{label}</span>
+              </Link>
+            ))}
+            <AuthNav current={current} compact />
           </>
         )}
       </nav>

@@ -77,16 +77,37 @@ import type {
   SessionState,
 } from "@/lib/taste-types";
 
+function RecipeSectionSkeleton() {
+  return (
+    <div className="recipe recipe-skeleton" aria-hidden>
+      <div className="skeleton-block" style={{ width: "80px", height: "20px", marginBottom: "12px" }} />
+      <div className="skeleton-block" style={{ width: "160px", height: "16px", marginBottom: "20px" }} />
+      <div className="skeleton-block" style={{ width: "100%", height: "40px", marginBottom: "16px" }} />
+      <div className="skeleton-block" style={{ width: "100%", height: "120px" }} />
+    </div>
+  );
+}
+
+function NearbySectionSkeleton() {
+  return (
+    <div className="nearby nearby-skeleton" aria-hidden>
+      <div className="skeleton-block" style={{ width: "80px", height: "20px", marginBottom: "12px" }} />
+      <div className="skeleton-block" style={{ width: "100%", height: "72px", marginBottom: "12px" }} />
+      <div className="skeleton-block" style={{ width: "100%", height: "72px" }} />
+    </div>
+  );
+}
+
 const RecipeSection = dynamic(
   () =>
     import("@/components/result/RecipeSection").then((m) => m.RecipeSection),
-  { ssr: false },
+  { ssr: false, loading: () => <RecipeSectionSkeleton /> },
 );
 
 const NearbySection = dynamic(
   () =>
     import("@/components/result/NearbySection").then((m) => m.NearbySection),
-  { ssr: false },
+  { ssr: false, loading: () => <NearbySectionSkeleton /> },
 );
 
 type ResultViewProps = {
@@ -139,6 +160,7 @@ export function ResultView({ food }: ResultViewProps) {
   const [rejectNoteText, setRejectNoteText] = useState("");
   const [adjusting, setAdjusting] = useState(false);
   const [adjustNote, setAdjustNote] = useState<string | null>(null);
+  const [leaving, setLeaving] = useState(false);
 
   const [dragging, setDragging] = useState(false);
   const [exitDir, setExitDir] = useState<"left" | "right" | null>(null);
@@ -626,6 +648,7 @@ export function ResultView({ food }: ResultViewProps) {
               ? formatDnaChangeLine(meaningful)
               : undefined,
         });
+        setLeaving(true);
         router.push(`/result/${food.id}/done`);
         return;
       }
@@ -644,9 +667,9 @@ export function ResultView({ food }: ResultViewProps) {
     [animateExitThen, food, goToNext, pendingRating, places, router],
   );
 
-  const rated = lastRating !== null || pendingRating !== null;
-  const showDone = lastRating === "nailed" || lastRating === "kinda";
-  const showFeedback = pendingRating !== null && lastRating === null;
+  const rated = lastRating !== null || pendingRating !== null || leaving;
+  const showFeedback =
+    !leaving && pendingRating !== null && lastRating === null;
 
   const toggleFeedbackTag = useCallback((id: string) => {
     setFeedbackTags((prev) => {
@@ -780,340 +803,343 @@ export function ResultView({ food }: ResultViewProps) {
 
   return (
     <section className="result">
-      <p className="eyebrow result-eyebrow">
-        {showDone
-          ? "Your pick"
-          : showFeedback
-            ? pendingRating === "nailed"
-              ? "What hit?"
-              : "What was off?"
-            : (adjustNote ??
-              (rejectNote
-                ? "Different one."
-                : "Your mood tastes like"))}
-      </p>
+      <div className="result-grid">
+        <div className="result-main-col">
+          <p className="eyebrow result-eyebrow">
+            {leaving
+              ? "Your pick"
+              : showFeedback
+                ? pendingRating === "nailed"
+                  ? "What hit?"
+                  : "What was off?"
+                : (adjustNote ??
+                  (rejectNote
+                    ? "Different one."
+                    : "Your mood tastes like"))}
+          </p>
 
-      <div
-        ref={cardRef}
-        className={cardClass}
-        onPointerDown={hasSession ? onPointerDown : undefined}
-        onPointerMove={hasSession ? onPointerMove : undefined}
-        onPointerUp={hasSession ? endDrag : undefined}
-        onPointerCancel={hasSession ? endDrag : undefined}
-        role={hasSession ? "group" : undefined}
-        aria-roledescription={hasSession ? "Swipeable recommendation" : undefined}
-        aria-label={
-          hasSession
-            ? `${food.name}. Swipe right to like, left for not for me.`
-            : undefined
-        }
-      >
-        <span className="result-card-hint result-card-hint-like" aria-hidden>
-          <span className="result-card-hint-mark">
-            <Heart size={18} strokeWidth={1.5} />
-          </span>{" "}
-          Like
-        </span>
-        <span className="result-card-hint result-card-hint-nope" aria-hidden>
-          <span className="result-card-hint-mark">
-            <X size={18} strokeWidth={1.5} />
-          </span>{" "}
-          Nope
-        </span>
+          <div
+            ref={cardRef}
+            className={cardClass}
+            onPointerDown={hasSession ? onPointerDown : undefined}
+            onPointerMove={hasSession ? onPointerMove : undefined}
+            onPointerUp={hasSession ? endDrag : undefined}
+            onPointerCancel={hasSession ? endDrag : undefined}
+            role={hasSession ? "group" : undefined}
+            aria-roledescription={hasSession ? "Swipeable recommendation" : undefined}
+            aria-label={
+              hasSession
+                ? `${food.name}. Swipe right to like, left for not for me.`
+                : undefined
+            }
+          >
+            <span className="result-card-hint result-card-hint-like" aria-hidden>
+              <span className="result-card-hint-mark">
+                <Heart size={18} strokeWidth={1.5} />
+              </span>{" "}
+              Like
+            </span>
+            <span className="result-card-hint result-card-hint-nope" aria-hidden>
+              <span className="result-card-hint-mark">
+                <X size={18} strokeWidth={1.5} />
+              </span>{" "}
+              Nope
+            </span>
 
-        <div className="result-media">
-          {imgFailed ? (
-            <div
-              className="result-fallback"
-              role="img"
-              aria-label={food.imageAlt}
-            >
-              <span>{food.name}</span>
+            <div className="result-media">
+              {imgFailed ? (
+                <div
+                  className="result-fallback"
+                  role="img"
+                  aria-label={food.imageAlt}
+                >
+                  <span>{food.name}</span>
+                </div>
+              ) : (
+                <Image
+                  key={food.image}
+                  src={food.image}
+                  alt={food.imageAlt}
+                  width={800}
+                  height={800}
+                  priority
+                  quality={75}
+                  sizes="(max-width: 720px) 92vw, 560px"
+                  className="result-image"
+                  onError={() => setImgFailed(true)}
+                  draggable={false}
+                />
+              )}
             </div>
+
+            <div className="result-card-body">
+              <h1 className="result-title">{food.name}</h1>
+
+              {intent === "recipe" && food.recipe ? (
+                <p className="result-venue">
+                  <ChefHat size={18} strokeWidth={1.5} aria-hidden />
+                  Home recipe
+                </p>
+              ) : intent === "restaurant" ? (
+                <p className="result-venue">
+                  <MapPin size={18} strokeWidth={1.5} aria-hidden />
+                  Nearby spot
+                </p>
+              ) : intent === "snack" ? (
+                <p className="result-venue">
+                  Quick bite
+                </p>
+              ) : null}
+
+              <p className="result-desc">{explanation}</p>
+
+              {attrs.length > 0 ? (
+                <ul className="result-attrs" aria-label="Matched attributes">
+                  {attrs.map((a) => (
+                    <li key={a}>{a}</li>
+                  ))}
+                </ul>
+              ) : null}
+
+              {intent === "recipe" && food.recipe ? (
+                <div className="result-meta">
+                  <div>
+                    <span className="result-meta-label">Prep time</span>
+                    <span className="result-meta-value">
+                      {food.recipe.timeMinutes} min
+                    </span>
+                  </div>
+                  <div className="result-meta-end">
+                    <span className="result-meta-label">Servings</span>
+                    <span className="result-meta-value">
+                      {food.recipe.servings}
+                    </span>
+                  </div>
+                </div>
+              ) : intent === "snack" ? (
+                <div className="result-meta">
+                  <div>
+                    <span className="result-meta-label">Time</span>
+                    <span className="result-meta-value">Ready now</span>
+                  </div>
+                </div>
+              ) : null}
+            </div>
+          </div>
+
+          {riff ? <p className="result-riff">{riff}</p> : null}
+
+          {!sessionReady ? null : hasSession ? (
+            <>
+              {leaving ? (
+                <div className="result-leaving" role="status" aria-live="polite">
+                  <p className="result-done-copy">One moment…</p>
+                </div>
+              ) : showFeedback && pendingRating ? (
+                <div className="feedback-panel" role="group" aria-label="Feedback">
+                  <p className="feedback-lead">
+                    {pendingRating === "nailed"
+                      ? "What hit? Tap any that fit."
+                      : "What was off? Tap any that fit."}
+                  </p>
+                  <ul className="feedback-chips">
+                    {(pendingRating === "nailed" ? HIT_TAGS : MISS_TAGS).map(
+                      (tag) => {
+                        const selected = feedbackTags.includes(tag.id);
+                        return (
+                          <li key={tag.id}>
+                            <button
+                              type="button"
+                              className={
+                                selected
+                                  ? "feedback-chip is-selected"
+                                  : "feedback-chip"
+                              }
+                              aria-pressed={selected}
+                              onClick={() => toggleFeedbackTag(tag.id)}
+                            >
+                              {tag.label}
+                            </button>
+                          </li>
+                        );
+                      },
+                    )}
+                  </ul>
+                  <div className="feedback-actions">
+                    <button
+                      type="button"
+                      className="cta"
+                      onClick={() => commitFeedback(feedbackTags)}
+                    >
+                      <Check size={18} strokeWidth={1.5} aria-hidden />
+                      Save
+                    </button>
+                    <button
+                      type="button"
+                      className="text-link"
+                      onClick={() => commitFeedback([])}
+                    >
+                      Skip
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <div className="reaction-dock">
+                  <div className="reaction-bar" role="group" aria-label="Reactions">
+                    <button
+                      type="button"
+                      className="reaction-btn reaction-btn-nope"
+                      onClick={onNope}
+                      disabled={adjusting || rated}
+                      aria-label="Not for me"
+                    >
+                      <span className="reaction-icon" aria-hidden>
+                        <X size={22} strokeWidth={1.5} />
+                      </span>
+                      <span className="reaction-label">Nope</span>
+                    </button>
+                    <button
+                      type="button"
+                      className="reaction-btn reaction-btn-again"
+                      onClick={onTryAgain}
+                      disabled={adjusting || rated}
+                      aria-label="Try again"
+                    >
+                      <span className="reaction-icon" aria-hidden>
+                        <RotateCcw size={22} strokeWidth={1.5} />
+                      </span>
+                      <span className="reaction-label">Again</span>
+                    </button>
+                    <button
+                      type="button"
+                      className="reaction-btn reaction-btn-like"
+                      onClick={onLike}
+                      disabled={rated || adjusting}
+                      aria-label={
+                        intent === "restaurant"
+                          ? "Let's go"
+                          : intent === "recipe"
+                            ? "Make this"
+                            : intent === "snack"
+                              ? "That's the one"
+                              : "I like it"
+                      }
+                    >
+                      <span className="reaction-icon" aria-hidden>
+                        <Heart size={22} strokeWidth={1.5} />
+                      </span>
+                      <span className="reaction-label">
+                        {intent === "restaurant"
+                          ? "Let's go"
+                          : intent === "recipe"
+                            ? "Make this"
+                            : intent === "snack"
+                              ? "That's the one"
+                              : "I like it"}
+                      </span>
+                    </button>
+                  </div>
+
+                  <div className="reaction-quiet">
+                    <button
+                      type="button"
+                      className="text-link"
+                      onClick={() => beginFeedback("kinda")}
+                      disabled={rated || adjusting}
+                    >
+                      Kinda
+                    </button>
+                    <button
+                      type="button"
+                      className="text-link"
+                      onClick={() => {
+                        setWhyOpen((v) => !v);
+                        setWhyPanelOpen(false);
+                      }}
+                      aria-expanded={whyOpen}
+                      disabled={adjusting || rated}
+                    >
+                      Why this?
+                    </button>
+                    <button
+                      type="button"
+                      className="text-link"
+                      onClick={() => {
+                        setWhyPanelOpen((v) => !v);
+                        setWhyOpen(false);
+                      }}
+                      aria-expanded={whyPanelOpen}
+                      disabled={adjusting || rated}
+                    >
+                      Off?
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {!leaving && !showFeedback && whyOpen ? (
+                <p className="result-why" id="result-why">
+                  {explanation}
+                </p>
+              ) : null}
+
+              {!leaving && !showFeedback && whyPanelOpen ? (
+                <div className="reject-panel">
+                  <label className="reject-label" htmlFor="reject-note">
+                    What&apos;s off?
+                  </label>
+                  <input
+                    id="reject-note"
+                    className="reject-input"
+                    type="text"
+                    autoComplete="off"
+                    enterKeyHint="go"
+                    maxLength={120}
+                    placeholder="too heavy, something colder"
+                    value={rejectNoteText}
+                    onChange={(e) => setRejectNoteText(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" && !adjusting) {
+                        void onRejectWithNote();
+                      }
+                    }}
+                  />
+                  <div className="reject-actions">
+                    <button
+                      type="button"
+                      className="cta"
+                      onClick={() => void onRejectWithNote()}
+                      disabled={adjusting}
+                    >
+                      <RotateCcw size={18} strokeWidth={1.5} aria-hidden />
+                      {adjusting ? "Rethinking" : "Try again"}
+                    </button>
+                    <button
+                      type="button"
+                      className="text-link"
+                      onClick={onReject}
+                      disabled={adjusting}
+                    >
+                      Skip
+                    </button>
+                  </div>
+                </div>
+              ) : null}
+            </>
           ) : (
-            <Image
-              key={food.image}
-              src={food.image}
-              alt={food.imageAlt}
-              width={800}
-              height={800}
-              priority
-              quality={75}
-              sizes="(max-width: 720px) 92vw, 560px"
-              className="result-image"
-              onError={() => setImgFailed(true)}
-              draggable={false}
-            />
+            <div className="result-actions">
+              <p className="result-desc">
+                Take the quiz to find something that fits how you feel.
+              </p>
+              <Link className="cta" href="/">
+                <Utensils size={20} strokeWidth={1.5} aria-hidden />
+                Hungry?
+              </Link>
+            </div>
           )}
         </div>
 
-        <div className="result-card-body">
-          <h1 className="result-title">{food.name}</h1>
-
-          {intent === "recipe" && food.recipe ? (
-            <p className="result-venue">
-              <ChefHat size={18} strokeWidth={1.5} aria-hidden />
-              Home recipe
-            </p>
-          ) : intent === "restaurant" ? (
-            <p className="result-venue">
-              <MapPin size={18} strokeWidth={1.5} aria-hidden />
-              Nearby spot
-            </p>
-          ) : intent === "snack" ? (
-            <p className="result-venue">
-              Quick bite
-            </p>
-          ) : null}
-
-          <p className="result-desc">{explanation}</p>
-
-          {attrs.length > 0 ? (
-            <ul className="result-attrs" aria-label="Matched attributes">
-              {attrs.map((a) => (
-                <li key={a}>{a}</li>
-              ))}
-            </ul>
-          ) : null}
-
-          {intent === "recipe" && food.recipe ? (
-            <div className="result-meta">
-              <div>
-                <span className="result-meta-label">Prep time</span>
-                <span className="result-meta-value">
-                  {food.recipe.timeMinutes} min
-                </span>
-              </div>
-              <div className="result-meta-end">
-                <span className="result-meta-label">Servings</span>
-                <span className="result-meta-value">
-                  {food.recipe.servings}
-                </span>
-              </div>
-            </div>
-          ) : intent === "snack" ? (
-            <div className="result-meta">
-              <div>
-                <span className="result-meta-label">Time</span>
-                <span className="result-meta-value">Ready now</span>
-              </div>
-            </div>
-          ) : null}
-        </div>
-      </div>
-
-      {riff ? <p className="result-riff">{riff}</p> : null}
-
-      {intent === "recipe" && food.recipe && hasSession && !showDone ? (
-        <p className="result-act-link">
-          <a href="#recipe">
-            <ChefHat size={16} strokeWidth={1.5} aria-hidden />
-            See recipe
-          </a>
-        </p>
-      ) : null}
-
-      {!sessionReady ? null : hasSession ? (
-        <>
-          {showDone ? (
-            <div className="result-done result-done-handoff" role="status" aria-live="polite">
-              <p className="result-done-mark" aria-hidden>
-                <Check size={28} strokeWidth={1.5} />
-              </p>
-              <h2 className="result-done-title">Decision made.</h2>
-              <p className="result-done-copy">One moment…</p>
-            </div>
-          ) : showFeedback && pendingRating ? (
-            <div className="feedback-panel" role="group" aria-label="Feedback">
-              <p className="feedback-lead">
-                {pendingRating === "nailed"
-                  ? "What hit? Tap any that fit."
-                  : "What was off? Tap any that fit."}
-              </p>
-              <ul className="feedback-chips">
-                {(pendingRating === "nailed" ? HIT_TAGS : MISS_TAGS).map(
-                  (tag) => {
-                    const selected = feedbackTags.includes(tag.id);
-                    return (
-                      <li key={tag.id}>
-                        <button
-                          type="button"
-                          className={
-                            selected
-                              ? "feedback-chip is-selected"
-                              : "feedback-chip"
-                          }
-                          aria-pressed={selected}
-                          onClick={() => toggleFeedbackTag(tag.id)}
-                        >
-                          {tag.label}
-                        </button>
-                      </li>
-                    );
-                  },
-                )}
-              </ul>
-              <div className="feedback-actions">
-                <button
-                  type="button"
-                  className="cta"
-                  onClick={() => commitFeedback(feedbackTags)}
-                >
-                  <Check size={18} strokeWidth={1.5} aria-hidden />
-                  Save
-                </button>
-                <button
-                  type="button"
-                  className="text-link"
-                  onClick={() => commitFeedback([])}
-                >
-                  Skip
-                </button>
-              </div>
-            </div>
-          ) : (
-            <div className="reaction-dock">
-              <div className="reaction-bar" role="group" aria-label="Reactions">
-                <button
-                  type="button"
-                  className="reaction-btn reaction-btn-nope"
-                  onClick={onNope}
-                  disabled={adjusting || rated}
-                  aria-label="Not for me"
-                >
-                  <span className="reaction-icon" aria-hidden>
-                    <X size={22} strokeWidth={1.5} />
-                  </span>
-                  <span className="reaction-label">Nope</span>
-                </button>
-                <button
-                  type="button"
-                  className="reaction-btn reaction-btn-again"
-                  onClick={onTryAgain}
-                  disabled={adjusting || rated}
-                  aria-label="Try again"
-                >
-                  <span className="reaction-icon" aria-hidden>
-                    <RotateCcw size={22} strokeWidth={1.5} />
-                  </span>
-                  <span className="reaction-label">Again</span>
-                </button>
-                <button
-                  type="button"
-                  className="reaction-btn reaction-btn-like"
-                  onClick={onLike}
-                  disabled={rated || adjusting}
-                  aria-label={
-                    intent === "restaurant"
-                      ? "Let's go"
-                      : intent === "recipe"
-                        ? "Make this"
-                        : intent === "snack"
-                          ? "That's the one"
-                          : "I like it"
-                  }
-                >
-                  <span className="reaction-icon" aria-hidden>
-                    <Heart size={22} strokeWidth={1.5} />
-                  </span>
-                  <span className="reaction-label">
-                    {intent === "restaurant"
-                      ? "Let's go"
-                      : intent === "recipe"
-                        ? "Make this"
-                        : intent === "snack"
-                          ? "That's the one"
-                          : "I like it"}
-                  </span>
-                </button>
-              </div>
-
-              <div className="reaction-quiet">
-                <button
-                  type="button"
-                  className="text-link"
-                  onClick={() => beginFeedback("kinda")}
-                  disabled={rated || adjusting}
-                >
-                  Kinda
-                </button>
-                <button
-                  type="button"
-                  className="text-link"
-                  onClick={() => {
-                    setWhyOpen((v) => !v);
-                    setWhyPanelOpen(false);
-                  }}
-                  aria-expanded={whyOpen}
-                  disabled={adjusting || rated}
-                >
-                  Why this?
-                </button>
-                <button
-                  type="button"
-                  className="text-link"
-                  onClick={() => {
-                    setWhyPanelOpen((v) => !v);
-                    setWhyOpen(false);
-                  }}
-                  aria-expanded={whyPanelOpen}
-                  disabled={adjusting || rated}
-                >
-                  Off?
-                </button>
-              </div>
-            </div>
-          )}
-
-          {!showDone && !showFeedback && whyOpen ? (
-            <p className="result-why" id="result-why">
-              {explanation}
-            </p>
-          ) : null}
-
-          {!showDone && !showFeedback && whyPanelOpen ? (
-            <div className="reject-panel">
-              <label className="reject-label" htmlFor="reject-note">
-                What&apos;s off?
-              </label>
-              <input
-                id="reject-note"
-                className="reject-input"
-                type="text"
-                autoComplete="off"
-                enterKeyHint="go"
-                maxLength={120}
-                placeholder="too heavy, something colder"
-                value={rejectNoteText}
-                onChange={(e) => setRejectNoteText(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" && !adjusting) {
-                    void onRejectWithNote();
-                  }
-                }}
-              />
-              <div className="reject-actions">
-                <button
-                  type="button"
-                  className="cta"
-                  onClick={() => void onRejectWithNote()}
-                  disabled={adjusting}
-                >
-                  <RotateCcw size={18} strokeWidth={1.5} aria-hidden />
-                  {adjusting ? "Rethinking" : "Try again"}
-                </button>
-                <button
-                  type="button"
-                  className="text-link"
-                  onClick={onReject}
-                  disabled={adjusting}
-                >
-                  Skip
-                </button>
-              </div>
-            </div>
-          ) : null}
-
+        <div className="result-side-col">
           {intent === "recipe" ? (
             food.recipe ? (
               <RecipeSection
@@ -1131,7 +1157,7 @@ export function ResultView({ food }: ResultViewProps) {
                 <p className="recipe-missing">
                   No recipe for this one. Try again for another pick.
                 </p>
-                {!showDone ? (
+                {!leaving ? (
                   <button
                     type="button"
                     className="cta-secondary"
@@ -1154,19 +1180,9 @@ export function ResultView({ food }: ResultViewProps) {
             />
           ) : null}
 
-          {showDone ? null : <ProfileNudge context="result" />}
-        </>
-      ) : (
-        <div className="result-actions">
-          <p className="result-desc">
-            Take the quiz to find something that fits how you feel.
-          </p>
-          <Link className="cta" href="/">
-            <Utensils size={20} strokeWidth={1.5} aria-hidden />
-            Hungry?
-          </Link>
+          {leaving ? null : <ProfileNudge context="result" />}
         </div>
-      )}
+      </div>
     </section>
   );
 }

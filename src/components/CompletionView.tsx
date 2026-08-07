@@ -50,19 +50,34 @@ function primaryCta(
 }
 
 export function CompletionView({ food }: { food: Food }) {
-  const [intent, setIntent] = useState<Intent | null>(null);
-  const [levelLabel, setLevelLabel] = useState<string | null>(null);
-  const [deltasLine, setDeltasLine] = useState<string | null>(null);
+  // One piece of state, not three. These values are read together in a single
+  // pass and only ever change together, so splitting them meant three setState
+  // calls and three renders for what is one update.
+  const [session, setSession] = useState<{
+    intent: Intent | null;
+    levelLabel: string | null;
+    deltasLine: string | null;
+  }>({ intent: null, levelLabel: null, deltasLine: null });
+
   const [shareNote, setShareNote] = useState<string | null>(null);
 
   useEffect(() => {
-    const session = readSession();
-    setIntent(session?.answers.intent ?? null);
-    const meta = readDoneMeta(food.id);
-    if (meta?.levelLabel) setLevelLabel(meta.levelLabel);
-    if (meta?.deltasLine) setDeltasLine(meta.deltasLine);
+    // Reads localStorage, which does not exist during the server render, so
+    // this cannot move into a lazy useState initializer without breaking
+    // hydration. clearDoneMeta() is a genuine side effect on that store, which
+    // also rules out useSyncExternalStore (snapshots have to stay pure). An
+    // effect is the correct home for it; the rule's cascading-render concern is
+    // answered by the single setState above.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setSession({
+      intent: readSession()?.answers.intent ?? null,
+      levelLabel: readDoneMeta(food.id)?.levelLabel ?? null,
+      deltasLine: readDoneMeta(food.id)?.deltasLine ?? null,
+    });
     clearDoneMeta();
   }, [food.id]);
+
+  const { intent, levelLabel, deltasLine } = session;
 
   const cta = primaryCta(intent, food);
   const subtitle = intentSubtitle(intent, food);

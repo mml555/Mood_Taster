@@ -1,6 +1,6 @@
 "use client";
 
-import { Check, ChefHat, Clock, Copy, Heart, Plus } from "lucide-react";
+import { Bookmark, Check, ChefHat, Clock, Copy } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { ANALYTICS_EVENTS, track } from "@/lib/analytics";
 import {
@@ -112,11 +112,12 @@ export function RecipeSection({
           onClick={onToggleSave}
           aria-pressed={saved}
         >
-          {saved ? (
-            <Heart size={18} strokeWidth={1.5} aria-hidden />
-          ) : (
-            <Plus size={18} strokeWidth={1.5} aria-hidden />
-          )}
+          <Bookmark
+            size={18}
+            strokeWidth={1.5}
+            fill={saved ? "currentColor" : "none"}
+            aria-hidden
+          />
           {saved ? "Saved" : "Save"}
         </button>
       </div>
