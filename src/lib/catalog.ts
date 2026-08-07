@@ -7,9 +7,24 @@ import type { Food } from "./taste-types";
  * Client ranking must import RANK_FOODS from catalog-data, not this module.
  */
 export const CATALOG: Food[] = RANK_FOODS.map((food) => {
-  const { hasRecipe, ...rest } = food;
-  const recipe = RECIPES[food.id];
-  return recipe ? { ...rest, recipe } : { ...rest };
+  const recipe = food.hasRecipe ? RECIPES[food.id] : undefined;
+  return {
+    id: food.id,
+    name: food.name,
+    description: food.description,
+    flavorTags: food.flavorTags,
+    textureTags: food.textureTags,
+    heaviness: food.heaviness,
+    temperature: food.temperature,
+    adventurousness: food.adventurousness,
+    dietaryTags: food.dietaryTags,
+    image: food.image,
+    imageAlt: food.imageAlt,
+    imageCredit: food.imageCredit,
+    reasonTemplate: food.reasonTemplate,
+    ...(food.snack ? { snack: true as const } : {}),
+    ...(recipe ? { recipe } : {}),
+  };
 });
 
 export function getFoodById(id: string): Food | undefined {

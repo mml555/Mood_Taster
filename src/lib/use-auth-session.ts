@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useSyncExternalStore } from "react";
 import { createClient, isSupabaseConfigured } from "@/lib/supabase/client";
 
 export type AuthSessionState =
@@ -8,15 +8,15 @@ export type AuthSessionState =
   | { status: "guest" }
   | { status: "user"; username: string | null };
 
-type Listener = (state: AuthSessionState) => void;
+type Listener = () => void;
 
 let shared: AuthSessionState = { status: "loading" };
 let started = false;
-let listeners = new Set<Listener>();
+const listeners = new Set<Listener>();
 
 function emit(next: AuthSessionState) {
   shared = next;
-  for (const listener of listeners) listener(next);
+  for (const listener of listeners) listener();
 }
 
 function startAuthWatch() {
@@ -69,20 +69,25 @@ function startAuthWatch() {
   });
 }
 
+function subscribe(onStoreChange: Listener): () => void {
+  startAuthWatch();
+  listeners.add(onStoreChange);
+  return () => {
+    listeners.delete(onStoreChange);
+  };
+}
+
+function getSnapshot(): AuthSessionState {
+  return shared;
+}
+
+function getServerSnapshot(): AuthSessionState {
+  return { status: "loading" };
+}
+
 /**
  * One shared getUser + profile lookup for AuthNav, ProfileNudge, and friends.
  */
 export function useAuthSession(): AuthSessionState {
-  const [state, setState] = useState<AuthSessionState>(shared);
-
-  useEffect(() => {
-    startAuthWatch();
-    setState(shared);
-    listeners.add(setState);
-    return () => {
-      listeners.delete(setState);
-    };
-  }, []);
-
-  return state;
+  return useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
 }

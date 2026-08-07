@@ -16,10 +16,12 @@ Tickets are ordered **P0 → P2**. Each ticket names the **live route or module*
 | — | Quiz (Eat out / Cook + 4 axes) | `/taste` |
 | — | Result + reject + rate | `/result/[id]` |
 | — | Places nearby | `/api/places` + result Eat out |
-| — | Catalog recipes | `catalog.ts` + Cook result |
+| — | Catalog recipes | `catalog.ts` + `recipes.ts` + Cook result |
+| — | Slim rank catalog | `catalog-data.ts` + `engine.ts` |
 | — | Local Taste DNA | `/dna` + `dna.ts` |
 | — | Optional accounts + DNA sync | `/signup`, `/login`, `/account`, `/api/dna` |
 | — | Deterministic rank | `engine.ts` |
+| — | Unit tests (rank / DNA) | `npm test` (vitest) |
 
 ---
 
@@ -140,12 +142,12 @@ UI for dietary restrictions, disliked foods, default location. Clear history. De
 
 ---
 
-### P1-5 · Favorites (soft influence)
-**Routes:** `/result/[id]`, `/dna` or `/history`  
-**Modules:** `engine.ts`  
-**PRD:** §53  
+### P1-5 · Favorites (soft influence) — shipped (foods)
+**Routes:** `/result/[id]`, `/favorites`, `/dna`  
+**Modules:** `favorites.ts`, `favorites-sync.ts`, `engine.ts`, `/api/favorites`  
+**PRD:** §18, §53  
 
-Save food / place / recipe. Soft boost in rank; never dominate. Cap influence.
+Save food (incl. recipes) locally + cloud when authed. List at `/favorites`. Soft boost `+0.05` in `rank()` (novelty-sized). Copy recipe to clipboard on cook results. Place favorites still open.
 
 **Done when:** Favorite appears in a list and slightly affects rank without locking the catalog to that food.
 

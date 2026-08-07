@@ -3,6 +3,7 @@
 import { Check, ChefHat, Clock, Copy, Heart } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import {
+  FAVORITES_KEY,
   formatRecipeText,
   isFavorite,
   readFavorites,
@@ -58,7 +59,7 @@ export function RecipeSection({
   // Keep localStorage as source of truth if another tab toggles.
   useEffect(() => {
     function onStorage(e: StorageEvent) {
-      if (e.key !== "mood-taster-favorites") return;
+      if (e.key !== FAVORITES_KEY) return;
       setSaved(isFavorite(foodId, readFavorites()));
     }
     window.addEventListener("storage", onStorage);

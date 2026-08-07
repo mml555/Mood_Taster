@@ -227,8 +227,6 @@ export function ResultView({ food }: ResultViewProps) {
   // Places only for Go out. Cook shows the recipe. Snack and no-clue stay dish-first.
   useEffect(() => {
     if (intent !== "restaurant") {
-      setPlaces([]);
-      setPlacesState("fallback");
       return;
     }
 
