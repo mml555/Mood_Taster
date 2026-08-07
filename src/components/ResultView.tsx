@@ -780,9 +780,9 @@ export function ResultView({ food }: ResultViewProps) {
 
               <p
                 className={
-                  polished ? "result-desc is-polished" : "result-desc"
+                  swappedWhy ? "result-desc is-polished" : "result-desc"
                 }
-                key={polished ? "polished" : "base"}
+                key={swappedWhy ? "polished" : "base"}
               >
                 {explanation}
               </p>
