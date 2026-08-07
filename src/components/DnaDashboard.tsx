@@ -11,6 +11,7 @@ import {
   strongestDimensions,
 } from "@/lib/dna";
 import { loadDnaForUser, resetDnaEverywhere } from "@/lib/dna-sync";
+import { DietaryPrefsEditor } from "@/components/DietaryPrefsEditor";
 import { ProfileNudge } from "@/components/ProfileNudge";
 import { DNA_DIMENSION_ICONS } from "@/lib/mood-icons";
 import { createClient, isSupabaseConfigured } from "@/lib/supabase/client";
@@ -189,6 +190,13 @@ export function DnaDashboard() {
       </div>
 
       <ProfileNudge context="dna" />
+
+      <section className="account-dietary" aria-labelledby="diet-title">
+        <h2 id="diet-title" className="dietary-section-title">
+          Diet and allergies
+        </h2>
+        <DietaryPrefsEditor compact />
+      </section>
 
       <div className="result-actions">
         <Link className="cta" href="/taste">

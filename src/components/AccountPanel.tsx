@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
+import { DietaryPrefsEditor } from "@/components/DietaryPrefsEditor";
 import { createClient, isSupabaseConfigured } from "@/lib/supabase/client";
 
 type ProfileState = {
@@ -80,6 +81,13 @@ export function AccountPanel() {
           <dd>{profile.email ?? "—"}</dd>
         </div>
       </dl>
+
+      <section className="account-dietary" aria-labelledby="diet-title">
+        <h2 id="diet-title" className="dietary-section-title">
+          Diet and allergies
+        </h2>
+        <DietaryPrefsEditor />
+      </section>
 
       <div className="result-actions">
         <Link className="cta" href="/dna">

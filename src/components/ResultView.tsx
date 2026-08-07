@@ -25,6 +25,7 @@ import {
 import { persistDna } from "@/lib/dna-sync";
 import { ProfileNudge } from "@/components/ProfileNudge";
 import type { PlacesState } from "@/components/result/NearbySection";
+import { readDietary } from "@/lib/dietary";
 import { nextAfterReject, rank } from "@/lib/engine";
 import { capitalize } from "@/lib/explain";
 import {
@@ -972,7 +973,7 @@ function applySessionView(
   setExplanation: (s: string) => void,
   setAttrs: (a: string[]) => void,
 ) {
-  const rec = rank(session.answers, dna, session);
+  const rec = rank(session.answers, dna, session, readDietary());
   const match =
     rec.primary.food.id === food.id
       ? rec.primary

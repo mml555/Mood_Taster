@@ -1665,6 +1665,45 @@ button {
   margin-top: var(--space-4);
 }
 
+.dietary-prefs {
+  margin-top: var(--space-3);
+}
+
+.dietary-section-title {
+  margin: var(--space-5) 0 var(--space-2);
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.dietary-heading {
+  margin: var(--space-4) 0 var(--space-2);
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--paper-muted);
+}
+
+.dietary-note {
+  margin: 0;
+  color: var(--paper-muted);
+  font-size: 0.9rem;
+  max-width: 28rem;
+}
+
+.dietary-saved {
+  margin: var(--space-3) 0 0;
+  color: var(--ink);
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.account-dietary {
+  margin-top: var(--space-4);
+}
+
 .feedback-btn {
   display: inline-flex;
   align-items: center;
@@ -2482,12 +2521,6 @@ button {
 
   .foot-meta {
     line-height: 1.7;
-  }
-
-  /* Eight links on one wrapped line need vertical room to be tappable. */
-  .foot-meta a {
-    display: inline-block;
-    padding: 0.3rem 0;
   }
 
   .product-main {

@@ -68,13 +68,12 @@ Done screen shows `Your Taste DNA changed. Spicy ↑ …`.
 
 ---
 
-### P0-5 · Dietary hard constraints
-**Routes:** `/account` (or `/profile`), quiz, `engine.ts`  
+### P0-5 · Dietary hard constraints · done
+**Routes:** `/account`, `/dna`, quiz, `engine.ts`  
 **PRD:** §26, §56, §70  
 
-Distinguish preference vs safety. Hard constraints (allergies, vegan/vegetarian, etc.) never overridden by novelty. Apply in rank as hard filters. Clear copy that restaurant data cannot guarantee allergens.
-
-**Done when:** A configured allergen/restriction never appears in primary or alternate recommendations from the catalog.
+Local diet + allergen prefs. Hard-filtered in `rank()` / `/api/match`. Empty
+pool returns a recovery screen. Copy notes menus are not medical guarantees.
 
 ---
 

@@ -58,6 +58,10 @@ export function writeDietary(prefs: DietaryPrefs): void {
   localStorage.setItem(DIETARY_KEY, JSON.stringify(prefs));
 }
 
+export function hasDietaryConstraints(prefs: DietaryPrefs): boolean {
+  return prefs.diets.length > 0 || prefs.allergens.length > 0;
+}
+
 export function parseDietary(raw: unknown): DietaryPrefs {
   if (typeof raw !== "object" || raw === null) return EMPTY_DIETARY;
   const src = raw as Record<string, unknown>;
