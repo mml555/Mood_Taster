@@ -13,8 +13,8 @@ Match how you feel to what you should taste.
 A mood → match product with optional accounts:
 
 1. **Home** (`/`) asks "Hungry?" and starts the quiz
-2. **Quiz** (`/taste`) asks four one-tap questions (flavor, texture, heaviness, adventure)
-3. **Result** (`/result/[id]`) shows one specific dish, why it fits, feedback, and "Not feeling it"
+2. **Quiz** (`/taste`) starts with Eat out or Cook, then four craving taps (flavor, texture, heaviness, adventure)
+3. **Result** (`/result/[id]`) shows one dish and a why. Eat out shows nearby places. Cook shows ingredients and steps
 4. **Taste DNA** (`/dna`) shows a preference profile that updates from ratings
 5. **Accounts** (`/signup`, `/login`, `/account`) via Supabase: username + email + password, cloud-synced Taste DNA
 
@@ -58,7 +58,7 @@ Snack lane, live menus, delivery booking, native apps, social features.
 
 ## What comes next
 
-Restaurant act paths, richer profile prefs, and optional AI polish for explanations.
+Richer profile prefs, snack lane later, and optional AI polish for explanations.
 
 ## Getting started
 

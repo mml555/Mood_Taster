@@ -7,13 +7,12 @@ Scope: one night, nine tickets, four routes, no backend
 
 ## 1. What we are shipping
 
-Mood Taster asks four one-tap questions about what you are craving and returns one specific
+Mood Taster asks Eat out or Cook, then four craving taps, and returns one specific
 dish, not a category and not a menu. You can reject it and get another without redoing the
 quiz. Rating the result updates a local Taste DNA profile that visibly changes the next
 recommendation.
 
-Everything runs in the browser. No accounts, no database, no restaurant or delivery
-integration.
+Eat out shows nearby places. Cook shows ingredients and steps from the catalog.
 
 ### The judged demo (three minute budget)
 
@@ -42,7 +41,7 @@ settled. Raise an objection before you start, not in a PR.
 | Tailwind, deep purple, poppy yellow, large rounded controls | Brand Guide v1 without Tailwind: Ghost White / Indigo / Gold, CSS variables, rounded cards and buttons | `/brand` and `.cursor/rules/design-system.mdc` are source of truth |
 | "Create the Next.js application" | It already exists (Next 16, React 19, TypeScript). Ticket 1 shrinks to stubbing four routes and confirming the deploy | Repo state |
 | Homepage is the marketing hero | `/` becomes the app entry ("Hungry?"). `/prd` and `/strategy` stay reachable from the footer | Saves a tap in a three minute demo |
-| `PRD.md` lists Taste DNA as out of scope | `PRD.md` is knowingly left stale. Time goes to code | Deliberate call, noted here so nobody "fixes" it mid build |
+| Early Ship Night tickets vs later PRD | `PRD.md` v1.0 + `BACKLOG.md` are the product target; this file remains the Ship Night build record | Post-demo work is ticketed in BACKLOG, not by rewriting these tickets |
 | "No external AI is required for the core flow" | Preserved exactly. AI is an enhancement layer and never a dependency | Ticket 4 |
 
 **Dropped, do not build:** the three lane snack path (Grab a snack), PostHog
@@ -827,6 +826,6 @@ rejection sinking, and the bound on a single rating's effect. It is the safest t
    an already-good sentence. Somebody should confirm the cost of a night of team testing plus
    judging is acceptable, and decide whether it stays on for the demo or is a nice-to-have that
    gets switched off by unsetting four variables.
-3. `PRD.md` stays stale by choice. It currently lists Taste DNA as out of scope and describes a
-   three lane flow that we are not building. `/prd` is publicly linked.
+3. Post-Ship Night product work is tracked in `BACKLOG.md` (P0→P2) against `PRD.md` v1.0.
+   `/prd` mirrors the PRD. This BUILD file stays the Ship Night record.
 4. Git commits, making the repository public, and the Vercel deploy need an explicit go ahead.

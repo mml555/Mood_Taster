@@ -63,6 +63,13 @@ function main() {
   const withRecipe = CATALOG.filter((f) => f.recipe != null).length;
   console.log(`Catalog size: ${CATALOG.length} (${withRecipe} with recipes)`);
 
+  if (withRecipe !== CATALOG.length) {
+    console.error(
+      `FAIL: ${CATALOG.length - withRecipe} dishes missing recipes (Cook needs full coverage)`,
+    );
+    process.exit(1);
+  }
+
   let failed = false;
   for (const intent of INTENTS) {
     for (const c of casesForIntent(intent)) {

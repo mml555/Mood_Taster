@@ -4,9 +4,10 @@ Match how you feel to what you should taste. Mood first, menus second.
 
 ## Product
 
-- Flow: craving quiz → one dish → act (rate / reject / swipe) → Taste DNA
-- Client-only for Ship Night: no auth, no DB, no Places
+- Flow: Eat out or Cook → craving quiz → one dish → act → Taste DNA
+- Eat out: nearby places. Cook: catalog recipes (ingredients + steps)
 - Specific dishes only, never cuisine categories
+- Optional accounts (Supabase); guests work without an account
 
 ## Design
 

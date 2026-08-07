@@ -24,10 +24,12 @@ const RULES = [
   '"why": one sentence saying why this dish fits what the person asked for.',
   "Speak to them as 'you'. Name the qualities they asked for.",
   "Never mention scores, matching, or algorithms. Under 25 words.",
-  '"riff": one sentence with a practical tip: what to pair with it, how to',
-  "order it, or what makes a good one. Concrete, never generic praise.",
+  '"riff": one sentence with a practical tip. If intent is recipe, tip how to',
+  "cook or shop for it. If intent is restaurant, tip how to order or what to",
+  "look for. Concrete, never generic praise.",
   "Do not repeat the why. Do not use the word 'perfect'. Under 20 words.",
   "No em dashes anywhere.",
+  "Respect answers.intent: restaurant means eat out, recipe means cook at home.",
 ].join(" ");
 
 export async function POST(request: Request) {

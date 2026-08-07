@@ -98,6 +98,18 @@ button {
   font: inherit;
 }
 
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
 /* Accessibility exception: keyboard focus must stay visible. */
 :focus-visible {
   outline: 2px solid var(--accent);
@@ -966,11 +978,33 @@ button {
 }
 
 .quiz-progress {
-  margin: 0 0 var(--space-3);
-  color: var(--paper-muted);
-  font-size: 0.8rem;
-  font-weight: 500;
-  letter-spacing: 0.06em;
+  margin: 0 0 var(--space-4);
+}
+
+.quiz-dots {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.quiz-dot {
+  width: 0.55rem;
+  height: 0.55rem;
+  border-radius: var(--radius-pill);
+  background: var(--ink-soft);
+  transition: background 0.2s ease, transform 0.2s var(--ease), width 0.2s var(--ease);
+}
+
+.quiz-dot.is-done {
+  background: var(--ink);
+}
+
+.quiz-dot.is-current {
+  width: 1.35rem;
+  background: var(--accent);
 }
 
 .quiz-question-block {
@@ -1011,25 +1045,62 @@ button {
   gap: var(--space-2);
 }
 
+.quiz-options-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-3);
+}
+
+.quiz-options-stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
 .quiz-option {
   display: flex;
   align-items: center;
   gap: var(--space-3);
   width: 100%;
+  height: 100%;
   text-align: left;
   min-height: 3.5rem;
   padding: 0.85rem 1rem;
   background: var(--ink-raised);
   color: var(--ink);
   font-family: var(--font-display);
-  font-size: clamp(1.1rem, 3.5vw, 1.35rem);
+  font-size: clamp(1.05rem, 3.5vw, 1.3rem);
   font-weight: 400;
   cursor: pointer;
   border: 0;
   border-radius: var(--radius-card);
-  transition: background 0.2s ease, color 0.2s ease, font-weight 0.2s ease;
+  transition: background 0.2s ease, color 0.2s ease, font-weight 0.2s ease, transform 0.15s var(--ease);
   -webkit-tap-highlight-color: transparent;
   touch-action: manipulation;
+}
+
+.quiz-options-grid .quiz-option {
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: 6.5rem;
+  padding: var(--space-4) var(--space-3);
+  text-align: center;
+}
+
+.quiz-options-stack .quiz-option {
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: 4.25rem;
+  padding: var(--space-4);
+  text-align: center;
+}
+
+.quiz-option:active {
+  transform: scale(0.98);
 }
 
 .quiz-option-icon {
@@ -1037,9 +1108,9 @@ button {
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  width: 2.25rem;
-  height: 2.25rem;
-  border-radius: var(--radius-sm);
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: var(--radius-btn);
   background: color-mix(in srgb, var(--ink) 10%, var(--paper));
   color: inherit;
 }
@@ -1067,7 +1138,7 @@ button {
   display: inline-flex;
   align-items: center;
   gap: var(--space-2);
-  margin-top: var(--space-6);
+  margin-top: var(--space-5);
   padding: 0;
   background: transparent;
   color: var(--paper-muted);
@@ -1700,6 +1771,10 @@ button {
     opacity: 0;
     transform: none !important;
   }
+
+  .quiz-option:active {
+    transform: none;
+  }
 }
 
 /* --- AI riff, nearby places, conversational reject ----------------------- */
@@ -2100,7 +2175,7 @@ button {
   }
 
   .quiz-progress {
-    margin-bottom: var(--space-2);
+    margin-bottom: var(--space-3);
   }
 
   .quiz-question {
@@ -2119,20 +2194,27 @@ button {
 
   .quiz-options {
     margin-top: var(--space-4);
-    gap: 0.6rem;
   }
 
-  .quiz-option {
-    min-height: 3.15rem;
-    padding: 0.7rem 0.85rem;
-    font-size: 1.05rem;
+  .quiz-options-grid {
     gap: 0.65rem;
-    border-radius: var(--radius-btn);
+  }
+
+  .quiz-options-grid .quiz-option {
+    min-height: 5.75rem;
+    padding: var(--space-3) var(--space-2);
+    font-size: 1rem;
+  }
+
+  .quiz-options-stack .quiz-option {
+    min-height: 4rem;
+    padding: var(--space-3);
+    font-size: 1.1rem;
   }
 
   .quiz-option-icon {
-    width: 2rem;
-    height: 2rem;
+    width: 2.35rem;
+    height: 2.35rem;
   }
 
   .quiz-back {

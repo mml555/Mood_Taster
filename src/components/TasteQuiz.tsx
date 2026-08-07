@@ -175,12 +175,32 @@ export function TasteQuiz() {
 
   const selected = hydrated ? answers[current.key] : undefined;
   const StepIcon = QUIZ_STEP_ICONS[current.key];
+  const tileClass =
+    current.options.length <= 2
+      ? "quiz-options quiz-options-stack"
+      : "quiz-options quiz-options-grid";
 
   return (
     <section className="quiz" aria-labelledby="quiz-question">
-      <p className="step quiz-progress" aria-live="polite">
-        {stepLabel} / {totalLabel}
-      </p>
+      <div className="quiz-progress" aria-live="polite">
+        <span className="visually-hidden">
+          Step {stepLabel} of {totalLabel}
+        </span>
+        <ol className="quiz-dots" aria-hidden>
+          {STEPS.map((s, i) => {
+            const n = i + 1;
+            const state =
+              n < step ? "is-done" : n === step ? "is-current" : "";
+            return (
+              <li
+                key={s.key}
+                className={state ? `quiz-dot ${state}` : "quiz-dot"}
+              />
+            );
+          })}
+        </ol>
+      </div>
+
       <div className="quiz-question-block">
         <span className="quiz-question-icon" aria-hidden>
           <StepIcon size={20} strokeWidth={1.5} />
@@ -190,7 +210,7 @@ export function TasteQuiz() {
         </h1>
       </div>
 
-      <ul className="quiz-options" role="list">
+      <ul className={tileClass} role="list">
         {current.options.map((opt) => {
           const isSelected = selected === opt.value;
           const Icon = QUIZ_OPTION_ICONS[opt.value];
@@ -205,7 +225,7 @@ export function TasteQuiz() {
               >
                 {Icon ? (
                   <span className="quiz-option-icon" aria-hidden>
-                    <Icon size={18} strokeWidth={1.5} />
+                    <Icon size={22} strokeWidth={1.5} />
                   </span>
                 ) : null}
                 <span className="quiz-option-label">{opt.label}</span>

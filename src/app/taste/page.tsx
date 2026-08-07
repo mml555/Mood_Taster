@@ -15,7 +15,15 @@ export default function TastePage() {
         <Suspense
           fallback={
             <section className="quiz">
-              <p className="step">01 / 04</p>
+              <div className="quiz-progress">
+                <ol className="quiz-dots" aria-hidden>
+                  <li className="quiz-dot is-current" />
+                  <li className="quiz-dot" />
+                  <li className="quiz-dot" />
+                  <li className="quiz-dot" />
+                  <li className="quiz-dot" />
+                </ol>
+              </div>
               <h1 className="quiz-question">Loading…</h1>
             </section>
           }

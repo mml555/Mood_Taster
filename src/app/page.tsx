@@ -90,7 +90,10 @@ export default function HomePage() {
               </span>
               <span className="step">02</span>
               <h3>Match</h3>
-              <p>Get one dish and a short why. Not a long menu.</p>
+              <p>
+                Get one dish and a short why. Eat out finds nearby. Cook shows
+                the recipe.
+              </p>
             </li>
             <li>
               <span className="flow-icon" aria-hidden>

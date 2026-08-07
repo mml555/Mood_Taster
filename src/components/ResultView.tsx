@@ -584,11 +584,18 @@ export function ResultView({ food }: ResultViewProps) {
                   : "Got it. Your Taste DNA learned from this pick."}
               </p>
               <div className="result-done-actions">
-                {intent === "recipe" && food.recipe ? (
-                  <a className="cta" href="#recipe">
-                    <ChefHat size={20} strokeWidth={1.5} aria-hidden />
-                    See recipe
-                  </a>
+                {intent === "recipe" ? (
+                  food.recipe ? (
+                    <a className="cta" href="#recipe">
+                      <ChefHat size={20} strokeWidth={1.5} aria-hidden />
+                      See recipe
+                    </a>
+                  ) : (
+                    <Link className="cta" href="/taste">
+                      Try again
+                      <ArrowRight size={20} strokeWidth={1.5} aria-hidden />
+                    </Link>
+                  )
                 ) : (
                   <a
                     className="cta"

@@ -1,11 +1,12 @@
 import type { Metadata } from "next";
 import { SiteFooter } from "@/components/SiteFooter";
 import { SiteHeader } from "@/components/SiteHeader";
+import { PrdArticle } from "@/content/prd-article";
 
 export const metadata: Metadata = {
   title: "Product Requirements",
   description:
-    "Ship Night PRD for Mood Taster: craving quiz, dish match, Taste DNA, privacy promises, and demo success criteria.",
+    "Mood Taster PRD v1.0: craving capture, specific recommendations, Taste DNA, feedback, and the roadmap beyond Ship Night.",
 };
 
 export default function PrdPage() {
@@ -14,155 +15,87 @@ export default function PrdPage() {
       <SiteHeader current="prd" />
       <main className="doc">
         <header className="doc-hero">
-          <p className="eyebrow">Ship Night PRD · one page</p>
+          <p className="eyebrow">Product requirements · v1.0</p>
           <h1>Mood Taster</h1>
           <p className="lede">
-            Figure out what you&apos;re craving in under 30 seconds: one specific
-            dish, not another endless menu.
+            Figure out what you&apos;re craving: one specific dish, not another
+            endless menu. Ship Night is the shipped baseline. This PRD is the
+            product target.
           </p>
           <p className="doc-meta">
-            Scope locked for Ship Night ·{" "}
+            Status: v1.0 · Last updated: August 6, 2026 ·{" "}
             <a href="https://raw.githubusercontent.com/mml555/Mood_Taster/main/PRD.md">
               Markdown
+            </a>{" "}
+            ·{" "}
+            <a href="https://github.com/mml555/Mood_Taster/blob/main/BACKLOG.md">
+              Backlog
             </a>{" "}
             · <a href="/strategy">Strategy</a> · <a href="/brand">Brand</a> ·{" "}
             <a href="https://github.com/mml555/Mood_Taster">GitHub</a>
           </p>
         </header>
 
-        <article className="doc-body prd-onepager">
-          <section id="problem" aria-labelledby="problem-title">
-            <h2 id="problem-title">Problem</h2>
-            <p>
-              When people are hungry but don&apos;t know what they want, they
-              scroll delivery apps, maps, and group chats until the decision
-              feels worse than the hunger. Existing tools dump catalogs and
-              filters onto indecision instead of ending it.
-            </p>
-          </section>
+        <aside className="callout" aria-label="North star">
+          <p className="callout-label">North star</p>
+          <p>
+            Increase the probability that Mood Taster correctly identifies what
+            the user wants to eat. Everything else exists to make that happen.
+          </p>
+        </aside>
 
-          <section id="solution" aria-labelledby="solution-title">
-            <h2 id="solution-title">Solution</h2>
-            <p>
-              Mood Taster is a mobile-first web app. You pick eat out or cook,
-              then answer four short craving questions about flavor, texture,
-              heaviness, and adventure. You get one dish with a plain-English
-              &quot;why this fits.&quot; Eat out shows nearby spots. Cook shows
-              ingredients and steps. Not feeling it? Take another pick without
-              restarting. Rating the result updates a local Taste DNA profile
-              that shapes the next session.
-            </p>
-          </section>
+        <nav className="toc" aria-label="On this page">
+          <p className="toc-label">On this page</p>
+          <ol>
+            <li>
+              <a href="#baseline">Ship Night baseline</a>
+            </li>
+            <li>
+              <a href="#summary">1. Product summary</a>
+            </li>
+            <li>
+              <a href="#vision">2. Vision and value</a>
+            </li>
+            <li>
+              <a href="#principles">3. Principles</a>
+            </li>
+            <li>
+              <a href="#jobs">4. Jobs to be done</a>
+            </li>
+            <li>
+              <a href="#ia">5. Information architecture</a>
+            </li>
+            <li>
+              <a href="#intents">6. Intents</a>
+            </li>
+            <li>
+              <a href="#result">7. Result and places</a>
+            </li>
+            <li>
+              <a href="#dna">8. Taste DNA and feedback</a>
+            </li>
+            <li>
+              <a href="#engine">9. Recommendation engine</a>
+            </li>
+            <li>
+              <a href="#auth">10. Auth and privacy</a>
+            </li>
+            <li>
+              <a href="#gamification">11. Explore and gamification</a>
+            </li>
+            <li>
+              <a href="#roadmap">12. Roadmap</a>
+            </li>
+            <li>
+              <a href="#priority">13. Development priority</a>
+            </li>
+            <li>
+              <a href="#north-star">14. North star</a>
+            </li>
+          </ol>
+        </nav>
 
-          <section id="features" aria-labelledby="features-title">
-            <h2 id="features-title">Core features (V1)</h2>
-            <ul>
-              <li>
-                Intent step (Eat out / Cook) plus craving quiz → one primary food
-                recommendation with &quot;why this fits&quot;
-              </li>
-              <li>
-                Cook mode: catalog recipes with ingredients and steps on the
-                result
-              </li>
-              <li>
-                Eat out mode: nearby places for the recommended dish
-              </li>
-              <li>
-                &quot;Not feeling it&quot; alternate pick without restarting the
-                quiz
-              </li>
-              <li>Nailed it / Kinda / Nope feedback on the result</li>
-              <li>
-                Local Taste DNA that persists on device and affects later
-                rankings
-              </li>
-              <li>
-                Optional accounts (Supabase): username + email + password, with
-                Taste DNA synced to your profile
-              </li>
-              <li>
-                Guest mode still works with local Taste DNA and no account
-              </li>
-            </ul>
-          </section>
-
-          <section id="out-of-scope" aria-labelledby="oos-title">
-            <h2 id="oos-title">Out of scope</h2>
-            <ul>
-              <li>
-                Delivery or reservation booking
-              </li>
-              <li>
-                Snack lane, live menus
-              </li>
-              <li>Native iOS/Android apps</li>
-              <li>
-                Commercial products for Ship Night: affiliate handoffs, verified
-                visit codes, restaurant SaaS, and aggregate taste intelligence
-                products (future model on{" "}
-                <a href="/strategy">Strategy</a>; never sell personal Taste DNA)
-              </li>
-              <li>Social feed, streaks, calorie tracking</li>
-              <li>
-                Voice input, couple/group matching, fridge/pantry scanning
-              </li>
-            </ul>
-          </section>
-
-          <section id="privacy" aria-labelledby="privacy-title">
-            <h2 id="privacy-title">Privacy and data</h2>
-            <ul>
-              <li>
-                Taste DNA exists to improve matching for the user. It is not a
-                sellable personal profile.
-              </li>
-              <li>
-                We never sell personal Taste DNA or individual taste profiles to
-                third parties.
-              </li>
-              <li>
-                Future commercial intelligence, if any, is aggregate only, with
-                cohort floors and no user-level export path for buyers.
-              </li>
-              <li>
-                Commercial analytics for aggregate products require explicit,
-                unbundled consent, separate from using the core mood → match →
-                act flow.
-              </li>
-              <li>
-                Guests keep Taste DNA locally. Optional accounts may sync Taste
-                DNA to the profile. Deletion must actually delete account-held
-                Taste DNA when requested.
-              </li>
-              <li>
-                Binding public detail: <a href="/privacy">Privacy</a>. Business
-                framing: <a href="/strategy">Strategy</a>.
-              </li>
-            </ul>
-          </section>
-
-          <section id="success" aria-labelledby="success-title">
-            <h2 id="success-title">Success criteria</h2>
-            <p>
-              A judge on their phone completes Start → Eat out or Cook → four
-              craving questions → receives one specific dish with a why line,
-              taps &quot;Not feeling it&quot; for an alternate, rates feedback,
-              sees Taste DNA update, then starts another session where the
-              recommendation shifted. All live, under three minutes, no
-              account.
-            </p>
-          </section>
-
-          <section id="stack" aria-labelledby="stack-title">
-            <h2 id="stack-title">Tech stack</h2>
-            <p>
-              Next.js + TypeScript on Vercel, built in Cursor. Ranking is a pure
-              client-side function over a static catalog. Optional accounts and
-              cloud Taste DNA sync use Supabase when configured.
-            </p>
-          </section>
-        </article>
+        <PrdArticle />
       </main>
       <SiteFooter />
     </div>
