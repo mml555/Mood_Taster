@@ -1,5 +1,6 @@
 import { Suspense } from "react";
 import { SiteHeader } from "@/components/SiteHeader";
+import { ProductBottomNav } from "@/components/ProductBottomNav";
 import { TasteQuiz } from "@/components/TasteQuiz";
 
 export const metadata = {
@@ -10,17 +11,18 @@ export default function TastePage() {
   return (
     <>
       <SiteHeader current="taste" />
-      <main className="product-main">
+      <main className="product-main product-main-with-nav">
         <Suspense
           fallback={
             <section className="quiz">
               <div className="quiz-progress">
-                <ol className="quiz-dots" aria-hidden>
-                  <li className="quiz-dot is-current" />
-                  <li className="quiz-dot" />
-                  <li className="quiz-dot" />
-                  <li className="quiz-dot" />
-                  <li className="quiz-dot" />
+                <span className="quiz-progress-count">Loading</span>
+                <ol className="quiz-segments" aria-hidden>
+                  <li className="quiz-segment is-current" />
+                  <li className="quiz-segment" />
+                  <li className="quiz-segment" />
+                  <li className="quiz-segment" />
+                  <li className="quiz-segment" />
                 </ol>
               </div>
               <h1 className="quiz-question">Loading…</h1>
@@ -30,6 +32,7 @@ export default function TastePage() {
           <TasteQuiz />
         </Suspense>
       </main>
+      <ProductBottomNav current="taste" />
     </>
   );
 }

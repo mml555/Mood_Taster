@@ -5,12 +5,11 @@ import {
   ALLERGEN_OPTIONS,
   DIET_OPTIONS,
   EMPTY_DIETARY,
-  readDietary,
-  writeDietary,
   type AllergenId,
   type DietId,
   type DietaryPrefs,
 } from "@/lib/dietary";
+import { loadDietaryForUser, persistDietary } from "@/lib/dietary-sync";
 
 type DietaryPrefsEditorProps = {
   /** Compact copy for the DNA page. */
@@ -23,15 +22,16 @@ export function DietaryPrefsEditor({ compact = false }: DietaryPrefsEditorProps)
   const [saved, setSaved] = useState(false);
 
   useEffect(() => {
-    queueMicrotask(() => {
-      setPrefs(readDietary());
+    queueMicrotask(async () => {
+      const loaded = await loadDietaryForUser();
+      setPrefs(loaded);
       setHydrated(true);
     });
   }, []);
 
   const persist = useCallback((next: DietaryPrefs) => {
     setPrefs(next);
-    writeDietary(next);
+    void persistDietary(next);
     setSaved(true);
     window.setTimeout(() => setSaved(false), 1600);
   }, []);
@@ -124,7 +124,7 @@ export function DietaryPrefsEditor({ compact = false }: DietaryPrefsEditorProps)
 
       {saved ? (
         <p className="dietary-saved" role="status">
-          Saved on this device.
+          Saved.
         </p>
       ) : null}
     </div>

@@ -35,7 +35,9 @@ create policy "Profiles are updatable by owner"
   using ((select auth.uid()) = id)
   with check ((select auth.uid()) = id);
 
--- Taste DNA JSON blob (same shape as client DnaProfile)
+-- Taste DNA JSON blob (client DnaProfile).
+-- v2: { version: 2, prefs: {dim: {score,confidence,samples}}, experience: {...} }
+-- v1 flat Record<dim, entry> still loads; app migrates in memory on read/save.
 create table if not exists public.taste_dna (
   user_id uuid primary key references auth.users (id) on delete cascade,
   profile jsonb not null default '{}'::jsonb,
@@ -148,3 +150,102 @@ $$;
 -- disclosure /api/auth/login was written to prevent. Name the roles.
 revoke all on function public.email_for_username(text) from public, anon, authenticated;
 grant execute on function public.email_for_username(text) to service_role;
+
+-- ---------------------------------------------------------------------------
+-- P1-1 · Recommendation history (append-only picks; owner-only RLS)
+-- Safe to re-run: create if not exists + drop/create policies.
+-- ---------------------------------------------------------------------------
+create table if not exists public.recommendation_history (
+  id text primary key,
+  user_id uuid not null references auth.users (id) on delete cascade,
+  food_id text not null,
+  intent text not null,
+  rating text,
+  answers jsonb,
+  place jsonb,
+  created_at timestamptz not null default now(),
+  constraint recommendation_history_intent_check
+    check (intent in ('restaurant', 'recipe', 'snack', 'clue')),
+  constraint recommendation_history_rating_check
+    check (rating is null or rating in ('nailed', 'kinda', 'nope'))
+);
+
+create index if not exists recommendation_history_user_created_idx
+  on public.recommendation_history (user_id, created_at desc);
+
+alter table public.recommendation_history enable row level security;
+
+drop policy if exists "History readable by owner" on public.recommendation_history;
+create policy "History readable by owner"
+  on public.recommendation_history for select
+  using ((select auth.uid()) = user_id);
+
+drop policy if exists "History insertable by owner" on public.recommendation_history;
+create policy "History insertable by owner"
+  on public.recommendation_history for insert
+  with check ((select auth.uid()) = user_id);
+
+drop policy if exists "History updatable by owner" on public.recommendation_history;
+create policy "History updatable by owner"
+  on public.recommendation_history for update
+  using ((select auth.uid()) = user_id)
+  with check ((select auth.uid()) = user_id);
+
+drop policy if exists "History deletable by owner" on public.recommendation_history;
+create policy "History deletable by owner"
+  on public.recommendation_history for delete
+  using ((select auth.uid()) = user_id);
+
+-- =============================================================================
+-- P1-4 · Account preferences (dietary) — APPEND ONLY
+-- Run after the base profiles / taste_dna / favorites section above.
+-- Safe to re-run: add column if missing; no policy rewrites for unrelated tables.
+-- =============================================================================
+
+alter table public.profiles
+  add column if not exists dietary jsonb not null
+  default '{"diets":[],"allergens":[]}'::jsonb;
+
+comment on column public.profiles.dietary is
+  'Owner dietary hard constraints: { diets: string[], allergens: string[] }. Synced via /api/preferences.';
+
+-- Follow-up: recommendation_history (P1-1 above) already cascades on auth
+-- user delete. DELETE /api/account also wipes that table explicitly first.
+
+-- =============================================================================
+-- P2 · Gamification progress blob (XP, passport, quests, streak, explore)
+-- Safe to re-run: create if not exists + drop/create policies.
+-- Client shape: { version: 1, xp, passport, quests, streak, exploreBalance }
+-- Synced via /api/gamification. Guests stay on localStorage only.
+-- =============================================================================
+create table if not exists public.gamification (
+  user_id uuid primary key references auth.users (id) on delete cascade,
+  state jsonb not null default '{}'::jsonb,
+  updated_at timestamptz not null default now()
+);
+
+comment on table public.gamification is
+  'Owner P2 progress: XP, passport stamps, quests, weekly streak, explore balance.';
+
+alter table public.gamification enable row level security;
+
+drop policy if exists "Gamification readable by owner" on public.gamification;
+create policy "Gamification readable by owner"
+  on public.gamification for select
+  using ((select auth.uid()) = user_id);
+
+drop policy if exists "Gamification insertable by owner" on public.gamification;
+create policy "Gamification insertable by owner"
+  on public.gamification for insert
+  with check ((select auth.uid()) = user_id);
+
+drop policy if exists "Gamification updatable by owner" on public.gamification;
+create policy "Gamification updatable by owner"
+  on public.gamification for update
+  using ((select auth.uid()) = user_id)
+  with check ((select auth.uid()) = user_id);
+
+drop policy if exists "Gamification deletable by owner" on public.gamification;
+create policy "Gamification deletable by owner"
+  on public.gamification for delete
+  using ((select auth.uid()) = user_id);

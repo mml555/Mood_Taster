@@ -3,6 +3,7 @@ import {
   Candy,
   ChefHat,
   CircleHelp,
+  Clock,
   Compass,
   Cookie,
   Dices,
@@ -21,8 +22,10 @@ import {
   Snowflake,
   Sparkles,
   Thermometer,
+  Timer,
   Utensils,
   Weight,
+  Zap,
 } from "lucide-react";
 
 /** Lucide icons that teach each quiz pick. Use strokeWidth={1.5} at call site. */
@@ -48,11 +51,28 @@ export const QUIZ_OPTION_ICONS: Record<string, LucideIcon> = {
   surprise: Dices,
   hot: Flame,
   cold: Snowflake,
+  barely: Zap,
+  fifteen: Timer,
+  cook: ChefHat,
+  peckish: Feather,
+  hungry: Utensils,
+  starving: Flame,
+  cozy: HandHeart,
+  bright: Sparkles,
+  bold: Zap,
 };
 
 /** One mark per quiz question step. */
 export const QUIZ_STEP_ICONS: Record<
-  "intent" | "flavor" | "texture" | "heaviness" | "adventure" | "temperature",
+  | "intent"
+  | "flavor"
+  | "texture"
+  | "heaviness"
+  | "adventure"
+  | "temperature"
+  | "cookEffort"
+  | "hunger"
+  | "vibe",
   LucideIcon
 > = {
   intent: Utensils,
@@ -61,6 +81,9 @@ export const QUIZ_STEP_ICONS: Record<
   heaviness: Scale,
   adventure: Dices,
   temperature: Thermometer,
+  cookEffort: Clock,
+  hunger: Weight,
+  vibe: Sparkles,
 };
 
 /** DNA dimension labels share the same marks as quiz picks. */

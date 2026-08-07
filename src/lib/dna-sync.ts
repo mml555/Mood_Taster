@@ -1,5 +1,7 @@
 import {
   createNeutralDna,
+  dnaHasEvidence,
+  normalizeDna,
   readDna,
   writeDna,
 } from "@/lib/dna";
@@ -7,16 +9,17 @@ import type { DnaProfile } from "@/lib/taste-types";
 import { isSupabaseConfigured } from "@/lib/supabase/client";
 import { parseDnaProfile } from "@/lib/auth-schema";
 
-/** Write DNA locally and, when signed in, mirror to Supabase. */
+/** Write DNA locally (v2) and, when signed in, mirror to Supabase. */
 export async function persistDna(dna: DnaProfile): Promise<void> {
-  writeDna(dna);
+  const profile = normalizeDna(dna);
+  writeDna(profile);
   if (!isSupabaseConfigured()) return;
 
   try {
     await fetch("/api/dna", {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ profile: dna }),
+      body: JSON.stringify({ profile }),
     });
   } catch {
     // Local write already succeeded; cloud sync is best-effort.
@@ -42,6 +45,7 @@ export async function resetDnaEverywhere(): Promise<void> {
 /**
  * Load DNA for the current user: prefer cloud when signed in,
  * seed cloud from local on first login, always keep local in sync.
+ * Flat v1 cloud rows migrate in memory via parseDnaProfile / normalizeDna.
  */
 export async function loadDnaForUser(): Promise<DnaProfile> {
   const local = readDna();
@@ -54,8 +58,7 @@ export async function loadDnaForUser(): Promise<DnaProfile> {
 
     const body = (await res.json()) as { profile?: unknown; empty?: boolean };
     if (body.empty) {
-      const hasEvidence = Object.values(local).some((e) => e.samples > 0);
-      if (hasEvidence) {
+      if (dnaHasEvidence(local)) {
         await persistDna(local);
       }
       return local;

@@ -1,3 +1,4 @@
+import { z } from "zod";
 import type { FoodLike } from "./taste-types";
 
 export const DIETARY_KEY = "mood-taster-dietary";
@@ -35,6 +36,26 @@ const ALLERGEN_TAG: Record<AllergenId, string> = Object.fromEntries(
   ALLERGEN_OPTIONS.map((a) => [a.id, a.tag]),
 ) as Record<AllergenId, string>;
 
+const dietIdSchema = z.enum(
+  DIET_OPTIONS.map((d) => d.id) as [DietId, ...DietId[]],
+);
+const allergenIdSchema = z.enum(
+  ALLERGEN_OPTIONS.map((a) => a.id) as [AllergenId, ...AllergenId[]],
+);
+
+/** Request body for PUT /api/preferences. Dedupes and rejects unknown ids. */
+export const dietaryPrefsSchema = z.object({
+  diets: z.array(dietIdSchema).max(DIET_OPTIONS.length),
+  allergens: z.array(allergenIdSchema).max(ALLERGEN_OPTIONS.length),
+});
+
+export function uniqueDietary(prefs: DietaryPrefs): DietaryPrefs {
+  return {
+    diets: [...new Set(prefs.diets)],
+    allergens: [...new Set(prefs.allergens)],
+  };
+}
+
 export function readDietary(): DietaryPrefs {
   if (typeof window === "undefined") return EMPTY_DIETARY;
   try {
@@ -56,6 +77,11 @@ export function readDietary(): DietaryPrefs {
 export function writeDietary(prefs: DietaryPrefs): void {
   if (typeof window === "undefined") return;
   localStorage.setItem(DIETARY_KEY, JSON.stringify(prefs));
+}
+
+export function clearDietary(): void {
+  if (typeof window === "undefined") return;
+  localStorage.removeItem(DIETARY_KEY);
 }
 
 export function hasDietaryConstraints(prefs: DietaryPrefs): boolean {

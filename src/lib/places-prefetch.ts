@@ -1,4 +1,5 @@
 import type { Food, NearbyPlace } from "@/lib/taste-types";
+import { parsePlacesResponse } from "@/lib/api-schemas";
 
 const GEO_CACHE_KEY = "mood-taster-geo";
 const GEO_CACHE_MS = 10 * 60 * 1000;
@@ -73,7 +74,8 @@ export function readPrefetchedPlaces(foodId: string): NearbyPlace[] | null {
       return null;
     }
     if (Date.now() - parsed.at > PLACES_PREFETCH_MS) return null;
-    return parsed.places;
+    const places = parsePlacesResponse({ places: parsed.places }).places;
+    return places.length > 0 ? places : null;
   } catch {
     return null;
   }
@@ -108,8 +110,8 @@ export function prefetchPlacesForFood(foodId: string): void {
         `/api/places?foodId=${encodeURIComponent(foodId)}&lat=${lat}&lng=${lng}`,
       );
       if (!res.ok) return;
-      const data = (await res.json()) as { places?: NearbyPlace[] };
-      const places = data.places ?? [];
+      const data = parsePlacesResponse(await res.json());
+      const places = data.places;
       if (places.length > 0) writePrefetchedPlaces(foodId, places);
     } catch {
       /* best-effort */

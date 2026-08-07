@@ -28,8 +28,17 @@
   --space-5: 2rem; /* 32 */
   --space-6: 3rem; /* 48 */
   --space-7: 4rem; /* 64 */
-  --space-8: clamp(4rem, 12vh, 7rem);
-  --page-inset: clamp(1.25rem, 4vw, 3rem);
+  /* Section break for marketing/docs. Prefer space-4/5 on product screens. */
+  --space-8: clamp(2.5rem, 6vh, 4rem);
+  --page-inset: clamp(1rem, 3vw, 2rem);
+
+  /* One measure for every surface. Header, main and footer share this column
+     so their left and right edges line up at every width. Phone and desktop
+     then differ only in how much paper sits outside the column, never in
+     where the content starts. Widen this and the whole site widens together. */
+  --measure: 40rem;
+  /* Long-form reading only (PRD, Strategy). Still centered on --measure. */
+  --measure-doc: 44rem;
 
   /* Shape language */
   --radius-sm: 12px;
@@ -95,11 +104,6 @@ video {
   .grain {
     display: none;
   }
-
-  .hero-peek li:nth-child(2),
-  .hero-peek li:nth-child(4) {
-    transform: none;
-  }
 }
 
 a {
@@ -140,6 +144,12 @@ button {
   padding: var(--space-3) var(--page-inset);
   padding-top: max(var(--space-3), env(safe-area-inset-top));
   animation: rise 0.9s var(--ease) both;
+}
+
+/* Home: nav only. Brand lives in the hero, not a second lockup. */
+.top-home {
+  justify-content: flex-end;
+  padding-bottom: var(--space-2);
 }
 
 .mark {
@@ -218,59 +228,54 @@ button {
 .hero {
   position: relative;
   z-index: 1;
-  display: grid;
-  gap: var(--space-6);
-  align-content: start;
-  min-height: calc(100vh - 4.5rem);
-  min-height: calc(100dvh - 4.5rem);
-  max-width: 64rem;
-  padding: var(--space-5) var(--page-inset) var(--space-7);
-}
-
-.hero-copy {
-  max-width: 28rem;
-}
-
-.hero-peek {
-  list-style: none;
-  margin: 0;
-  padding: 0;
   display: flex;
-  gap: var(--space-3);
-  overflow-x: auto;
-  scroll-snap-type: x mandatory;
-  -webkit-overflow-scrolling: touch;
-  scrollbar-width: none;
-  animation: rise 1s var(--ease) 0.5s both;
-}
-
-.hero-peek::-webkit-scrollbar {
-  display: none;
-}
-
-.hero-peek li {
-  flex: 0 0 auto;
-  width: 7.5rem;
-  scroll-snap-align: start;
-}
-
-.hero-peek-image {
-  display: block;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  gap: var(--space-4);
+  /* Content-sized: no full-viewport void that floats the CTA in empty paper. */
+  min-height: auto;
   width: 100%;
-  height: auto;
-  aspect-ratio: 1;
-  object-fit: cover;
-  border-radius: var(--radius-card);
-  background: var(--ink-soft);
+  max-width: 40rem;
+  margin-inline: auto;
+  padding: var(--space-5) var(--page-inset) var(--space-4);
+  text-align: center;
 }
 
-.hero-peek-name {
-  display: block;
-  margin-top: var(--space-2);
-  color: var(--paper-muted);
-  font-size: 0.75rem;
-  font-weight: 500;
-  line-height: 1.3;
+.hero-body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 0 1 auto;
+  justify-content: flex-start;
+  gap: var(--space-3);
+  width: 100%;
+}
+
+.hero-logo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+  margin-bottom: 0;
+  animation: rise 1s var(--ease) 0.1s both;
+}
+
+.hero-mark {
+  width: 3.5rem;
+  height: 3.5rem;
+  object-fit: contain;
+}
+
+.hero-brand {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(1.35rem, 3.5vw, 1.6rem);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+  text-transform: lowercase;
+  color: var(--ink);
 }
 
 .eyebrow {
@@ -297,72 +302,65 @@ button {
 
 .hero h1 {
   margin: 0;
+  max-width: 20rem;
   font-family: var(--font-display);
-  font-size: clamp(3.4rem, 12vw, 6.5rem);
+  font-size: clamp(1.75rem, 5.5vw, 2.15rem);
   font-weight: 700;
-  line-height: 0.95;
+  line-height: 1.2;
   letter-spacing: -0.02em;
   color: var(--ink);
   animation: rise 1s var(--ease) 0.18s both;
 }
 
 .lede {
-  margin: var(--space-4) 0 0;
+  margin: var(--space-3) 0 0;
   max-width: 28rem;
-  font-size: clamp(1rem, 2.4vw, 1.2rem);
+  font-size: clamp(1rem, 2.4vw, 1.15rem);
+  line-height: 1.45;
   color: var(--paper-muted);
   animation: rise 1s var(--ease) 0.28s both;
 }
 
+.hero .lede {
+  margin: 0;
+  max-width: 18rem;
+}
+
 .cta-row {
-  margin-top: var(--space-6);
+  margin-top: var(--space-4);
   animation: rise 1s var(--ease) 0.4s both;
 }
 
-/* One primary start path, then lighter path picks. */
+/* Reference landing: one primary CTA, pinned under the copy. */
 .hero-start {
-  margin-top: var(--space-5);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+  width: 100%;
   max-width: 22rem;
+  padding-bottom: var(--space-2);
   animation: rise 1s var(--ease) 0.4s both;
 }
 
 .hero-start-primary {
   width: 100%;
-  min-height: 3.25rem;
-  font-size: 1.05rem;
+  min-height: 3.5rem;
+  padding-block: 1rem;
+  font-size: 1.1rem;
+  border-radius: var(--radius-lg);
 }
 
 .hero-start-hint {
-  margin: var(--space-2) 0 0;
+  margin: 0;
   color: var(--paper-quiet);
   font-size: 0.85rem;
+  font-weight: 700;
   line-height: 1.4;
 }
 
-.hero-start-divider {
-  margin: var(--space-4) 0 var(--space-3);
-  color: var(--paper-quiet);
-  font-size: 0.75rem;
-  font-weight: 600;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-}
-
-.hero-paths {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: var(--space-2);
-}
-
-.hero-path {
-  width: 100%;
-  justify-content: flex-start;
-  padding-inline: 1.1rem;
-  font-size: 0.9rem;
-}
-
 .intent-picker {
-  margin-top: var(--space-6);
+  margin-top: var(--space-4);
   display: grid;
   grid-template-columns: 1fr;
   gap: var(--space-3);
@@ -377,57 +375,6 @@ button {
 
 .about .intent-picker {
   margin-top: var(--space-5);
-}
-
-@media (min-width: 900px) {
-  .hero {
-    grid-template-columns: minmax(0, 26rem) minmax(18rem, 1fr);
-    align-items: center;
-    gap: clamp(var(--space-5), 5vw, var(--space-8));
-    max-width: 72rem;
-    padding-top: clamp(var(--space-5), 6vh, var(--space-7));
-    padding-bottom: var(--space-7);
-  }
-
-  .hero-peek {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: var(--space-3);
-    overflow: visible;
-    max-width: 26rem;
-    justify-self: end;
-  }
-
-  .hero-peek li {
-    width: auto;
-  }
-
-  .hero-peek li:nth-child(2),
-  .hero-peek li:nth-child(4) {
-    transform: translateY(var(--space-5));
-  }
-
-  .hero-peek-name {
-    font-size: 0.8rem;
-  }
-
-  .hero-paths {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-
-  .hero-path {
-    justify-content: center;
-    flex-direction: column;
-    gap: 0.35rem;
-    padding: 0.85rem 0.5rem;
-    font-size: 0.8rem;
-    text-align: center;
-    line-height: 1.2;
-  }
-
-  .hero-start {
-    max-width: none;
-  }
 }
 
 
@@ -508,12 +455,67 @@ button {
 .about {
   position: relative;
   z-index: 1;
-  max-width: 64rem;
-  padding: var(--space-8) var(--page-inset) 0;
+  width: 100%;
+  max-width: var(--measure);
+  margin-inline: auto;
+  padding: var(--space-6) var(--page-inset) 0;
 }
 
 .about {
-  padding-bottom: var(--space-8);
+  padding-bottom: var(--space-6);
+}
+
+/* Quiet home below-fold: one short column, no competing CTAs. */
+.how-quiet {
+  /* Inherits --measure from .how. A narrower cap here made the step cards
+     shrink as the viewport grew, which is what made desktop read as a
+     stretched phone. Prose inside stays short via its own caps. */
+  padding-top: var(--space-4);
+  padding-bottom: var(--space-5);
+  text-align: center;
+}
+
+.how-quiet h2 {
+  font-size: clamp(1.35rem, 3vw, 1.6rem);
+  font-weight: 700;
+}
+
+.flow-quiet {
+  list-style: none;
+  margin: var(--space-4) 0 0;
+  padding: 0;
+  display: grid;
+  gap: var(--space-2);
+  text-align: left;
+}
+
+.flow-quiet li {
+  display: grid;
+  gap: 0.15rem;
+  padding: var(--space-3) var(--space-4);
+  background: var(--ink-raised);
+  border-radius: var(--radius-card);
+}
+
+.flow-quiet strong {
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.flow-quiet span {
+  color: var(--paper-muted);
+  font-size: 0.95rem;
+  line-height: 1.4;
+}
+
+.how-stance {
+  margin: var(--space-3) auto 0;
+  max-width: 22rem;
+  color: var(--paper-muted);
+  font-size: 0.95rem;
+  line-height: 1.45;
 }
 
 .how h2,
@@ -535,10 +537,10 @@ button {
 
 .flow {
   list-style: none;
-  margin: var(--space-7) 0 0;
+  margin: var(--space-5) 0 0;
   padding: 0;
   display: grid;
-  gap: var(--space-6);
+  gap: var(--space-4);
 }
 
 @media (min-width: 720px) {
@@ -592,8 +594,8 @@ button {
 }
 
 .about-tight {
-  padding-top: var(--space-6);
-  padding-bottom: var(--space-7);
+  padding-top: var(--space-5);
+  padding-bottom: var(--space-5);
 }
 
 .about-tight p {
@@ -623,9 +625,9 @@ button {
 }
 
 .lane-list {
-  margin: var(--space-7) 0 0;
+  margin: var(--space-5) 0 0;
   display: grid;
-  gap: var(--space-6);
+  gap: var(--space-4);
   max-width: 40rem;
 }
 
@@ -646,10 +648,14 @@ button {
   z-index: 1;
   display: flex;
   flex-wrap: wrap;
-  gap: var(--space-3) var(--space-5);
+  gap: var(--space-3) var(--space-4);
   align-items: baseline;
   justify-content: space-between;
-  padding: var(--space-7) var(--page-inset) var(--space-6);
+  /* Same column as .top and the main surfaces. */
+  width: 100%;
+  max-width: var(--measure);
+  margin-inline: auto;
+  padding: var(--space-5) var(--page-inset) var(--space-4);
 }
 
 .foot-brand {
@@ -699,11 +705,11 @@ button {
   z-index: 1;
   max-width: 44rem;
   margin: 0 auto;
-  padding: 0 var(--page-inset) var(--space-8);
+  padding: 0 var(--page-inset) var(--space-6);
 }
 
 .doc-hero {
-  padding: var(--space-6) 0 var(--space-5);
+  padding: var(--space-5) 0 var(--space-4);
   animation: rise 0.9s var(--ease) both;
 }
 
@@ -729,8 +735,8 @@ button {
 
 /* Detaches by tone step, not by a rule or a stroke. */
 .callout {
-  margin: 0 0 var(--space-6);
-  padding: var(--space-4) var(--space-5);
+  margin: 0 0 var(--space-4);
+  padding: var(--space-4);
   background: var(--ink-raised);
   border-radius: var(--radius-card);
   animation: rise 1s var(--ease) 0.08s both;
@@ -759,7 +765,7 @@ button {
 }
 
 .toc {
-  margin: 0 0 var(--space-7);
+  margin: 0 0 var(--space-5);
   animation: rise 1s var(--ease) 0.12s both;
 }
 
@@ -794,7 +800,7 @@ button {
 }
 
 .doc-body section {
-  padding: var(--space-7) 0 0;
+  padding: var(--space-5) 0 0;
   scroll-margin-top: var(--space-4);
 }
 
@@ -869,11 +875,11 @@ button {
 
 .brand-guide .swatch-grid {
   list-style: none;
-  margin: 0 0 var(--space-6);
+  margin: 0 0 var(--space-5);
   padding: 0;
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(9.5rem, 1fr));
-  gap: var(--space-5);
+  gap: var(--space-4);
 }
 
 .brand-guide .swatch-grid li {
@@ -939,11 +945,11 @@ button {
 
 .brand-guide .logo-grid {
   list-style: none;
-  margin: 0 0 var(--space-6);
+  margin: 0 0 var(--space-5);
   padding: 0;
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(14rem, 1fr));
-  gap: var(--space-5);
+  gap: var(--space-4);
 }
 
 .brand-guide .logo-grid li {
@@ -1008,8 +1014,8 @@ button {
 
 .brand-demos {
   display: grid;
-  gap: var(--space-6);
-  margin: 0 0 var(--space-5);
+  gap: var(--space-4);
+  margin: 0 0 var(--space-4);
 }
 
 @media (min-width: 640px) {
@@ -1155,14 +1161,64 @@ button {
 .product-main {
   position: relative;
   z-index: 1;
-  max-width: 40rem;
+  width: 100%;
+  max-width: var(--measure);
   margin: 0 auto;
-  padding: var(--space-5) var(--page-inset) var(--space-7);
+  padding: var(--space-4) var(--page-inset) var(--space-5);
   min-height: auto;
 }
 
 .quiz-progress {
+  margin: 0;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+.quiz-progress-count {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--paper-muted);
+}
+
+.quiz-top {
+  display: grid;
+  grid-template-columns: 2.75rem minmax(0, 1fr) 2.75rem;
+  align-items: center;
+  gap: var(--space-2);
   margin: 0 0 var(--space-4);
+}
+
+.quiz-top-spacer {
+  width: 2.75rem;
+  height: 2.75rem;
+}
+
+.quiz-segments {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  width: 100%;
+  max-width: 14rem;
+}
+
+.quiz-segment {
+  flex: 1 1 0;
+  height: 0.35rem;
+  border-radius: var(--radius-pill);
+  background: var(--ink-soft);
+  transition: background 0.2s ease;
+}
+
+.quiz-segment.is-done,
+.quiz-segment.is-current {
+  background: var(--ink);
 }
 
 .quiz-dots {
@@ -1171,6 +1227,7 @@ button {
   padding: 0;
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 0.45rem;
 }
 
@@ -1193,9 +1250,21 @@ button {
 
 .quiz-question-block {
   display: flex;
-  flex-direction: row;
-  align-items: flex-start;
+  flex-direction: column;
   gap: var(--space-3);
+}
+
+.quiz-question-copy {
+  min-width: 0;
+}
+
+.quiz-category {
+  margin: 0 0 var(--space-2);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--paper-muted);
 }
 
 .quiz-question-icon {
@@ -1214,8 +1283,8 @@ button {
 .quiz-question {
   margin: 0;
   font-family: var(--font-display);
-  font-size: clamp(1.65rem, 5.5vw, 2.35rem);
-  font-weight: 500;
+  font-size: clamp(1.65rem, 5.5vw, 2.15rem);
+  font-weight: 700;
   line-height: 1.15;
   color: var(--ink);
 }
@@ -1229,65 +1298,40 @@ button {
 
 .quiz-options {
   list-style: none;
-  margin: var(--space-5) 0 0;
+  margin: var(--space-4) 0 0;
   padding: 0;
   display: flex;
   flex-direction: column;
   gap: var(--space-2);
 }
 
-.quiz-options-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: var(--space-3);
-}
-
+.quiz-options-grid,
 .quiz-options-stack {
   display: flex;
   flex-direction: column;
-  gap: var(--space-3);
+  gap: var(--space-2);
 }
 
 .quiz-option {
   display: flex;
+  flex-direction: row;
   align-items: center;
   gap: var(--space-3);
   width: 100%;
-  height: 100%;
   text-align: left;
   min-height: 3.5rem;
-  padding: 0.85rem 1rem;
+  padding: var(--space-3) var(--space-4);
   background: var(--ink-raised);
   color: var(--ink);
   font-family: var(--font-display);
-  font-size: clamp(1.05rem, 3.5vw, 1.3rem);
-  font-weight: 400;
+  font-size: 1.05rem;
+  font-weight: 700;
   cursor: pointer;
   border: 0;
-  border-radius: var(--radius-card);
-  transition: background 0.2s ease, color 0.2s ease, font-weight 0.2s ease, transform 0.15s var(--ease);
+  border-radius: var(--radius-lg);
+  transition: background 0.2s ease, color 0.2s ease, transform 0.15s var(--ease);
   -webkit-tap-highlight-color: transparent;
   touch-action: manipulation;
-}
-
-.quiz-options-grid .quiz-option {
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  gap: var(--space-2);
-  min-height: 6.5rem;
-  padding: var(--space-4) var(--space-3);
-  text-align: center;
-}
-
-.quiz-options-stack .quiz-option {
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  gap: var(--space-2);
-  min-height: 4.25rem;
-  padding: var(--space-4);
-  text-align: center;
 }
 
 .quiz-option:active {
@@ -1301,17 +1345,47 @@ button {
   flex-shrink: 0;
   width: 2.5rem;
   height: 2.5rem;
-  border-radius: var(--radius-btn);
-  background: color-mix(in srgb, var(--ink) 10%, var(--paper));
+  border-radius: var(--radius-pill);
+  background: color-mix(in srgb, var(--ink) 8%, var(--paper));
   color: inherit;
 }
 
 .quiz-option.is-selected .quiz-option-icon {
-  background: color-mix(in srgb, var(--paper) 18%, transparent);
+  background: color-mix(in srgb, var(--paper) 16%, transparent);
+  color: var(--accent);
+}
+
+.quiz-option-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  min-width: 0;
+  flex: 1;
 }
 
 .quiz-option-label {
   min-width: 0;
+  line-height: 1.2;
+}
+
+.quiz-option-desc {
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+  font-weight: 500;
+  line-height: 1.35;
+  color: var(--paper-muted);
+}
+
+.quiz-option.is-selected .quiz-option-desc {
+  color: color-mix(in srgb, var(--paper) 72%, transparent);
+}
+
+.quiz-option-check {
+  flex-shrink: 0;
+  color: var(--accent);
+  font-size: 1.25rem;
+  font-weight: 700;
+  line-height: 1;
 }
 
 .quiz-option:hover,
@@ -1322,35 +1396,102 @@ button {
 .quiz-option.is-selected {
   background: var(--ink);
   color: var(--paper);
-  font-weight: 600;
 }
 
 .quiz-back {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: var(--space-2);
-  margin-top: var(--space-5);
+  width: 2.75rem;
+  height: 2.75rem;
+  margin: 0;
   padding: 0;
   background: transparent;
-  color: var(--paper-muted);
+  color: var(--ink);
   font-size: 0.95rem;
   font-weight: 500;
+  text-decoration: none;
   cursor: pointer;
+  border: 0;
+  border-radius: var(--radius-pill);
+}
+
+.quiz-back-label {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
   border: 0;
 }
 
 .quiz-back:hover,
 .quiz-back:focus-visible {
   color: var(--ink);
+  background: var(--ink-raised);
+}
+
+.quiz-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-6);
+  min-height: min(70vh, 32rem);
+  text-align: center;
+  animation: rise 0.7s var(--ease) both;
+}
+
+.quiz-loading-brand {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.quiz-loading-mark {
+  width: 4rem;
+  height: 4rem;
+  object-fit: contain;
+}
+
+.quiz-loading-wordmark {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 1.35rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  text-transform: lowercase;
+  color: var(--ink);
+}
+
+.quiz-loading-msg {
+  margin: 0;
+  min-height: 1.5em;
+  color: var(--paper-muted);
+  font-size: 1.15rem;
+  font-weight: 700;
+  animation: rise 0.45s var(--ease) both;
 }
 
 /* Swipeable recommendation card */
+.result-eyebrow {
+  text-align: center;
+  justify-content: center;
+  width: 100%;
+}
+
 .result-card {
   position: relative;
-  margin: var(--space-4) 0 0;
-  padding: var(--space-4);
+  margin: var(--space-3) 0 0;
+  padding: 0;
+  overflow: hidden;
   background: var(--paper);
-  border-radius: var(--radius-card);
+  border-radius: var(--radius-lg);
   box-shadow: 0 12px 40px color-mix(in srgb, var(--ink) 12%, transparent);
   touch-action: pan-y;
   user-select: none;
@@ -1428,10 +1569,11 @@ button {
 .result-media {
   margin: 0;
   width: 100%;
-  aspect-ratio: 1;
+  aspect-ratio: 4 / 3;
+  max-height: min(36vh, 22rem);
   background: var(--ink-soft);
   overflow: hidden;
-  border-radius: calc(var(--radius-card) - 4px);
+  border-radius: 0;
   pointer-events: none;
 }
 
@@ -1456,20 +1598,38 @@ button {
   text-align: center;
 }
 
+.result-card-body {
+  padding: var(--space-3) var(--space-4) var(--space-4);
+}
+
 .result-title {
-  margin: var(--space-4) 0 0;
+  margin: 0;
   font-family: var(--font-display);
-  font-size: clamp(2rem, 7vw, 3rem);
-  font-weight: 600;
+  font-size: clamp(1.75rem, 6vw, 2.4rem);
+  font-weight: 700;
   line-height: 1.1;
   color: var(--ink);
+  pointer-events: none;
+}
+
+.result-venue {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  margin: var(--space-3) 0 0;
+  color: var(--paper-muted);
+  font-size: 0.95rem;
+  font-weight: 700;
   pointer-events: none;
 }
 
 .result-desc {
   margin: var(--space-3) 0 0;
   color: var(--paper-muted);
+  font-size: 1.05rem;
+  line-height: 1.45;
   max-width: 32rem;
+  pointer-events: none;
 }
 
 .result-attrs {
@@ -1479,16 +1639,48 @@ button {
   display: flex;
   flex-wrap: wrap;
   gap: var(--space-2);
+  pointer-events: none;
 }
 
 .result-attrs li {
   padding: 0.35rem 0.85rem;
-  background: var(--accent);
+  background: color-mix(in srgb, var(--accent) 35%, var(--paper));
   color: var(--ink);
   font-size: 0.8rem;
   font-weight: 600;
   letter-spacing: 0.02em;
   border-radius: var(--radius-pill);
+}
+
+.result-meta {
+  margin-top: var(--space-4);
+  padding: var(--space-3) var(--space-4);
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-4);
+  background: var(--ink-raised);
+  border-radius: var(--radius-card);
+  pointer-events: none;
+}
+
+.result-meta-end {
+  text-align: right;
+}
+
+.result-meta-label {
+  display: block;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--paper-quiet);
+}
+
+.result-meta-value {
+  display: block;
+  margin-top: 0.2rem;
+  font-weight: 700;
+  color: var(--ink);
 }
 
 .why-toggle {
@@ -1517,21 +1709,21 @@ button {
   display: flex;
   flex-wrap: wrap;
   gap: var(--space-3);
-  margin-top: var(--space-5);
+  margin-top: var(--space-4);
   align-items: center;
 }
 
 .reaction-bar {
   display: flex;
   flex-wrap: nowrap;
-  gap: var(--space-4);
-  margin-top: var(--space-5);
+  gap: var(--space-3);
+  margin-top: 0;
   align-items: center;
-  justify-content: center;
+  justify-content: stretch;
 }
 
 .reaction-dock {
-  margin-top: var(--space-5);
+  margin-top: var(--space-4);
 }
 
 .reaction-btn {
@@ -1541,10 +1733,10 @@ button {
   align-items: center;
   justify-content: center;
   gap: 0.35rem;
-  width: 4.25rem;
-  height: 4.25rem;
-  min-width: 4.25rem;
-  min-height: 4.25rem;
+  width: 3.75rem;
+  height: 3.75rem;
+  min-width: 3.75rem;
+  min-height: 3.75rem;
   padding: 0;
   background: var(--ink-soft);
   color: var(--ink);
@@ -1569,28 +1761,47 @@ button {
   cursor: default;
 }
 
-.reaction-btn-like {
-  width: 4.75rem;
-  height: 4.75rem;
-  min-width: 4.75rem;
-  min-height: 4.75rem;
-  background: var(--accent);
+.reaction-btn-again {
+  background: var(--ink-raised);
   color: var(--ink);
+}
+
+.reaction-btn-like {
+  flex: 1 1 auto;
+  width: auto;
+  min-width: 0;
+  height: 3.75rem;
+  min-height: 3.75rem;
+  flex-direction: row;
+  gap: var(--space-2);
+  padding-inline: var(--space-4);
+  border-radius: var(--radius-lg);
+  background: var(--ink);
+  color: var(--accent);
+  font-size: 1.05rem;
+}
+
+.reaction-btn-like .reaction-label {
+  display: inline;
+  color: var(--paper);
+  font-size: 1rem;
+  font-weight: 700;
 }
 
 .reaction-btn-like:hover:not(:disabled),
 .reaction-btn-like:focus-visible:not(:disabled) {
-  background: color-mix(in srgb, var(--accent) 85%, var(--ink));
+  background: color-mix(in srgb, var(--ink) 88%, var(--paper));
+  transform: translateY(-2px);
 }
 
 .reaction-btn-nope {
-  background: var(--ink);
-  color: var(--paper);
+  background: var(--ink-raised);
+  color: var(--ink);
 }
 
 .reaction-btn-nope:hover:not(:disabled),
 .reaction-btn-nope:focus-visible:not(:disabled) {
-  background: color-mix(in srgb, var(--ink) 88%, var(--paper));
+  background: var(--ink-soft);
 }
 
 .reaction-icon {
@@ -1600,6 +1811,7 @@ button {
 }
 
 .reaction-label {
+  display: none;
   line-height: 1.1;
 }
 
@@ -1713,6 +1925,27 @@ button {
   margin-top: var(--space-4);
 }
 
+.account-delete {
+  margin-top: var(--space-5);
+  padding-top: var(--space-4);
+}
+
+.account-delete-confirm {
+  margin-top: var(--space-3);
+}
+
+.account-delete-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+  margin-top: var(--space-3);
+}
+
+.account-delete-actions .reject-btn {
+  margin-top: 0;
+}
+
 .feedback-btn {
   display: inline-flex;
   align-items: center;
@@ -1764,43 +1997,91 @@ button {
 }
 
 .result-done {
-  margin-top: var(--space-5);
-  padding: var(--space-4);
-  background: var(--ink-raised);
-  border-radius: var(--radius-card);
+  margin-top: var(--space-4);
+  padding: var(--space-4) var(--space-3);
+  background: transparent;
+  border-radius: 0;
   text-align: center;
   animation: rise 0.7s var(--ease) both;
 }
 
 .result-done-mark {
-  margin: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 3.5rem;
+  height: 3.5rem;
+  margin: 0 auto;
+  background: var(--accent);
   color: var(--ink);
-  font-size: 1.75rem;
+  font-size: 1.5rem;
+  font-weight: 700;
   line-height: 1;
+  border-radius: var(--radius-pill);
 }
 
 .result-done-title {
-  margin: var(--space-2) 0 0;
+  margin: var(--space-3) 0 0;
   font-family: var(--font-display);
   font-size: clamp(1.5rem, 5vw, 2rem);
-  font-weight: 600;
+  font-weight: 700;
   line-height: 1.15;
   color: var(--ink);
 }
 
 .result-done-copy {
   margin: var(--space-3) auto 0;
-  max-width: 28rem;
+  max-width: 20rem;
   color: var(--paper-muted);
-  font-size: 0.95rem;
+  font-size: 1.1rem;
+}
+
+.result-done-pick {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  width: 100%;
+  max-width: 22rem;
+  margin: var(--space-4) auto 0;
+  padding: var(--space-3);
+  text-align: left;
+  background: var(--ink-raised);
+  border-radius: var(--radius-card);
+}
+
+.result-done-thumb {
+  flex-shrink: 0;
+  width: 3.5rem;
+  height: 3.5rem;
+  object-fit: cover;
+  border-radius: var(--radius-sm);
+  background: var(--ink-soft);
+}
+
+.result-done-pick-copy {
+  min-width: 0;
+}
+
+.result-done-pick-name {
+  margin: 0;
+  font-weight: 700;
+  color: var(--ink);
+  line-height: 1.25;
 }
 
 .result-done-actions {
   display: flex;
-  flex-wrap: wrap;
+  flex-direction: column;
+  align-items: stretch;
   gap: var(--space-3);
-  justify-content: center;
-  margin-top: var(--space-4);
+  max-width: 22rem;
+  margin: var(--space-4) auto 0;
+}
+
+.result-done-actions .cta,
+.result-done-actions .cta-secondary {
+  width: 100%;
+  max-width: none;
 }
 
 .result-done-dna {
@@ -1833,7 +2114,7 @@ button {
 }
 
 .result-dna-link {
-  margin: var(--space-5) 0 0;
+  margin: var(--space-4) 0 0;
 }
 
 .result-dna-link a {
@@ -1871,7 +2152,7 @@ button {
 .dna-title {
   margin: 0;
   font-family: var(--font-display);
-  font-size: clamp(2rem, 7vw, 3rem);
+  font-size: clamp(1.75rem, 6vw, 2.5rem);
   font-weight: 600;
   line-height: 1.1;
   color: var(--ink);
@@ -1891,7 +2172,7 @@ button {
 }
 
 .dna-meter {
-  margin-top: var(--space-4);
+  margin-top: var(--space-3);
   width: 100%;
   max-width: 20rem;
   height: 0.55rem;
@@ -1913,20 +2194,20 @@ button {
 }
 
 .dna-lede {
-  margin: var(--space-4) 0 0;
+  margin: var(--space-3) 0 0;
   color: var(--paper-muted);
   max-width: 32rem;
 }
 
 .dna-block {
-  margin-top: var(--space-6);
+  margin-top: var(--space-4);
   padding: var(--space-4);
   background: var(--ink-raised);
   border-radius: var(--radius-card);
 }
 
 .dna-heading {
-  margin: 0 0 var(--space-4);
+  margin: 0 0 var(--space-3);
   font-family: var(--font-display);
   font-size: 1.15rem;
   font-weight: 500;
@@ -1938,7 +2219,7 @@ button {
   padding: 0;
   display: flex;
   flex-direction: column;
-  gap: var(--space-3);
+  gap: var(--space-2);
 }
 
 .dna-list li {
@@ -1970,10 +2251,30 @@ button {
   font-variant-numeric: tabular-nums;
 }
 
+.dna-develop {
+  margin-top: var(--space-4);
+  margin-bottom: 0;
+}
+
+.dna-develop .result-actions {
+  margin-top: var(--space-3);
+}
+
+.dna-develop-list {
+  list-style: none;
+  margin: 0 0 var(--space-3);
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-3);
+  color: var(--paper-muted);
+  font-size: 0.95rem;
+}
+
 /* Auth + account */
 
 .auth-form {
-  margin-top: var(--space-6);
+  margin-top: var(--space-4);
   display: flex;
   flex-direction: column;
   gap: var(--space-1);
@@ -2013,7 +2314,7 @@ button {
 }
 
 .auth-submit {
-  margin-top: var(--space-5);
+  margin-top: var(--space-3);
   align-self: flex-start;
 }
 
@@ -2041,9 +2342,9 @@ button {
 }
 
 .account-facts {
-  margin: var(--space-6) 0 0;
+  margin: var(--space-4) 0 0;
   display: grid;
-  gap: var(--space-5);
+  gap: var(--space-4);
 }
 
 .account-facts dt {
@@ -2063,8 +2364,8 @@ button {
 }
 
 .profile-nudge {
-  margin-top: var(--space-6);
-  padding: var(--space-5) 0 0;
+  margin-top: var(--space-4);
+  padding: var(--space-3) 0 0;
   max-width: 32rem;
 }
 
@@ -2140,12 +2441,12 @@ button {
 }
 
 .nearby {
-  margin-top: var(--space-5);
+  margin-top: var(--space-4);
 }
 
 .recipe {
-  margin-top: var(--space-5);
-  scroll-margin-top: var(--space-5);
+  margin-top: var(--space-4);
+  scroll-margin-top: var(--space-4);
 }
 
 .recipe-label {
@@ -2238,7 +2539,7 @@ button {
 
 .favorites-list {
   list-style: none;
-  margin: var(--space-5) 0 0;
+  margin: var(--space-4) 0 0;
   padding: 0;
 }
 
@@ -2289,6 +2590,14 @@ button {
   font-size: 0.85rem;
 }
 
+.history-filters {
+  margin-top: var(--space-4);
+}
+
+.history-empty-filter {
+  margin-top: var(--space-5);
+}
+
 .nearby-label {
   display: inline-flex;
   align-items: center;
@@ -2307,6 +2616,25 @@ button {
   font-size: 0.95rem;
 }
 
+.nearby-manual {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  margin: var(--space-3) 0;
+  max-width: 22rem;
+}
+
+.nearby-error {
+  margin: var(--space-2) 0 0;
+  color: var(--ink);
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.nearby-change-place {
+  margin-top: var(--space-3);
+}
+
 .nearby-link {
   display: inline-flex;
   align-items: center;
@@ -2323,7 +2651,7 @@ button {
   padding: 0;
   display: flex;
   flex-direction: column;
-  gap: var(--space-2);
+  gap: var(--space-3);
 }
 
 .nearby-place {
@@ -2360,6 +2688,32 @@ button {
   flex: 1;
 }
 
+.nearby-role {
+  display: block;
+  margin: 0 0 var(--space-1);
+  color: var(--paper-muted);
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.nearby-role.is-best {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--ink);
+}
+
+.nearby-role.is-best::before {
+  content: "";
+  width: 0.45rem;
+  height: 0.45rem;
+  border-radius: var(--radius-pill);
+  background: var(--accent);
+  flex-shrink: 0;
+}
+
 .nearby-head {
   display: flex;
   align-items: baseline;
@@ -2391,6 +2745,16 @@ button {
   margin-top: var(--space-1);
   color: var(--paper-quiet);
   font-size: 0.9rem;
+}
+
+.nearby-directions {
+  display: block;
+  margin-top: var(--space-2);
+  color: var(--ink);
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
 }
 
 .reject-panel {
@@ -2463,10 +2827,16 @@ button {
     object-fit: contain;
   }
 
+  /* Wraps rather than clips. The body clips horizontally, so a nowrap row
+     that outgrows the phone does not just look tight, it puts the last
+     destination past the edge where no thumb can reach it. Wrapping costs a
+     second header line only when the row genuinely does not fit, and it holds
+     however many destinations the nav ends up carrying. */
   .top nav {
     gap: 0.25rem;
     font-size: 0.8rem;
-    flex-wrap: nowrap;
+    flex-wrap: wrap;
+    justify-content: flex-end;
   }
 
   .top nav a.nav-primary {
@@ -2504,29 +2874,30 @@ button {
 
   .hero {
     min-height: auto;
-    gap: var(--space-5);
-    padding: var(--space-4) var(--page-inset) var(--space-6);
+    gap: var(--space-4);
+    padding: var(--space-4) var(--page-inset) var(--space-3);
+  }
+
+  .hero-body {
+    flex: 0 1 auto;
+    gap: var(--space-3);
+  }
+
+  .hero-mark {
+    width: 3rem;
+    height: 3rem;
+  }
+
+  .hero-brand {
+    font-size: 1.25rem;
   }
 
   .hero h1 {
-    font-size: clamp(2.75rem, 14vw, 4rem);
-  }
-
-  /* Bleeds to the right edge so the strip reads as scrollable, but a snapped
-     tile still lands on the page inset rather than flush to the glass. */
-  .hero-peek {
-    margin-right: calc(-1 * var(--page-inset));
-    padding-right: var(--page-inset);
-    scroll-padding-left: var(--page-inset);
-    gap: var(--space-2);
-  }
-
-  .hero-peek li {
-    width: 6.5rem;
+    max-width: 18rem;
+    font-size: clamp(1.6rem, 6.5vw, 1.9rem);
   }
 
   .lede {
-    margin-top: var(--space-3);
     font-size: 1rem;
   }
 
@@ -2535,30 +2906,14 @@ button {
   }
 
   .hero-start {
-    margin-top: var(--space-4);
     max-width: none;
+    padding-bottom: var(--space-2);
   }
 
   .hero-start-primary {
-    min-height: 3.25rem;
-  }
-
-  .hero-start-divider {
-    margin: var(--space-3) 0 var(--space-2);
-  }
-
-  .hero-paths {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-
-  .hero-path {
-    justify-content: center;
-    flex-direction: column;
-    gap: 0.35rem;
-    padding: 0.7rem 0.4rem;
-    font-size: 0.78rem;
-    text-align: center;
-    line-height: 1.2;
+    width: 100%;
+    max-width: none;
+    min-height: 3.5rem;
   }
 
   .intent-picker {
@@ -2575,8 +2930,7 @@ button {
     touch-action: manipulation;
   }
 
-  .hero-start-primary,
-  .hero-path {
+  .hero .cta.hero-start-primary {
     max-width: none;
   }
 
@@ -2591,17 +2945,17 @@ button {
   }
 
   .about {
-    padding-bottom: var(--space-6);
+    padding-bottom: var(--space-5);
   }
 
   .about-tight {
-    padding-top: var(--space-5);
-    padding-bottom: var(--space-6);
+    padding-top: var(--space-4);
+    padding-bottom: var(--space-5);
   }
 
   .flow {
-    margin-top: var(--space-5);
-    gap: var(--space-5);
+    margin-top: var(--space-4);
+    gap: var(--space-4);
   }
 
   .flow-icon {
@@ -2634,14 +2988,14 @@ button {
 
   .product-main {
     max-width: 100%;
-    padding: var(--space-3) var(--page-inset) var(--space-6);
-    padding-bottom: max(var(--space-6), calc(env(safe-area-inset-bottom) + var(--space-4)));
+    padding: var(--space-3) var(--page-inset) var(--space-5);
+    padding-bottom: max(var(--space-5), calc(env(safe-area-inset-bottom) + var(--space-3)));
     min-height: auto;
   }
 
   /* Sticky reaction dock needs room under the card, not under every product page. */
   .product-main:has(.result) {
-    padding-bottom: max(6.5rem, calc(env(safe-area-inset-bottom) + 5.5rem));
+    padding-bottom: max(5.75rem, calc(env(safe-area-inset-bottom) + 4.75rem));
   }
 
   .quiz-progress {
@@ -2663,49 +3017,42 @@ button {
   }
 
   .quiz-options {
-    margin-top: var(--space-4);
-  }
-
-  .quiz-options-grid {
-    gap: 0.65rem;
-  }
-
-  .quiz-options-grid .quiz-option {
-    min-height: 5.75rem;
-    padding: var(--space-3) var(--space-2);
-    font-size: 1rem;
+    margin-top: var(--space-3);
   }
 
   .quiz-options-stack .quiz-option {
-    min-height: 4rem;
-    padding: var(--space-3);
-    font-size: 1.1rem;
+    min-height: 3.5rem;
+    padding: var(--space-3) var(--space-4);
+    font-size: 1.05rem;
   }
 
   .quiz-option-icon {
-    width: 2.35rem;
-    height: 2.35rem;
+    width: 2.5rem;
+    height: 2.5rem;
   }
 
   .quiz-back {
-    margin-top: var(--space-4);
-    min-height: 2.5rem;
+    min-height: 2.75rem;
     touch-action: manipulation;
   }
 
   .result-card {
     margin-top: var(--space-3);
-    padding: var(--space-3);
-    border-radius: var(--radius-card);
+    padding: 0;
+    border-radius: var(--radius-lg);
+  }
+
+  .result-card-body {
+    padding: var(--space-3) var(--space-3) var(--space-4);
   }
 
   .result-media {
     aspect-ratio: 4 / 3;
-    max-height: min(42vh, 20rem);
+    max-height: min(34vh, 16rem);
   }
 
   .result-title {
-    margin-top: var(--space-3);
+    margin-top: 0;
     font-size: clamp(1.55rem, 7vw, 2.1rem);
   }
 
@@ -2757,32 +3104,32 @@ button {
 
   .reaction-bar {
     margin-top: 0;
-    gap: var(--space-5);
+    gap: var(--space-3);
     width: 100%;
   }
 
   .reaction-btn {
-    width: 3.75rem;
-    height: 3.75rem;
-    min-width: 3.75rem;
-    min-height: 3.75rem;
-    font-size: 0;
+    width: 3.5rem;
+    height: 3.5rem;
+    min-width: 3.5rem;
+    min-height: 3.5rem;
     padding: 0;
   }
 
   .reaction-btn-like {
-    width: 4.35rem;
-    height: 4.35rem;
-    min-width: 4.35rem;
-    min-height: 4.35rem;
+    flex: 1 1 auto;
+    width: auto;
+    min-width: 0;
+    height: 3.5rem;
+    min-height: 3.5rem;
+  }
+
+  .reaction-btn-like .reaction-label {
+    display: inline;
   }
 
   .reaction-icon {
-    font-size: 1.65rem;
-  }
-
-  .reaction-label {
-    display: none;
+    font-size: 1.4rem;
   }
 
   .reaction-quiet {
@@ -2823,7 +3170,7 @@ button {
   }
 
   .doc-body section {
-    padding-top: var(--space-6);
+    padding-top: var(--space-5);
   }
 
   .toc a {
@@ -2926,30 +3273,40 @@ button {
 @media (max-height: 520px) and (pointer: coarse) {
   .hero {
     min-height: auto;
-    gap: var(--space-4);
-    padding-top: var(--space-4);
-    padding-bottom: var(--space-5);
+    gap: var(--space-3);
+    padding-top: var(--space-3);
+    padding-bottom: var(--space-4);
+  }
+
+  .hero-body {
+    flex: 0 1 auto;
+    gap: var(--space-2);
+  }
+
+  .hero-logo {
+    margin-bottom: 0;
+    gap: var(--space-2);
+  }
+
+  .hero-mark {
+    width: 2.5rem;
+    height: 2.5rem;
+  }
+
+  .hero-brand {
+    font-size: 1.1rem;
   }
 
   .hero h1 {
-    font-size: clamp(2.25rem, 11vh, 4rem);
+    font-size: clamp(1.35rem, 5vh, 1.75rem);
   }
 
   .lede {
-    margin-top: var(--space-2);
+    font-size: 0.95rem;
   }
 
-  .cta-row,
   .hero-start {
-    margin-top: var(--space-3);
-  }
-
-  .hero-peek {
-    display: none;
-  }
-
-  .hero-peek li {
-    width: 5.5rem;
+    padding-bottom: 0;
   }
 
   .product-main {
@@ -2964,17 +3321,18 @@ button {
 
   /* A pinned dock must not eat a third of a 390px-tall viewport. */
   .reaction-btn {
-    width: 3.25rem;
-    height: 3.25rem;
-    min-width: 3.25rem;
-    min-height: 3.25rem;
+    width: 3rem;
+    height: 3rem;
+    min-width: 3rem;
+    min-height: 3rem;
   }
 
   .reaction-btn-like {
-    width: 3.75rem;
-    height: 3.75rem;
-    min-width: 3.75rem;
-    min-height: 3.75rem;
+    flex: 1 1 auto;
+    width: auto;
+    min-width: 0;
+    height: 3rem;
+    min-height: 3rem;
   }
 
   .reaction-icon {
@@ -2988,18 +3346,18 @@ button {
 
 @media (min-width: 721px) {
   .reaction-btn {
-    width: 4.5rem;
-    height: 4.5rem;
-    min-width: 4.5rem;
-    min-height: 4.5rem;
-    font-size: 0.72rem;
+    width: 3.75rem;
+    height: 3.75rem;
+    min-width: 3.75rem;
+    min-height: 3.75rem;
   }
 
   .reaction-btn-like {
-    width: 5rem;
-    height: 5rem;
-    min-width: 5rem;
-    min-height: 5rem;
+    flex: 1 1 auto;
+    width: auto;
+    min-width: 0;
+    height: 3.75rem;
+    min-height: 3.75rem;
   }
 
   .top nav {
@@ -3008,5 +3366,193 @@ button {
 
   .mark-lockup {
     height: 1.35rem;
+  }
+}
+
+/* P2 Explore loop */
+
+.explore {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.explore-block {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.explore-block-title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  color: var(--ink);
+}
+
+.explore-note {
+  margin: 0;
+  color: var(--paper-muted);
+  font-size: 0.95rem;
+}
+
+.dna-level {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.dna-streak {
+  margin: 0;
+  color: var(--paper-muted);
+  font-size: 0.95rem;
+}
+
+.result-done-level {
+  margin: 0;
+  color: var(--paper-muted);
+  font-size: 0.95rem;
+}
+
+.explore-balance {
+  border: 0;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.explore-balance-compact {
+  margin-top: var(--space-4);
+  gap: var(--space-2);
+}
+
+.explore-balance-hint {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--paper-muted);
+}
+
+.explore-balance-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.explore-balance-btn {
+  appearance: none;
+  border: 0;
+  border-radius: var(--radius-btn);
+  padding: 0.65rem 1rem;
+  background: var(--ink-raised);
+  color: var(--ink);
+  font: inherit;
+  font-size: 0.95rem;
+  cursor: pointer;
+}
+
+.explore-balance-btn.is-selected {
+  background: var(--ink);
+  color: var(--paper);
+}
+
+.explore-balance-btn:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 2px;
+}
+
+.passport-grid {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-2);
+}
+
+.passport-chip {
+  appearance: none;
+  width: 100%;
+  border: 0;
+  border-radius: var(--radius-btn);
+  padding: 0.75rem 0.85rem;
+  background: var(--ink-raised);
+  color: var(--paper-muted);
+  font: inherit;
+  font-size: 0.9rem;
+  text-align: left;
+  cursor: pointer;
+}
+
+.passport-chip.is-stamped {
+  background: var(--ink);
+  color: var(--paper);
+}
+
+.passport-chip:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 2px;
+}
+
+.passport-detail {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.passport-detail p {
+  margin: 0;
+}
+
+.product-bottom-nav {
+  display: none;
+}
+
+@media (max-width: 720px) {
+  .product-bottom-nav {
+    display: block;
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 40;
+    background: var(--paper);
+    padding: var(--space-2) var(--page-inset);
+    padding-bottom: max(var(--space-2), env(safe-area-inset-bottom));
+  }
+
+  .product-bottom-nav-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--space-2);
+  }
+
+  .product-bottom-nav-link {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.2rem;
+    padding: 0.45rem 0.25rem;
+    border-radius: var(--radius-btn);
+    color: var(--paper-muted);
+    text-decoration: none;
+    font-size: 0.72rem;
+  }
+
+  .product-bottom-nav-link.is-active {
+    color: var(--ink);
+    background: var(--ink-raised);
+  }
+
+  .product-bottom-nav-link:focus-visible {
+    outline: 2px solid var(--ink);
+    outline-offset: 2px;
+  }
+
+  .product-main-with-nav {
+    padding-bottom: max(5rem, calc(env(safe-area-inset-bottom) + 4rem));
   }
 }

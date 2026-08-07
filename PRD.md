@@ -118,7 +118,7 @@ Crave → Taste → Eat → Rate → Learn → Explore → Crave
 | `/dna` | Taste dashboard | Shipped (basic) | Pref vs experience, XP, develop-your-taste |
 | `/favorites` | Saved foods | Shipped (foods) | Place favorites later |
 | `/explore` | Quests, Quick Bites, passport | Missing | V1 after baseline |
-| `/history` | Past recommendations | Missing | V1 |
+| `/history` | Past recommendations | Shipped (basic) | Filters Loved / Kinda / Nope / mode; richer place snapshots |
 | `/profile` or `/account` | Account / prefs | Partial (`/account`) | Dietary hard constraints, delete, defaults |
 | `/auth` family | Auth | Partial (`/login`, `/signup`) | Keep; optional OAuth later |
 | `/prd`, `/strategy`, `/brand` | Docs | Shipped | Keep |

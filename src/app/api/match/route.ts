@@ -1,12 +1,15 @@
 import { NextResponse } from "next/server";
+import { HttpError, readJson, withRoute } from "@/lib/api-route";
+import { matchBodySchema } from "@/lib/api-schemas";
+import { parseDnaProfile } from "@/lib/auth-schema";
 import { parseDietary } from "@/lib/dietary";
 import { createNeutralDna } from "@/lib/dna";
 import { NoDietaryMatchError, rank } from "@/lib/engine";
+import { parseExploreBalance } from "@/lib/explore-balance";
 import { parseFavoriteIds } from "@/lib/favorites";
 import { emptySession } from "@/lib/session";
 import type { DnaProfile, SessionState } from "@/lib/taste-types";
 import { parseAnswers } from "@/lib/validate";
-import { parseDnaProfile } from "@/lib/auth-schema";
 
 /**
  * Server-side initial match. Client still keeps a slim rank catalog for
@@ -14,52 +17,49 @@ import { parseDnaProfile } from "@/lib/auth-schema";
  * quiz finish path does not need to ship recipe bodies.
  */
 
-function parseIdList(raw: unknown): string[] {
-  if (!Array.isArray(raw)) return [];
-  return raw.filter((id): id is string => typeof id === "string" && id.length > 0);
-}
+const MAX_ALTERNATES = 8;
+const RANK_FAILED = "Could not rank foods for these answers";
 
-export async function POST(request: Request) {
-  let body: unknown;
-  try {
-    body = await request.json();
-  } catch {
-    return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
+export const POST = withRoute("match", RANK_FAILED, async (request) => {
+  const envelope = matchBodySchema.safeParse(await readJson(request));
+  if (!envelope.success) {
+    return NextResponse.json({ error: "Invalid answers" }, { status: 400 });
   }
 
-  const src = body as Record<string, unknown>;
-  const answers = parseAnswers(src.answers);
+  const answers = parseAnswers(envelope.data.answers);
   if (!answers) {
     return NextResponse.json({ error: "Invalid answers" }, { status: 400 });
   }
 
-  const dna: DnaProfile = parseDnaProfile(src.dna) ?? createNeutralDna();
-  const dietary = parseDietary(src.dietary);
-  const favoriteIds = parseFavoriteIds(src.favoriteIds);
+  const dna: DnaProfile = parseDnaProfile(envelope.data.dna) ?? createNeutralDna();
   const session: SessionState = {
     ...emptySession(answers),
-    rejectedIds: parseIdList(src.rejectedIds),
-    servedIds: parseIdList(src.servedIds),
+    rejectedIds: envelope.data.rejectedIds ?? [],
+    servedIds: envelope.data.servedIds ?? [],
   };
 
   try {
-    const rec = rank(answers, dna, session, dietary, favoriteIds);
+    const rec = rank(
+      answers,
+      dna,
+      session,
+      parseDietary(envelope.data.dietary),
+      parseFavoriteIds(envelope.data.favoriteIds),
+      parseExploreBalance(envelope.data.exploreBalance),
+    );
     return NextResponse.json({
       foodId: rec.primary.food.id,
       explanation: rec.primary.explanation,
       matchedAttributes: rec.primary.matchedAttributes,
-      alternateIds: rec.alternates.slice(0, 8).map((a) => a.food.id),
+      alternateIds: rec.alternates
+        .slice(0, MAX_ALTERNATES)
+        .map((a) => a.food.id),
     });
   } catch (err) {
     if (err instanceof NoDietaryMatchError) {
-      return NextResponse.json(
-        { error: "No foods match your dietary settings" },
-        { status: 422 },
-      );
+      throw new HttpError(422, "No foods match your dietary settings");
     }
-    return NextResponse.json(
-      { error: "Could not rank foods for these answers" },
-      { status: 500 },
-    );
+    // Anything else is a bug in the ranker. withRoute logs it and answers 500.
+    throw err;
   }
-}
+});

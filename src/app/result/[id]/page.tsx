@@ -13,6 +13,10 @@ export async function generateMetadata({ params }: PageProps) {
   const food = getFoodById(id);
   return {
     title: food?.name ?? "Not found",
+    // A result belongs to one person's session. Kept out of the index so a
+    // shared or crawled link never becomes a search listing, matching the
+    // /result/ disallow in robots.ts.
+    robots: { index: false, follow: false },
   };
 }
 

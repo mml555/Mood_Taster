@@ -1,7 +1,12 @@
 import { RANK_FOODS } from "./catalog-data";
 import type { DietaryPrefs } from "./dietary";
 import { EMPTY_DIETARY, passesHardConstraints } from "./dietary";
-import { foodDimensions } from "./dna";
+import { effectiveEntry, foodDimensions } from "./dna";
+import {
+  DEFAULT_EXPLORE_BALANCE,
+  NOVELTY_WEIGHT,
+  type ExploreBalance,
+} from "./explore-balance";
 import { buildExplanation, matchedAttributes } from "./explain";
 import { favoriteIdSet } from "./favorites";
 import type {
@@ -20,6 +25,10 @@ import type {
 
 /** Soft nudge for saved foods. Matches novelty weight so quiz still leads. */
 export const FAVORITE_BOOST = 0.05;
+
+/** Quiz + DNA weights stay fixed; novelty weight comes from explore balance. */
+const QUIZ_WEIGHT = 0.75;
+const DNA_WEIGHT = 0.2;
 
 const NEAR_FLAVOR: Record<Flavor, Flavor[]> = {
   savory: ["spicy"],
@@ -93,8 +102,82 @@ function temperatureScore(answer: Temperature, food: RankFood): number {
   return 0.2;
 }
 
+function effortScore(
+  effort: Answers["cookEffort"],
+  food: RankFood,
+): number {
+  if (effort === "any" || food.recipeMinutes == null) return 0.5;
+  const t = food.recipeMinutes;
+  if (effort === "barely") {
+    if (t <= 15) return 1;
+    if (t <= 25) return 0.55;
+    if (t <= 40) return 0.2;
+    return 0.05;
+  }
+  if (effort === "fifteen") {
+    if (t <= 20) return 1;
+    if (t <= 35) return 0.5;
+    if (t <= 50) return 0.2;
+    return 0.05;
+  }
+  // "cook": open to a real project
+  if (t >= 30) return 1;
+  if (t >= 15) return 0.7;
+  return 0.45;
+}
+
+/** Appetite size → preferred dish weight (distinct from explicit heaviness). */
+function hungerScore(hunger: Answers["hunger"], food: RankFood): number {
+  if (hunger === "any") return 0.5;
+  const target: Heaviness =
+    hunger === "peckish"
+      ? "light"
+      : hunger === "starving"
+        ? "filling"
+        : "medium";
+  return (
+    1 -
+    Math.abs(HEAVINESS_VALUE[target] - HEAVINESS_VALUE[food.heaviness]) / 2
+  );
+}
+
+/**
+ * Table vibe without new catalog fields: cozy → comfort/hot, bright →
+ * lighter/cooler, bold → higher adventure.
+ */
+function vibeScore(vibe: Answers["vibe"], food: RankFood): number {
+  if (vibe === "any") return 0.5;
+  if (vibe === "cozy") {
+    return (
+      0.55 * adventureScore("safe", food) +
+      0.45 * temperatureScore("hot", food)
+    );
+  }
+  if (vibe === "bright") {
+    return (
+      0.5 * temperatureScore("cold", food) +
+      0.5 * heavinessScore("light", food)
+    );
+  }
+  return adventureScore("surprise", food);
+}
+
 function quizMatch(answers: Answers, food: RankFood): number {
   const caresAboutTemp = answers.temperature !== "any";
+  const caresAboutEffort = answers.cookEffort !== "any";
+  const caresAboutHunger = answers.hunger !== "any";
+  const caresAboutVibe = answers.vibe !== "any";
+
+  if (caresAboutEffort) {
+    return (
+      0.28 * flavorScore(answers.flavor, food) +
+      0.22 * textureScore(answers.texture, food) +
+      0.15 * heavinessScore(answers.heaviness, food) +
+      0.12 * adventureScore(answers.adventure, food) +
+      0.23 * effortScore(answers.cookEffort, food)
+    );
+  }
+
   if (caresAboutTemp) {
     return (
       0.28 * flavorScore(answers.flavor, food) +
@@ -104,6 +187,21 @@ function quizMatch(answers: Answers, food: RankFood): number {
       0.15 * temperatureScore(answers.temperature, food)
     );
   }
+
+  if (caresAboutHunger || caresAboutVibe) {
+    const hungerW = caresAboutHunger ? (caresAboutVibe ? 0.17 : 0.22) : 0;
+    const vibeW = caresAboutVibe ? (caresAboutHunger ? 0.17 : 0.22) : 0;
+    const rest = 1 - hungerW - vibeW;
+    return (
+      rest * 0.35 * flavorScore(answers.flavor, food) +
+      rest * 0.3 * textureScore(answers.texture, food) +
+      rest * 0.2 * heavinessScore(answers.heaviness, food) +
+      rest * 0.15 * adventureScore(answers.adventure, food) +
+      hungerW * hungerScore(answers.hunger, food) +
+      vibeW * vibeScore(answers.vibe, food)
+    );
+  }
+
   return (
     0.35 * flavorScore(answers.flavor, food) +
     0.3 * textureScore(answers.texture, food) +
@@ -116,12 +214,15 @@ function dnaMatch(dna: DnaProfile, food: RankFood): number {
   const dims = foodDimensions(food);
   if (dims.length === 0) return 0.5;
 
-  const withSamples = dims.filter((d) => dna[d].samples > 0);
+  const withSamples = dims.filter((d) => {
+    const entry = effectiveEntry(dna, d);
+    return entry.samples > 0;
+  });
   if (withSamples.length === 0) return 0.5;
 
   const mean =
     withSamples.reduce((sum, d) => {
-      const entry = dna[d];
+      const entry = effectiveEntry(dna, d);
       const effective = 0.5 + (entry.score - 0.5) * entry.confidence;
       return sum + effective;
     }, 0) / withSamples.length;
@@ -160,14 +261,18 @@ function scoreOnly(
   dna: DnaProfile,
   ctx: ScoreContext,
   favorites: ReadonlySet<string>,
+  noveltyWeight: number,
 ): { food: RankFood; score: number } {
   const q = quizMatch(answers, food);
   const d = dnaMatch(dna, food);
   const n = noveltyScore(food.id, ctx);
+  // Keep quiz+DNA dominant; noveltyWeight shifts Comfort ↔ Explore.
+  const quizW = QUIZ_WEIGHT;
+  const dnaW = DNA_WEIGHT;
   const score =
-    0.75 * q +
-    0.2 * d +
-    0.05 * n +
+    quizW * q +
+    dnaW * d +
+    noveltyWeight * n +
     (favorites.has(food.id) ? FAVORITE_BOOST : 0) -
     rejectionPenalty(food.id, ctx) -
     recentPenalty(food.id, ctx);
@@ -196,6 +301,9 @@ function candidatePool(
     pool = RANK_FOODS.filter((food) => food.hasRecipe);
   } else if (answers.intent === "snack") {
     pool = RANK_FOODS.filter((food) => food.snack === true);
+  } else if (answers.intent === "restaurant") {
+    // Go Out: dishes you can find nearby, not packaged snack products.
+    pool = RANK_FOODS.filter((food) => food.snack !== true);
   } else {
     pool = RANK_FOODS;
   }
@@ -215,6 +323,7 @@ export function rank(
   session: SessionState,
   dietary: DietaryPrefs = EMPTY_DIETARY,
   favoriteIds: ReadonlySet<string> | readonly string[] = [],
+  exploreBalance: ExploreBalance = DEFAULT_EXPLORE_BALANCE,
 ): Recommendation {
   const pool = candidatePool(answers, dietary);
 
@@ -224,8 +333,11 @@ export function rank(
 
   const favorites = favoriteIdSet(favoriteIds);
   const ctx = buildScoreContext(session);
+  const noveltyWeight = NOVELTY_WEIGHT[exploreBalance];
   const scored = pool
-    .map((food) => scoreOnly(food, answers, dna, ctx, favorites))
+    .map((food) =>
+      scoreOnly(food, answers, dna, ctx, favorites, noveltyWeight),
+    )
     .sort((a, b) => {
       if (b.score !== a.score) return b.score - a.score;
       return a.food.id.localeCompare(b.food.id);
@@ -253,6 +365,7 @@ export function nextAfterReject(
   currentId: string,
   dietary: DietaryPrefs = EMPTY_DIETARY,
   favoriteIds: ReadonlySet<string> | readonly string[] = [],
+  exploreBalance: ExploreBalance = DEFAULT_EXPLORE_BALANCE,
 ): ScoredFood | null {
   const withReject = {
     ...session,
@@ -260,7 +373,14 @@ export function nextAfterReject(
       ? session.rejectedIds
       : [...session.rejectedIds, currentId],
   };
-  const rec = rank(answers, dna, withReject, dietary, favoriteIds);
+  const rec = rank(
+    answers,
+    dna,
+    withReject,
+    dietary,
+    favoriteIds,
+    exploreBalance,
+  );
   if (rec.primary.food.id === currentId) {
     const alt = rec.alternates.find((s) => s.food.id !== currentId);
     return alt ?? null;

@@ -3,15 +3,24 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Sparkles } from "lucide-react";
-import { FormEvent, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
+import { ANALYTICS_EVENTS, track } from "@/lib/analytics";
 import { signupSchema } from "@/lib/auth-schema";
-import { createClient, isSupabaseConfigured } from "@/lib/supabase/client";
 import { loadDnaForUser } from "@/lib/dna-sync";
+import { loadDietaryForUser } from "@/lib/dietary-sync";
+import { loadFavoritesForUser } from "@/lib/favorites-sync";
+import { loadGamificationForUser } from "@/lib/gamification-sync";
+import { loadHistoryForUser } from "@/lib/history-sync";
+import { createClient, isSupabaseConfigured } from "@/lib/supabase/client";
 
 export function SignupForm() {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
+
+  useEffect(() => {
+    track(ANALYTICS_EVENTS.signupShown, { source: "signup_page" });
+  }, []);
 
   if (!isSupabaseConfigured()) {
     return (
@@ -62,6 +71,9 @@ export function SignupForm() {
       }
 
       if (!data.session) {
+        track(ANALYTICS_EVENTS.signupCompleted, {
+          confirmed: false,
+        });
         setError("Check your email to confirm your account, then sign in.");
         setPending(false);
         return;
@@ -75,7 +87,14 @@ export function SignupForm() {
         updated_at: new Date().toISOString(),
       });
 
-      await loadDnaForUser();
+      await Promise.all([
+        loadDnaForUser(),
+        loadDietaryForUser(),
+        loadFavoritesForUser(),
+        loadHistoryForUser(),
+        loadGamificationForUser(),
+      ]);
+      track(ANALYTICS_EVENTS.signupCompleted, { confirmed: true });
       router.push("/account");
       router.refresh();
     } catch (err) {

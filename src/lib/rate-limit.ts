@@ -48,11 +48,37 @@ export function resetRateLimits(): void {
   buckets.clear();
 }
 
-export function clientRateKey(request: Request, route: string): string {
+/**
+ * The caller's address, taking only values a client cannot set for itself.
+ *
+ * Vercel strips inbound `x-vercel-*` headers and writes this one itself, so it
+ * is the trustworthy source and is preferred. Failing that, the proxy appends
+ * the peer address to the RIGHT of `x-forwarded-for`, so the last entry is the
+ * one our own edge wrote. The leftmost entry is whatever the client sent, which
+ * is why reading it defeats the point: anyone could vary that header per
+ * request and get a fresh bucket every time, walking a password list at the
+ * login route unthrottled.
+ *
+ * With several trusted proxies in front of us the last entry is the innermost
+ * one, so callers share a bucket and the limit gets stricter, never looser.
+ */
+function clientIp(request: Request): string {
+  const vercel = request.headers.get("x-vercel-forwarded-for")?.trim();
+  if (vercel) return vercel;
+
   const forwarded = request.headers.get("x-forwarded-for");
-  const ip =
-    (forwarded ? forwarded.split(",")[0]?.trim() : null) ||
-    request.headers.get("x-real-ip") ||
-    "anon";
-  return `${route}:${ip}`;
+  if (forwarded) {
+    const hops = forwarded
+      .split(",")
+      .map((hop) => hop.trim())
+      .filter(Boolean);
+    const nearest = hops[hops.length - 1];
+    if (nearest) return nearest;
+  }
+
+  return request.headers.get("x-real-ip")?.trim() || "anon";
+}
+
+export function clientRateKey(request: Request, route: string): string {
+  return `${route}:${clientIp(request)}`;
 }

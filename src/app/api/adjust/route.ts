@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { ask, isAiConfigured, parseJsonObject, sanitizeLine } from "@/lib/ai";
+import { readJson, withRoute } from "@/lib/api-route";
 import { adjustBodySchema } from "@/lib/api-schemas";
 import { clientRateKey, rateLimitAllow } from "@/lib/rate-limit";
 import {
@@ -35,23 +36,19 @@ const RULES = [
   "No em dashes anywhere.",
 ].join(" ");
 
-export async function POST(request: Request) {
+/** Every soft failure looks the same to the caller: keep what you had. */
+const UNCHANGED = { answers: null, note: null };
+
+export const POST = withRoute("adjust", "Could not adjust", async (request) => {
   if (!isAiConfigured()) {
-    return NextResponse.json({ answers: null, note: null });
+    return NextResponse.json(UNCHANGED);
   }
 
   if (!rateLimitAllow(clientRateKey(request, "adjust"))) {
-    return NextResponse.json({ answers: null, note: null });
+    return NextResponse.json(UNCHANGED);
   }
 
-  let body: unknown;
-  try {
-    body = await request.json();
-  } catch {
-    return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
-  }
-
-  const envelope = adjustBodySchema.safeParse(body);
+  const envelope = adjustBodySchema.safeParse(await readJson(request));
   if (!envelope.success) {
     return NextResponse.json(
       { error: "Invalid answers or note" },
@@ -77,24 +74,34 @@ export async function POST(request: Request) {
   });
 
   if (raw === null) {
-    return NextResponse.json({ answers: null, note: null });
+    return NextResponse.json(UNCHANGED);
   }
 
   const parsed = parseJsonObject(raw);
   if (!parsed) {
-    return NextResponse.json({ answers: null, note: null });
+    return NextResponse.json(UNCHANGED);
   }
 
   // Re-validate against the same guards used for user input. The model is not
   // more trusted than the browser. Force original intent so adjust cannot flip
   // Eat out ↔ Cook.
-  const nextAnswers = parseAnswers({ ...parsed, intent: answers.intent });
+  //
+  // The current answers are the base, not an empty object. RULES only asks for
+  // four axes, so temperature, cookEffort, hunger, and vibe are absent from the
+  // reply, and parseAnswers reads a missing axis as "any" to tolerate legacy
+  // sessions. Spreading the reply alone would silently reset every axis the
+  // model was never asked about, which the ranker reads as "no preference".
+  const nextAnswers = parseAnswers({
+    ...answers,
+    ...parsed,
+    intent: answers.intent,
+  });
   if (!nextAnswers) {
-    return NextResponse.json({ answers: null, note: null });
+    return NextResponse.json(UNCHANGED);
   }
 
   const note =
     typeof parsed.note === "string" ? sanitizeLine(parsed.note, 120) : null;
 
   return NextResponse.json({ answers: nextAnswers, note });
-}
+});

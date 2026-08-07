@@ -15,13 +15,14 @@ Tickets are ordered **P0 → P2**. Each ticket names the **live route or module*
 | — | Home entry | `/` |
 | — | Quiz (Eat out / Cook + 4 axes) | `/taste` |
 | — | Result + reject + rate | `/result/[id]` |
-| — | Places nearby | `/api/places` + result Eat out |
+| — | Places nearby (labeled cards) | `/api/places` + result Eat out |
 | — | Catalog recipes | `catalog.ts` + `recipes.ts` + Cook result |
 | — | Slim rank catalog | `catalog-data.ts` + `engine.ts` |
 | — | Local Taste DNA | `/dna` + `dna.ts` |
 | — | Optional accounts + DNA sync | `/signup`, `/login`, `/account`, `/api/dna` |
 | — | Deterministic rank | `engine.ts` |
 | — | Unit tests (rank / DNA) | `npm test` (vitest) |
+| — | Recommendation history | `/history` + `history.ts` |
 
 ---
 
@@ -79,39 +80,38 @@ pool returns a recovery screen. Copy notes menus are not medical guarantees.
 
 ---
 
-### P0-6 · Make Something practicality inputs
+### P0-6 · Make Something practicality inputs · done
 **Routes:** `/taste` (Cook), `/result/[id]`  
 **PRD:** §17–18  
 
-Add effort/time taps (barely any / ~15 min / I can cook). Prefer catalog recipes that fit. Surface time + difficulty on result. Missing-ingredient / pantry matching can wait.
-
-**Done when:** Cook path asks at least time/effort and ranks with it; result shows time clearly.
+Cook path asks effort first (Barely any / About 15 min / I can cook). Rank
+weights `recipeMinutes`. Recipe meta shows time + Easy/Doable/Project.
 
 ---
 
-### P0-7 · Manual location fallback
+### P0-7 · Manual location fallback · done
 **Routes:** `/result/[id]` (Eat out), `/api/places`  
 **PRD:** §23, §72  
 
-When geolocation denied or fails: city / ZIP search. Keep Maps deep link. Error states with recovery CTAs.
-
-**Done when:** User can get nearby results without granting browser location.
+When geo fails: city/ZIP form geocodes server-side, then Places search. Maps
+deep link remains. Change place returns to the form.
 
 ---
 
 ## P1 — Memory, places quality, account depth
 
-### P1-1 · Recommendation history
-**Routes:** new `/history`  
+### P1-1 · Recommendation history · done
+**Routes:** `/history`  
+**Modules:** `history.ts`, `history-sync.ts`, `/api/history`  
 **PRD:** §52  
 
-Persist sessions (local first; cloud when authed). List food, date, match/intent, rating. Filters: All / Loved / Kinda / Nope / Restaurants / Recipes / Snacks. "Find again" reopens result or re-ranks with same craving.
+Persist sessions (local first; cloud when authed). List food, date, match/intent, rating. Filters: All / Loved / Kinda / Nope / Restaurants / Recipes / Snacks. "Find again" reopens result with the same craving when answers were saved.
 
 **Done when:** Guest and authed users can reopen past picks after a reload.
 
 ---
 
-### P1-2 · Richer restaurant cards
+### P1-2 · Richer restaurant cards · done
 **Routes:** `/result/[id]`, `/api/places`  
 **PRD:** §22  
 
@@ -121,7 +121,7 @@ Up to 3 results labeled Best match / Closest / Wildcard when data allows. Show d
 
 ---
 
-### P1-3 · Taste DNA preference vs experience
+### P1-3 · Taste DNA preference vs experience · done
 **Routes:** `/dna`  
 **Modules:** `dna.ts`, `/api/dna`  
 **PRD:** §27–30, §39  
@@ -132,11 +132,12 @@ Split preference_score and experience_score (or equivalent). Discovery % from co
 
 ---
 
-### P1-4 · Account preferences and deletion
-**Routes:** `/account`, `/privacy` alignment  
+### P1-4 · Account preferences and deletion — done
+**Routes:** `/account`, `/api/preferences`, `DELETE /api/account`  
 **PRD:** §26, §69  
 
-UI for dietary restrictions, disliked foods, default location. Clear history. Delete account + cloud DNA (and document how).
+Cloud sync for dietary prefs on `profiles.dietary`. Account delete wipes DNA,
+favorites, history, profile, and the auth user (self-serve from `/account`).
 
 **Done when:** User can set a hard restriction and delete cloud DNA without emailing support.
 
@@ -153,7 +154,7 @@ Save food (incl. recipes) locally + cloud when authed. List at `/favorites`. Sof
 
 ---
 
-### P1-6 · Analytics event spine
+### P1-6 · Analytics event spine · done
 **Modules:** client analytics helper (PostHog or equivalent)  
 **PRD:** §63–65  
 
@@ -161,9 +162,11 @@ Instrument: home, intent, question, abandon, recommendation, alternate, places c
 
 **Done when:** Funnel from home → recommendation → feedback is visible in the analytics tool for production.
 
+**Shipped:** Typed `track()` in `src/lib/analytics.ts` (PostHog capture when `NEXT_PUBLIC_POSTHOG_KEY` is set; no-op otherwise). Funnel events wired on home, quiz, result, places, recipe, signup. North star: `feedback_submitted` with `successful: true` (rating nailed). Build that funnel insight in PostHog for production.
+
 ---
 
-### P1-7 · Go Out question depth (fixed bank, not fully adaptive)
+### P1-7 · Go Out question depth (fixed bank, not fully adaptive) · done
 **Routes:** `/taste`  
 **PRD:** §13–14  
 
@@ -171,13 +174,15 @@ Add optional vibe / hunger / direction questions when snack/clue are not in play
 
 **Done when:** Eat out can ask 1–2 extra high-value questions without exceeding ~45s median.
 
+**Shipped:** Go Out asks hunger + vibe (both skippable via Any) before the four craving axes. Cap stays at 6. Wired into `rank()`; other intents default those fields to `any`.
+
 ---
 
 ## P2 — Explore loop and gamification
 
 Only after P0 recommendation quality is solid.
 
-### P2-1 · Explore page shell
+### P2-1 · Explore page shell · done
 **Routes:** new `/explore`  
 **PRD:** §50  
 
@@ -185,9 +190,11 @@ Sections: Today’s quest (stub), Develop your taste, Quick Bite, Passport progr
 
 **Done when:** Authenticated mobile user can reach Explore from persistent nav.
 
+**Shipped:** `/explore` with quest, develop, Quick Bite, passport, achievements. `ProductBottomNav` on taste/DNA/explore/history for signed-in users.
+
 ---
 
-### P2-2 · Quick Bites (active learning)
+### P2-2 · Quick Bites (active learning) · done
 **Routes:** `/explore`, `/dna`  
 **PRD:** §48–49  
 
@@ -195,9 +202,11 @@ One-tap pairwise questions prioritized by low-confidence dimensions. Updates DNA
 
 **Done when:** Answering a Quick Bite visibly moves a low-confidence dimension.
 
+**Shipped:** `quick-bites.ts` + Explore Quick Bite UI. Prefs nudge + XP; streak on answer.
+
 ---
 
-### P2-3 · Flavor XP and levels
+### P2-3 · Flavor XP and levels · done
 **Modules:** DNA model, `/dna`  
 **PRD:** §36–38  
 
@@ -205,9 +214,11 @@ XP per dimension from try/rate/quest/Quick Bite. Levels secondary to DNA viz. Ov
 
 **Done when:** Rating a match awards dimension XP and level label can change.
 
+**Shipped:** `xp.ts`; rating awards XP in ResultView; DNA shows overall label + per-dim levels.
+
 ---
 
-### P2-4 · Taste Quests
+### P2-4 · Taste Quests · done
 **Routes:** `/explore`, `/dna`  
 **PRD:** §39–41  
 
@@ -215,9 +226,11 @@ Rule-generated quests (tangy, creamy, cuisine, comfort breaker). MVP completion 
 
 **Done when:** User can start and complete one quest; DNA/experience updates.
 
+**Shipped:** `quests.ts` on Explore; confirm bumps experience XP; cuisine quests stamp passport when catalog has that cuisine.
+
 ---
 
-### P2-5 · Food Passport
+### P2-5 · Food Passport · done
 **Routes:** `/explore`, passport detail  
 **PRD:** §42–44  
 
@@ -225,9 +238,11 @@ Cuisine stamps from confirmed experiences. Progress N / M. Detail: experiences, 
 
 **Done when:** Completing a cuisine-tagged recommendation (with confirm) stamps the passport.
 
+**Shipped:** `cuisines.ts` + `passport.ts`; nailed/kinda ratings stamp; `/passport` detail grid.
+
 ---
 
-### P2-6 · Weekly Taste Streak
+### P2-6 · Weekly Taste Streak · done
 **Routes:** `/dna` or `/explore`  
 **PRD:** §47  
 
@@ -235,9 +250,11 @@ Weekly meaningful action streak (feedback / quest / Quick Bite), not daily force
 
 **Done when:** Completing one meaningful action in consecutive weeks increments the streak.
 
+**Shipped:** `streak.ts`; shown on Explore and DNA; increments on feedback, quest, Quick Bite.
+
 ---
 
-### P2-7 · Adaptive question engine
+### P2-7 · Adaptive question engine · done
 **Routes:** `/taste`  
 **PRD:** §15, V1.5  
 
@@ -245,15 +262,19 @@ Dynamic stop when craving confidence is enough. Use DNA gaps and prior answers. 
 
 **Done when:** High-signal early answers can end the quiz early with equal or better Nailed it rate.
 
+**Shipped:** `adaptive-quiz.ts`; TasteQuiz finishes early when flavor+texture+enough signal (≥0.75). Clue path stays fixed.
+
 ---
 
-### P2-8 · Comfort vs Explore control
+### P2-8 · Comfort vs Explore control · done
 **Routes:** `/taste` or result  
 **PRD:** §58  
 
 User-facing balance control. Default balanced. Novelty weight adjustable without breaking hard constraints.
 
 **Done when:** Explore mode increases novel catalog picks while staying inside predicted liking.
+
+**Shipped:** `explore-balance.ts` + control on DNA and quiz; `rank()` novelty weight comfort 0.02 / balanced 0.05 / explore 0.14.
 
 ---
 

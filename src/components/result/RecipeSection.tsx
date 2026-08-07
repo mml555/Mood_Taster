@@ -2,6 +2,7 @@
 
 import { Check, ChefHat, Clock, Copy, Heart } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
+import { ANALYTICS_EVENTS, track } from "@/lib/analytics";
 import {
   FAVORITES_KEY,
   formatRecipeText,
@@ -11,6 +12,12 @@ import {
 } from "@/lib/favorites";
 import { persistFavorites } from "@/lib/favorites-sync";
 import type { Recipe } from "@/lib/taste-types";
+
+function difficultyLabel(minutes: number): string {
+  if (minutes <= 15) return "Easy";
+  if (minutes <= 35) return "Doable";
+  return "Project";
+}
 
 export function RecipeSection({
   foodId,
@@ -32,7 +39,12 @@ export function RecipeSection({
     queueMicrotask(() => {
       setSaved(isFavorite(foodId));
     });
-  }, [foodId]);
+    track(ANALYTICS_EVENTS.recipeOpen, {
+      food_id: foodId,
+      time_minutes: recipe.timeMinutes,
+      servings: recipe.servings,
+    });
+  }, [foodId, recipe.servings, recipe.timeMinutes]);
 
   const onCopy = useCallback(async () => {
     const text = formatRecipeText(foodName, recipe);
@@ -77,6 +89,7 @@ export function RecipeSection({
           <Clock size={16} strokeWidth={1.5} aria-hidden />
           {recipe.timeMinutes} min
         </span>
+        <span>{difficultyLabel(recipe.timeMinutes)}</span>
         <span>{recipe.servings} servings</span>
       </p>
 

@@ -28,6 +28,7 @@ import {
 } from "react";
 import {
   applyRating,
+  foodDimensions,
   formatDnaChangeLine,
   HIT_TAGS,
   MISS_TAGS,
@@ -37,17 +38,28 @@ import {
   type DnaDelta,
 } from "@/lib/dna";
 import { persistDna } from "@/lib/dna-sync";
+import { ANALYTICS_EVENTS, track } from "@/lib/analytics";
 import { ProfileNudge } from "@/components/ProfileNudge";
 import type { PlacesState } from "@/components/result/NearbySection";
 import { readDietary } from "@/lib/dietary";
 import { nextAfterReject, rank } from "@/lib/engine";
+import { readExploreBalance } from "@/lib/explore-balance";
 import {
   isFavorite,
   readFavorites,
   toggleFavorite,
 } from "@/lib/favorites";
 import { persistFavorites } from "@/lib/favorites-sync";
+import { persistGamification } from "@/lib/gamification-sync";
+import {
+  recordRecommendationRating,
+  recordRecommendationShown,
+} from "@/lib/history-sync";
+import { confirmPassportExperience, readPassport } from "@/lib/passport";
+import { recordMeaningfulAction } from "@/lib/streak";
+import { awardRatingXp, overallTasteLabel, readXp, writeXp } from "@/lib/xp";
 import { capitalize } from "@/lib/explain";
+import { parsePlacesResponse } from "@/lib/api-schemas";
 import {
   mapsSearchUrl,
   readCachedGeo,
@@ -119,6 +131,7 @@ export function ResultView({ food }: ResultViewProps) {
   const [imgFailed, setImgFailed] = useState(false);
   const [deltas, setDeltas] = useState<DnaDelta[] | null>(null);
   const [lastRating, setLastRating] = useState<Rating | null>(null);
+  const [levelLabel, setLevelLabel] = useState<string | null>(null);
   const [pendingRating, setPendingRating] = useState<Rating | null>(null);
   const [feedbackTags, setFeedbackTags] = useState<string[]>([]);
   const [emptyAlts, setEmptyAlts] = useState(false);
@@ -127,6 +140,7 @@ export function ResultView({ food }: ResultViewProps) {
   const [cookTip, setCookTip] = useState<string | null>(null);
   const [places, setPlaces] = useState<NearbyPlace[]>([]);
   const [placesState, setPlacesState] = useState<PlacesState>("locating");
+  const [locationError, setLocationError] = useState<string | null>(null);
   const [intent, setIntent] = useState<Intent | null>(readIntentSync);
 
   const [whyPanelOpen, setWhyPanelOpen] = useState(false);
@@ -147,6 +161,8 @@ export function ResultView({ food }: ResultViewProps) {
   const dragXRef = useRef(0);
   const busyRef = useRef(false);
   const cardRef = useRef<HTMLDivElement>(null);
+  /** User opted into city/ZIP; ignore late browser geolocation results. */
+  const placesManualRef = useRef(false);
 
   useEffect(() => {
     renderId.current += 1;
@@ -155,8 +171,8 @@ export function ResultView({ food }: ResultViewProps) {
 
     queueMicrotask(() => {
       setImgFailed(false);
-      setWhyOpen(false);
       setDeltas(null);
+      setLevelLabel(null);
       setLastRating(null);
       setEmptyAlts(false);
       setRiff(null);
@@ -198,6 +214,27 @@ export function ResultView({ food }: ResultViewProps) {
       setHasSession(true);
       setSessionReady(true);
 
+      const isAlternate = rejectNote;
+      track(ANALYTICS_EVENTS.recommendation, {
+        food_id: food.id,
+        intent: active.answers.intent,
+        alternate: isAlternate,
+      });
+      if (isAlternate) {
+        track(ANALYTICS_EVENTS.alternate, {
+          food_id: food.id,
+          intent: active.answers.intent,
+        });
+      }
+
+      const prefetched = readPrefetchedPlaces(food.id);
+      void recordRecommendationShown({
+        foodId: food.id,
+        intent: active.answers.intent,
+        answers: active.answers,
+        place: prefetched?.[0] ?? null,
+      });
+
       // Enhancement only. The explanation above is already correct and shown.
       void polish(food.id, active.answers, token, abort.signal);
     });
@@ -236,7 +273,10 @@ export function ResultView({ food }: ResultViewProps) {
     return () => {
       abort.abort();
     };
-  }, [food]);
+    // rejectNote only ever changes alongside food: rejecting routes to a new
+    // food id carrying ?alt=1. Listed so the tracked alternate flag can never
+    // go stale against the food it describes.
+  }, [food, rejectNote]);
 
   // Places only for Go out. Cook shows the recipe. Snack and no-clue stay dish-first.
   useEffect(() => {
@@ -252,8 +292,10 @@ export function ResultView({ food }: ResultViewProps) {
     }, 2500);
 
     queueMicrotask(() => {
+      placesManualRef.current = false;
       setPlaces([]);
       setPlacesState("locating");
+      setLocationError(null);
 
       const prefetched = readPrefetchedPlaces(food.id);
       if (prefetched && prefetched.length > 0) {
@@ -278,13 +320,15 @@ export function ResultView({ food }: ResultViewProps) {
 
       navigator.geolocation.getCurrentPosition(
         (pos) => {
-          if (cancelled) return;
+          if (cancelled || placesManualRef.current) return;
           writeCachedGeo(pos.coords.latitude, pos.coords.longitude);
           setPlacesState("loading");
           void load(pos.coords.latitude, pos.coords.longitude);
         },
         () => {
-          if (!cancelled) setPlacesState("fallback");
+          if (!cancelled && !placesManualRef.current) {
+            setPlacesState("fallback");
+          }
         },
         { timeout: 5000, maximumAge: 300_000 },
       );
@@ -309,12 +353,17 @@ export function ResultView({ food }: ResultViewProps) {
           `/api/places?foodId=${encodeURIComponent(food.id)}&lat=${lat}&lng=${lng}`,
           { signal: abort.signal },
         );
-        if (cancelled || token !== renderId.current || abort.signal.aborted) {
+        if (
+          cancelled ||
+          placesManualRef.current ||
+          token !== renderId.current ||
+          abort.signal.aborted
+        ) {
           return;
         }
 
-        const data = (await res.json()) as { places?: NearbyPlace[] };
-        const found = data.places ?? [];
+        const data = parsePlacesResponse(await res.json());
+        const found = data.places;
 
         if (found.length === 0) {
           setPlacesState("fallback");
@@ -324,7 +373,13 @@ export function ResultView({ food }: ResultViewProps) {
         setPlaces(found);
         setPlacesState("ready");
       } catch {
-        if (!cancelled && !abort.signal.aborted) setPlacesState("fallback");
+        if (
+          !cancelled &&
+          !placesManualRef.current &&
+          !abort.signal.aborted
+        ) {
+          setPlacesState("fallback");
+        }
       }
     }
 
@@ -334,6 +389,60 @@ export function ResultView({ food }: ResultViewProps) {
       window.clearTimeout(fallbackTimer);
     };
   }, [food, intent]);
+
+  const onSearchLocation = useCallback(
+    async (query: string) => {
+      placesManualRef.current = true;
+
+      if (!query) {
+        setPlaces([]);
+        setPlacesState("fallback");
+        setLocationError(null);
+        return;
+      }
+
+      setLocationError(null);
+      setPlacesState("loading");
+
+      try {
+        const res = await fetch(
+          `/api/places?foodId=${encodeURIComponent(food.id)}&q=${encodeURIComponent(query)}`,
+        );
+        const data = parsePlacesResponse(await res.json());
+
+        if (data.geoError) {
+          setPlaces([]);
+          setPlacesState("fallback");
+          setLocationError("Could not find that place. Try another city or ZIP.");
+          return;
+        }
+
+        const found = data.places;
+        if (
+          typeof data.lat === "number" &&
+          typeof data.lng === "number"
+        ) {
+          writeCachedGeo(data.lat, data.lng);
+        }
+
+        if (found.length === 0) {
+          setPlaces([]);
+          setPlacesState("fallback");
+          setLocationError("No spots found there. Try a nearby city.");
+          return;
+        }
+
+        writePrefetchedPlaces(food.id, found);
+        setPlaces(found);
+        setPlacesState("ready");
+      } catch {
+        setPlaces([]);
+        setPlacesState("fallback");
+        setLocationError("Search failed. Check your connection and try again.");
+      }
+    },
+    [food.id],
+  );
 
   // Surface the model's summary of what it changed, once, on the next dish.
   useEffect(() => {
@@ -357,6 +466,7 @@ export function ResultView({ food }: ResultViewProps) {
         food.id,
         readDietary(),
         readFavorites().foodIds,
+        readExploreBalance(),
       );
       if (!next) {
         setEmptyAlts(true);
@@ -451,7 +561,6 @@ export function ResultView({ food }: ResultViewProps) {
       }
       setPendingRating(rating);
       setFeedbackTags([]);
-      setWhyOpen(false);
       setWhyPanelOpen(false);
     },
     [lastRating, pendingRating],
@@ -474,13 +583,52 @@ export function ResultView({ food }: ResultViewProps) {
         detail,
       );
       void persistDna(next);
+
+      const dims = foodDimensions(food);
+      const xpResult = awardRatingXp(readXp(), dims, rating);
+      writeXp(xpResult.state);
+      recordMeaningfulAction();
+
+      if (rating === "nailed" || rating === "kinda") {
+        confirmPassportExperience(readPassport(), {
+          foodId: food.id,
+          foodName: food.name,
+          matchScore: rating === "nailed" ? 1 : 0.6,
+        });
+      }
+      void persistGamification();
+
+      const current = readSession();
+      track(ANALYTICS_EVENTS.feedback, {
+        food_id: food.id,
+        rating,
+        tag_count: tags.length,
+        successful: rating === "nailed",
+        intent: current?.answers.intent,
+      });
+      track(ANALYTICS_EVENTS.dnaUpdate, {
+        reason: "feedback",
+        rating,
+        intent: current?.answers.intent,
+      });
+      void recordRecommendationRating(
+        food.id,
+        rating,
+        current
+          ? {
+              intent: current.answers.intent,
+              answers: current.answers,
+              place: places[0] ?? null,
+            }
+          : undefined,
+      );
       setDeltas(changes.filter((d) => d.direction !== "flat"));
       setLastRating(rating);
       setPendingRating(null);
       setFeedbackTags([]);
+      setLevelLabel(overallTasteLabel(xpResult.state));
 
       if (rating === "nope") {
-        const current = readSession();
         if (!current) {
           router.push("/taste");
           return;
@@ -491,7 +639,7 @@ export function ResultView({ food }: ResultViewProps) {
         });
       }
     },
-    [animateExitThen, food, goToNext, pendingRating, router],
+    [animateExitThen, food, goToNext, pendingRating, places, router],
   );
 
   const rated = lastRating !== null || pendingRating !== null;
@@ -631,7 +779,7 @@ export function ResultView({ food }: ResultViewProps) {
 
   return (
     <section className="result">
-      <p className="eyebrow">
+      <p className="eyebrow result-eyebrow">
         {showDone
           ? "Your pick"
           : showFeedback
@@ -641,13 +789,7 @@ export function ResultView({ food }: ResultViewProps) {
             : (adjustNote ??
               (rejectNote
                 ? "Different one."
-                : intent === "recipe"
-                  ? "Cook this"
-                  : intent === "restaurant"
-                    ? "Go out"
-                    : intent === "snack"
-                      ? "Snack"
-                      : "Your match"))}
+                : "Your mood tastes like"))}
       </p>
 
       <div
@@ -698,16 +840,59 @@ export function ResultView({ food }: ResultViewProps) {
           )}
         </div>
 
-        <h1 className="result-title">{food.name}</h1>
-        <p className="result-desc">{food.description}</p>
+        <div className="result-card-body">
+          <h1 className="result-title">{food.name}</h1>
 
-        {attrs.length > 0 ? (
-          <ul className="result-attrs" aria-label="Matched attributes">
-            {attrs.map((a) => (
-              <li key={a}>{a}</li>
-            ))}
-          </ul>
-        ) : null}
+          {intent === "recipe" && food.recipe ? (
+            <p className="result-venue">
+              <ChefHat size={18} strokeWidth={1.5} aria-hidden />
+              Home recipe
+            </p>
+          ) : intent === "restaurant" ? (
+            <p className="result-venue">
+              <MapPin size={18} strokeWidth={1.5} aria-hidden />
+              Nearby spot
+            </p>
+          ) : intent === "snack" ? (
+            <p className="result-venue">
+              Quick bite
+            </p>
+          ) : null}
+
+          <p className="result-desc">{explanation}</p>
+
+          {attrs.length > 0 ? (
+            <ul className="result-attrs" aria-label="Matched attributes">
+              {attrs.map((a) => (
+                <li key={a}>{a}</li>
+              ))}
+            </ul>
+          ) : null}
+
+          {intent === "recipe" && food.recipe ? (
+            <div className="result-meta">
+              <div>
+                <span className="result-meta-label">Prep time</span>
+                <span className="result-meta-value">
+                  {food.recipe.timeMinutes} min
+                </span>
+              </div>
+              <div className="result-meta-end">
+                <span className="result-meta-label">Servings</span>
+                <span className="result-meta-value">
+                  {food.recipe.servings}
+                </span>
+              </div>
+            </div>
+          ) : intent === "snack" ? (
+            <div className="result-meta">
+              <div>
+                <span className="result-meta-label">Time</span>
+                <span className="result-meta-value">Ready now</span>
+              </div>
+            </div>
+          ) : null}
+        </div>
       </div>
 
       {riff ? <p className="result-riff">{riff}</p> : null}
@@ -726,22 +911,35 @@ export function ResultView({ food }: ResultViewProps) {
           {showDone ? (
             <div className="result-done" role="status" aria-live="polite">
               <p className="result-done-mark" aria-hidden>
-                {lastRating === "nailed" ? "♡" : "✓"}
+                ✓
               </p>
-              <h2 className="result-done-title">
-                {lastRating === "nailed" ? "Locked in" : "Close enough"}
-              </h2>
-              <p className="result-done-copy">
-                {deltas && deltas.length > 0
-                  ? formatDnaChangeLine(deltas)
-                  : "Got it. Your Taste DNA learned from this pick."}
-              </p>
+              <h2 className="result-done-title">Decision made.</h2>
+              <p className="result-done-copy">Your only job now is to eat.</p>
+              <div className="result-done-pick">
+                <Image
+                  src={food.image}
+                  alt=""
+                  width={64}
+                  height={64}
+                  className="result-done-thumb"
+                />
+                <div className="result-done-pick-copy">
+                  <p className="result-done-pick-name">{food.name}</p>
+                  {levelLabel ? (
+                    <p className="result-done-level">{levelLabel}</p>
+                  ) : deltas && deltas.length > 0 ? (
+                    <p className="result-done-level">
+                      {formatDnaChangeLine(deltas)}
+                    </p>
+                  ) : null}
+                </div>
+              </div>
               <div className="result-done-actions">
                 {intent === "recipe" ? (
                   food.recipe ? (
                     <a className="cta" href="#recipe">
                       <ChefHat size={20} strokeWidth={1.5} aria-hidden />
-                      See recipe
+                      View recipe
                     </a>
                   ) : (
                     <Link className="cta" href="/taste">
@@ -757,7 +955,7 @@ export function ResultView({ food }: ResultViewProps) {
                     rel="noopener noreferrer"
                   >
                     <MapPin size={20} strokeWidth={1.5} aria-hidden />
-                    Find nearby
+                    Open directions
                   </a>
                 ) : (
                   <Link className="cta" href="/">
@@ -857,11 +1055,10 @@ export function ResultView({ food }: ResultViewProps) {
                   <span className="reaction-icon" aria-hidden>
                     <X size={22} strokeWidth={1.5} />
                   </span>
-                  <span className="reaction-label">Nope</span>
                 </button>
                 <button
                   type="button"
-                  className="reaction-btn"
+                  className="reaction-btn reaction-btn-again"
                   onClick={onTryAgain}
                   disabled={adjusting || rated}
                   aria-label="Try again"
@@ -869,19 +1066,34 @@ export function ResultView({ food }: ResultViewProps) {
                   <span className="reaction-icon" aria-hidden>
                     <RotateCcw size={22} strokeWidth={1.5} />
                   </span>
-                  <span className="reaction-label">Again</span>
                 </button>
                 <button
                   type="button"
                   className="reaction-btn reaction-btn-like"
                   onClick={onLike}
                   disabled={rated || adjusting}
-                  aria-label="I like it"
+                  aria-label={
+                    intent === "restaurant"
+                      ? "Let's go"
+                      : intent === "recipe"
+                        ? "Make this"
+                        : intent === "snack"
+                          ? "That's the one"
+                          : "I like it"
+                  }
                 >
                   <span className="reaction-icon" aria-hidden>
                     <Heart size={22} strokeWidth={1.5} />
                   </span>
-                  <span className="reaction-label">Like</span>
+                  <span className="reaction-label">
+                    {intent === "restaurant"
+                      ? "Let's go"
+                      : intent === "recipe"
+                        ? "Make this"
+                        : intent === "snack"
+                          ? "That's the one"
+                          : "I like it"}
+                  </span>
                 </button>
               </div>
 
@@ -1006,7 +1218,13 @@ export function ResultView({ food }: ResultViewProps) {
               </div>
             )
           ) : intent === "restaurant" ? (
-            <NearbySection food={food} places={places} state={placesState} />
+            <NearbySection
+              food={food}
+              places={places}
+              state={placesState}
+              onSearchLocation={(q) => void onSearchLocation(q)}
+              locationError={locationError}
+            />
           ) : null}
 
           {showDone ? <ProfileNudge context="result" /> : null}
@@ -1039,6 +1257,7 @@ function applySessionView(
     session,
     readDietary(),
     readFavorites().foodIds,
+    readExploreBalance(),
   );
   const match =
     rec.primary.food.id === food.id

@@ -1,87 +1,46 @@
 import { NextResponse } from "next/server";
+import { failOnDbError, readJson, withUser } from "@/lib/api-route";
+import { favoritesBodySchema } from "@/lib/api-schemas";
 import { parseFavoriteIds } from "@/lib/favorites";
-import { isSupabaseConfigured } from "@/lib/supabase/client";
-import { createClient } from "@/lib/supabase/server";
 
-/**
- * Database errors are logged, never returned. The raw Postgres message names
- * schemas and constraints, which is free reconnaissance for an anonymous caller.
- */
 const LOAD_FAILED = "Could not load your favorites";
 const SAVE_FAILED = "Could not save your favorites";
 
-export async function GET() {
-  if (!isSupabaseConfigured()) {
-    return NextResponse.json(
-      { error: "Accounts are not configured" },
-      { status: 503 },
-    );
-  }
-
-  try {
-    const supabase = await createClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-
-    if (!user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
+export const GET = withUser(
+  "favorites",
+  LOAD_FAILED,
+  async ({ supabase, user }) => {
     const { data, error } = await supabase
       .from("favorites")
       .select("food_ids, updated_at")
       .eq("user_id", user.id)
       .maybeSingle();
 
-    if (error) {
-      console.error("[favorites] load failed:", error.message);
-      return NextResponse.json({ error: LOAD_FAILED }, { status: 500 });
-    }
+    failOnDbError(error, "favorites", "load", LOAD_FAILED);
 
     if (!data) {
       return NextResponse.json({ empty: true, foodIds: [] });
     }
 
-    const foodIds = parseFavoriteIds(data.food_ids);
     return NextResponse.json({
       empty: false,
-      foodIds,
+      foodIds: parseFavoriteIds(data.food_ids),
       updatedAt: data.updated_at,
     });
-  } catch (err) {
-    console.error("[favorites] load threw:", err);
-    return NextResponse.json({ error: LOAD_FAILED }, { status: 500 });
-  }
-}
+  },
+);
 
-export async function PUT(request: Request) {
-  if (!isSupabaseConfigured()) {
-    return NextResponse.json(
-      { error: "Accounts are not configured" },
-      { status: 503 },
-    );
-  }
-
-  try {
-    const supabase = await createClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-
-    if (!user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+export const PUT = withUser(
+  "favorites",
+  SAVE_FAILED,
+  async ({ request, supabase, user }) => {
+    const envelope = favoritesBodySchema.safeParse(await readJson(request));
+    if (!envelope.success) {
+      return NextResponse.json({ error: "Invalid favorites" }, { status: 400 });
     }
 
-    let body: unknown;
-    try {
-      body = await request.json();
-    } catch {
-      return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
-    }
-
-    const src = body as Record<string, unknown>;
-    const foodIds = parseFavoriteIds(src.foodIds);
+    // parseFavoriteIds drops unknown ids, dedupes, and caps the list.
+    const foodIds = parseFavoriteIds(envelope.data.foodIds);
 
     const { error } = await supabase.from("favorites").upsert(
       {
@@ -92,14 +51,8 @@ export async function PUT(request: Request) {
       { onConflict: "user_id" },
     );
 
-    if (error) {
-      console.error("[favorites] save failed:", error.message);
-      return NextResponse.json({ error: SAVE_FAILED }, { status: 500 });
-    }
+    failOnDbError(error, "favorites", "save", SAVE_FAILED);
 
     return NextResponse.json({ ok: true, foodIds });
-  } catch (err) {
-    console.error("[favorites] save threw:", err);
-    return NextResponse.json({ error: SAVE_FAILED }, { status: 500 });
-  }
-}
+  },
+);
