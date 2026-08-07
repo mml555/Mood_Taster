@@ -1,6 +1,5 @@
 import { Suspense } from "react";
 import { notFound } from "next/navigation";
-import { SiteFooter } from "@/components/SiteFooter";
 import { SiteHeader } from "@/components/SiteHeader";
 import { ResultView } from "@/components/ResultView";
 import { getFoodById } from "@/lib/catalog";
@@ -37,7 +36,6 @@ export default async function ResultPage({ params }: PageProps) {
           <ResultView key={food.id} food={food} />
         </Suspense>
       </main>
-      <SiteFooter />
     </>
   );
 }

@@ -57,8 +57,9 @@ section 11 no longer governs these:
 |---|---|
 | Eat out / Cook | First quiz step. Cook filters to dishes with recipes; Eat out keeps Nearby |
 | Catalog recipes | Ingredients and steps on the result when intent is Cook |
-| AI why line | Azure rewrites the deterministic explanation after paint |
-| AI riff | One practical tip about eating the dish |
+| AI why line | Rewrites the deterministic explanation after paint |
+| AI riff | Practical tip: order tip for Eat out, cook tip for Cook |
+| AI cook tip | Extra chef tip inside the recipe block when intent is Cook |
 | Conversational reject | "Not feeling it" takes a reason ("too heavy"), and the model moves the craving axes. Ranking stays deterministic |
 | Google Places | Nearby spots on the Eat out result screen, auto-loaded on mount |
 

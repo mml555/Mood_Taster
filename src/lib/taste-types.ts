@@ -1,4 +1,4 @@
-export const INTENTS = ["restaurant", "recipe"] as const;
+export const INTENTS = ["restaurant", "recipe", "snack", "clue"] as const;
 export const FLAVORS = ["savory", "spicy", "sweet", "fresh"] as const;
 export const TEXTURES = ["crunchy", "creamy", "juicy", "soft"] as const;
 export const HEAVINESS = ["light", "medium", "filling"] as const;

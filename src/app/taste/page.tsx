@@ -1,5 +1,4 @@
 import { Suspense } from "react";
-import { SiteFooter } from "@/components/SiteFooter";
 import { SiteHeader } from "@/components/SiteHeader";
 import { TasteQuiz } from "@/components/TasteQuiz";
 
@@ -31,7 +30,6 @@ export default function TastePage() {
           <TasteQuiz />
         </Suspense>
       </main>
-      <SiteFooter />
     </>
   );
 }

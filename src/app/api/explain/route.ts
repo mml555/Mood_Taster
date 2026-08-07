@@ -8,6 +8,10 @@ import { parseAnswers } from "@/lib/validate";
  * Rewrites the deterministic explanation into something warmer, and adds a
  * short practical tip about the dish.
  *
+ * For Cook (intent=recipe), the tip is a home-cook note and an optional cookTip
+ * lands inside the recipe block. Catalog ingredients and steps stay the source
+ * of truth. AI never invents a replacement recipe here.
+ *
  * Both lines come from ONE request. An earlier version issued two calls in
  * parallel, which doubled the quota cost and, on a cold instance, doubled the
  * TLS handshakes for no benefit. One call is the single biggest latency win
@@ -20,21 +24,26 @@ import { parseAnswers } from "@/lib/validate";
 
 const RULES = [
   "You write copy for a food recommendation app.",
-  "Return ONLY a JSON object, no markdown fence, with exactly two keys:",
+  "Return ONLY a JSON object, no markdown fence, with keys:",
   '"why": one sentence saying why this dish fits what the person asked for.',
   "Speak to them as 'you'. Name the qualities they asked for.",
   "Never mention scores, matching, or algorithms. Under 25 words.",
-  '"riff": one sentence with a practical tip. If intent is recipe, tip how to',
-  "cook or shop for it. If intent is restaurant, tip how to order or what to",
-  "look for. Concrete, never generic praise.",
+  '"riff": one sentence with a practical tip.',
+  "If mode is cook: tip how to cook, shop, or plate it at home.",
+  "If mode is eat out: tip how to order or what to look for.",
+  "If mode is snack: tip how to find or enjoy the snack.",
+  "If mode is unsure: tip something concrete about eating it.",
   "Do not repeat the why. Do not use the word 'perfect'. Under 20 words.",
+  '"cookTip": only when mode is cook. One short chef tip tied to THIS recipe',
+  "(timing, heat, or a simple swap). Under 18 words. Else omit or use null.",
   "No em dashes anywhere.",
-  "Respect answers.intent: restaurant means eat out, recipe means cook at home.",
+  "Respect mode: eat out, cook, snack, or unsure.",
+  "Never invent new ingredient lists or replace the given steps.",
 ].join(" ");
 
 export async function POST(request: Request) {
   if (!isAiConfigured()) {
-    return NextResponse.json({ why: null, riff: null });
+    return NextResponse.json({ why: null, riff: null, cookTip: null });
   }
 
   let body: unknown;
@@ -57,27 +66,47 @@ export async function POST(request: Request) {
 
   const heaviness =
     answers.heaviness === "any" ? "no preference" : answers.heaviness;
+  const mode =
+    answers.intent === "recipe"
+      ? "cook"
+      : answers.intent === "snack"
+        ? "snack"
+        : answers.intent === "clue"
+          ? "unsure"
+          : "eat out";
+  const recipe = food.recipe;
+
+  const recipeBlock =
+    answers.intent === "recipe" && recipe
+      ? [
+          `Recipe time: ${recipe.timeMinutes} min. Servings: ${recipe.servings}.`,
+          `Ingredients: ${recipe.ingredients.join("; ")}.`,
+          `Steps: ${recipe.steps.join(" ")}`,
+        ].join(" ")
+      : "No recipe block for this mode.";
 
   const raw = await ask({
     instructions: RULES,
     input: [
+      `Mode: ${mode}.`,
       `Dish: ${food.name}.`,
       `What it is: ${food.description}.`,
       `They asked for: ${answers.flavor}, ${answers.texture}, ${heaviness},`,
       `feeling ${answers.adventure}.`,
       `Current line: ${buildExplanation(food, answers)}`,
+      recipeBlock,
     ].join(" "),
-    maxOutputTokens: 500,
+    maxOutputTokens: answers.intent === "recipe" ? 700 : 500,
     json: true,
   });
 
   if (raw === null) {
-    return NextResponse.json({ why: null, riff: null });
+    return NextResponse.json({ why: null, riff: null, cookTip: null });
   }
 
   const parsed = parseJsonObject(raw);
   if (!parsed) {
-    return NextResponse.json({ why: null, riff: null });
+    return NextResponse.json({ why: null, riff: null, cookTip: null });
   }
 
   // Each line is sanitized independently, so a bad riff cannot cost us a good
@@ -86,6 +115,10 @@ export async function POST(request: Request) {
     typeof parsed.why === "string" ? sanitizeLine(parsed.why, 160) : null;
   const riff =
     typeof parsed.riff === "string" ? sanitizeLine(parsed.riff, 140) : null;
+  const cookTip =
+    answers.intent === "recipe" && typeof parsed.cookTip === "string"
+      ? sanitizeLine(parsed.cookTip, 120)
+      : null;
 
-  return NextResponse.json({ why, riff });
+  return NextResponse.json({ why, riff, cookTip });
 }

@@ -10,7 +10,13 @@ type AuthNavState =
   | { status: "guest" }
   | { status: "user"; username: string | null };
 
-export function AuthNav({ current }: { current?: string }) {
+export function AuthNav({
+  current,
+  compact = false,
+}: {
+  current?: string;
+  compact?: boolean;
+}) {
   const [state, setState] = useState<AuthNavState>({ status: "loading" });
 
   useEffect(() => {
@@ -97,9 +103,11 @@ export function AuthNav({ current }: { current?: string }) {
 
   return (
     <>
-      <Link className="nav-save" href="/signup">
-        Save
-      </Link>
+      {compact ? null : (
+        <Link className="nav-save" href="/signup">
+          Save
+        </Link>
+      )}
       <Link
         className="nav-primary nav-with-icon"
         href="/login"

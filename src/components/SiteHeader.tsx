@@ -17,8 +17,10 @@ type SiteHeaderProps = {
 };
 
 export function SiteHeader({ current = "home" }: SiteHeaderProps) {
+  const inLoop = current === "taste" || current === "result";
+
   return (
-    <header className="top">
+    <header className={inLoop ? "top top-compact" : "top"}>
       <Link className="mark" href="/">
         <Image
           className="mark-lockup"
@@ -44,13 +46,17 @@ export function SiteHeader({ current = "home" }: SiteHeaderProps) {
             </Link>
             <AuthNav current={current} />
           </>
+        ) : inLoop ? (
+          <>
+            <Link className="nav-primary nav-with-icon" href="/dna">
+              <Sparkles size={16} strokeWidth={1.5} aria-hidden />
+              <span className="nav-dna-label">DNA</span>
+            </Link>
+            <AuthNav current={current} compact />
+          </>
         ) : (
           <>
-            <Link
-              className="nav-primary"
-              href="/taste"
-              aria-current={current === "taste" ? "page" : undefined}
-            >
+            <Link className="nav-primary" href="/taste">
               Quiz
             </Link>
             <Link

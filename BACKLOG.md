@@ -27,20 +27,13 @@ Tickets are ordered **P0 → P2**. Each ticket names the **live route or module*
 
 North star work. Ship before XP, passport, or badges.
 
-### P0-1 · Home intent picker
+### P0-1 · Home intent picker · done
 **Routes:** `/`, `/taste`  
 **PRD:** §8, §10, §73  
 
-Replace single "Show me" with four entry points that seed the quiz:
-
-- Go out → `intent: restaurant`
-- Make something → `intent: recipe`
-- Grab a snack → `intent: snack` (new)
-- I have no clue → `intent: clue` (new)
-
-Keep `/taste` usable as deep link. Preserve back/edit of prior answers.
-
-**Done when:** Home shows four actions; each lands in the right flow within one tap.
+Home shows Go out / Make something / Grab a snack / I have no clue. Each seeds
+`/taste?intent=…&from=home` and skips the intent step. Deep link `/taste` still
+offers all four intents. Snack catalog and no-clue pairwise flow are P0-2 / P0-3.
 
 ---
 
