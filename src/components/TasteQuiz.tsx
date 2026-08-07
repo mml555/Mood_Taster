@@ -1,13 +1,14 @@
 "use client";
 
+import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { loadDnaForUser } from "@/lib/dna-sync";
 import { rank } from "@/lib/engine";
 import { QUIZ_OPTION_ICONS, QUIZ_STEP_ICONS } from "@/lib/mood-icons";
 import { emptySession, writeSession } from "@/lib/session";
-import type { Answers } from "@/lib/taste-types";
+import type { Answers, Intent } from "@/lib/taste-types";
 import {
   ADVENTURE,
   FLAVORS,
@@ -16,15 +17,18 @@ import {
   TEXTURES,
 } from "@/lib/taste-types";
 
-const STEPS = [
-  {
-    key: "intent" as const,
-    question: "Eat out or cook?",
-    options: [
-      { value: "restaurant", label: "Eat out" },
-      { value: "recipe", label: "Cook" },
-    ],
-  },
+const INTENT_STEP = {
+  key: "intent" as const,
+  question: "How do you want to eat?",
+  options: [
+    { value: "restaurant", label: "Go out" },
+    { value: "recipe", label: "Make something" },
+    { value: "snack", label: "Grab a snack" },
+    { value: "clue", label: "I have no clue" },
+  ],
+};
+
+const CRAVING_STEPS = [
   {
     key: "flavor" as const,
     question: "What flavor?",
@@ -64,12 +68,11 @@ const STEPS = [
       { value: "surprise", label: "Surprise me" },
     ],
   },
-];
+] as const;
 
 type PartialAnswers = Partial<Answers>;
 
 const DRAFT_KEY = "mood-taster-quiz-draft";
-const TOTAL_STEPS = STEPS.length;
 
 function readDraft(): PartialAnswers {
   if (typeof window === "undefined") return {};
@@ -90,10 +93,15 @@ function clearDraft() {
   sessionStorage.removeItem(DRAFT_KEY);
 }
 
-function parseStep(raw: string | null): number {
+function parseIntent(raw: string | null): Intent | null {
+  if (!raw) return null;
+  return (INTENTS as readonly string[]).includes(raw) ? (raw as Intent) : null;
+}
+
+function parseStep(raw: string | null, total: number): number {
   const n = Number(raw ?? "1");
   if (!Number.isFinite(n) || n < 1) return 1;
-  return Math.min(TOTAL_STEPS, Math.floor(n));
+  return Math.min(total, Math.floor(n));
 }
 
 function isComplete(answers: PartialAnswers): answers is Answers {
@@ -112,29 +120,57 @@ function isComplete(answers: PartialAnswers): answers is Answers {
   );
 }
 
+function tasteHref(
+  intent: Intent | null,
+  step: number,
+  fromHome = false,
+): string {
+  const params = new URLSearchParams();
+  if (intent) params.set("intent", intent);
+  if (fromHome && intent) params.set("from", "home");
+  params.set("step", String(step));
+  return `/taste?${params.toString()}`;
+}
+
 export function TasteQuiz() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const step = parseStep(searchParams.get("step"));
+  const seededIntent = parseIntent(searchParams.get("intent"));
+  const fromHome = searchParams.get("from") === "home";
+  const steps = useMemo(
+    () => (seededIntent ? [...CRAVING_STEPS] : [INTENT_STEP, ...CRAVING_STEPS]),
+    [seededIntent],
+  );
+  const totalSteps = steps.length;
+  const step = parseStep(searchParams.get("step"), totalSteps);
   const [answers, setAnswers] = useState<PartialAnswers>({});
   const [hydrated, setHydrated] = useState(false);
 
   useEffect(() => {
     queueMicrotask(() => {
-      setAnswers(readDraft());
+      const draft = readDraft();
+      if (seededIntent) {
+        const next = { ...draft, intent: seededIntent };
+        setAnswers(next);
+        writeDraft(next);
+      } else {
+        setAnswers(draft);
+      }
       setHydrated(true);
     });
-  }, []);
+  }, [seededIntent]);
 
-  const current = STEPS[step - 1];
+  const current = steps[step - 1];
   const stepLabel = String(step).padStart(2, "0");
-  const totalLabel = String(TOTAL_STEPS).padStart(2, "0");
+  const totalLabel = String(totalSteps).padStart(2, "0");
 
   const goStep = useCallback(
-    (next: number) => {
-      router.push(`/taste?step=${next}`, { scroll: false });
+    (next: number, intent: Intent | null = seededIntent) => {
+      router.push(tasteHref(intent, next, fromHome && Boolean(intent)), {
+        scroll: false,
+      });
     },
-    [router],
+    [router, seededIntent, fromHome],
   );
 
   const finish = useCallback(
@@ -159,16 +195,22 @@ export function TasteQuiz() {
       setAnswers(next);
       writeDraft(next);
 
-      if (step < TOTAL_STEPS) {
+      if (current.key === "intent") {
+        const intent = value as Intent;
+        goStep(1, intent);
+        return;
+      }
+
+      if (step < totalSteps) {
         goStep(step + 1);
         return;
       }
 
       if (isComplete(next)) {
-        finish(next);
+        void finish(next);
       }
     },
-    [answers, current, finish, goStep, step],
+    [answers, current, finish, goStep, step, totalSteps],
   );
 
   if (!current) return null;
@@ -180,6 +222,17 @@ export function TasteQuiz() {
       ? "quiz-options quiz-options-stack"
       : "quiz-options quiz-options-grid";
 
+  const showBack = step > 1 || Boolean(seededIntent);
+  const onBack = () => {
+    if (step > 1) {
+      goStep(step - 1);
+      return;
+    }
+    if (seededIntent) {
+      router.push("/taste");
+    }
+  };
+
   return (
     <section className="quiz" aria-labelledby="quiz-question">
       <div className="quiz-progress" aria-live="polite">
@@ -187,7 +240,7 @@ export function TasteQuiz() {
           Step {stepLabel} of {totalLabel}
         </span>
         <ol className="quiz-dots" aria-hidden>
-          {STEPS.map((s, i) => {
+          {steps.map((s, i) => {
             const n = i + 1;
             const state =
               n < step ? "is-done" : n === step ? "is-current" : "";
@@ -235,15 +288,18 @@ export function TasteQuiz() {
         })}
       </ul>
 
-      {step > 1 ? (
-        <button
-          type="button"
-          className="quiz-back"
-          onClick={() => goStep(step - 1)}
-        >
-          <ArrowLeft size={20} strokeWidth={1.5} aria-hidden />
-          Back
-        </button>
+      {showBack ? (
+        step === 1 && seededIntent ? (
+          <Link className="quiz-back" href="/">
+            <ArrowLeft size={20} strokeWidth={1.5} aria-hidden />
+            Back
+          </Link>
+        ) : (
+          <button type="button" className="quiz-back" onClick={onBack}>
+            <ArrowLeft size={20} strokeWidth={1.5} aria-hidden />
+            Back
+          </button>
+        )
       ) : null}
     </section>
   );

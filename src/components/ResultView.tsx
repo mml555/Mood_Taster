@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { ArrowRight, ChefHat, ChevronDown, Clock, MapPin, Search, Sparkles } from "lucide-react";
+import { ArrowRight, ChefHat, Clock, MapPin, Search, Sparkles } from "lucide-react";
 import {
   useCallback,
   useEffect,
@@ -79,6 +79,7 @@ export function ResultView({ food }: ResultViewProps) {
   const [emptyAlts, setEmptyAlts] = useState(false);
 
   const [riff, setRiff] = useState<string | null>(null);
+  const [cookTip, setCookTip] = useState<string | null>(null);
   const [places, setPlaces] = useState<NearbyPlace[]>([]);
   const [placesState, setPlacesState] = useState<PlacesState>("locating");
   const [intent, setIntent] = useState<Intent | null>(null);
@@ -112,6 +113,7 @@ export function ResultView({ food }: ResultViewProps) {
       setLastRating(null);
       setEmptyAlts(false);
       setRiff(null);
+      setCookTip(null);
       setWhyPanelOpen(false);
       setRejectNoteText("");
       setSwipeHint(null);
@@ -165,11 +167,13 @@ export function ResultView({ food }: ResultViewProps) {
         const data = (await res.json()) as {
           why: string | null;
           riff: string | null;
+          cookTip?: string | null;
         };
         if (token !== renderId.current) return;
 
         if (data.why) setExplanation(data.why);
         if (data.riff) setRiff(data.riff);
+        if (data.cookTip) setCookTip(data.cookTip);
       } catch {
         // The deterministic line stays on screen. Nothing to recover.
       }
@@ -672,15 +676,36 @@ export function ResultView({ food }: ResultViewProps) {
                 <button
                   type="button"
                   className="text-link"
-                  onClick={() => setWhyPanelOpen((v) => !v)}
+                  onClick={() => {
+                    setWhyOpen((v) => !v);
+                    setWhyPanelOpen(false);
+                  }}
+                  aria-expanded={whyOpen}
+                  disabled={adjusting}
+                >
+                  Why this?
+                </button>
+                <button
+                  type="button"
+                  className="text-link"
+                  onClick={() => {
+                    setWhyPanelOpen((v) => !v);
+                    setWhyOpen(false);
+                  }}
                   aria-expanded={whyPanelOpen}
                   disabled={adjusting}
                 >
-                  Why?
+                  Off?
                 </button>
               </div>
             </div>
           )}
+
+          {!showDone && whyOpen ? (
+            <p className="result-why" id="result-why">
+              {explanation}
+            </p>
+          ) : null}
 
           {!showDone && whyPanelOpen ? (
             <div className="reject-panel">
@@ -724,25 +749,9 @@ export function ResultView({ food }: ResultViewProps) {
             </div>
           ) : null}
 
-          <button
-            type="button"
-            className="why-toggle"
-            aria-expanded={whyOpen}
-            onClick={() => setWhyOpen((v) => !v)}
-          >
-            Why this?
-            <ChevronDown
-              size={20}
-              strokeWidth={1.5}
-              aria-hidden
-              className={whyOpen ? "is-open" : undefined}
-            />
-          </button>
-          {whyOpen ? <p className="result-why">{explanation}</p> : null}
-
           {intent === "recipe" ? (
             food.recipe ? (
-              <RecipeSection recipe={food.recipe} />
+              <RecipeSection recipe={food.recipe} cookTip={cookTip} />
             ) : (
               <div className="recipe" id="recipe">
                 <p className="recipe-label">
@@ -785,7 +794,13 @@ export function ResultView({ food }: ResultViewProps) {
   );
 }
 
-function RecipeSection({ recipe }: { recipe: Recipe }) {
+function RecipeSection({
+  recipe,
+  cookTip,
+}: {
+  recipe: Recipe;
+  cookTip: string | null;
+}) {
   return (
     <div className="recipe" id="recipe">
       <p className="recipe-label">
@@ -799,6 +814,8 @@ function RecipeSection({ recipe }: { recipe: Recipe }) {
         </span>
         <span>{recipe.servings} servings</span>
       </p>
+
+      {cookTip ? <p className="recipe-tip">{cookTip}</p> : null}
 
       <h2 className="recipe-heading">Ingredients</h2>
       <ul className="recipe-ingredients">

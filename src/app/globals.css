@@ -1333,9 +1333,9 @@ button {
 .reaction-bar {
   display: flex;
   flex-wrap: nowrap;
-  gap: var(--space-2);
+  gap: var(--space-4);
   margin-top: var(--space-5);
-  align-items: stretch;
+  align-items: center;
   justify-content: center;
 }
 
@@ -1345,21 +1345,23 @@ button {
 
 .reaction-btn {
   display: inline-flex;
-  flex: 1 1 0;
+  flex: 0 0 auto;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 0.2rem;
-  min-width: 0;
-  min-height: 3.25rem;
-  padding: 0.65rem 0.5rem;
+  gap: 0.35rem;
+  width: 4.25rem;
+  height: 4.25rem;
+  min-width: 4.25rem;
+  min-height: 4.25rem;
+  padding: 0;
   background: var(--ink-soft);
   color: var(--ink);
-  font-size: 0.8rem;
+  font-size: 0.7rem;
   font-weight: 600;
   cursor: pointer;
   border: 0;
-  border-radius: var(--radius-btn);
+  border-radius: var(--radius-pill);
   transition: background 0.2s ease, transform 0.2s var(--ease);
   -webkit-tap-highlight-color: transparent;
   touch-action: manipulation;
@@ -1377,6 +1379,10 @@ button {
 }
 
 .reaction-btn-like {
+  width: 4.75rem;
+  height: 4.75rem;
+  min-width: 4.75rem;
+  min-height: 4.75rem;
   background: var(--accent);
   color: var(--ink);
 }
@@ -1397,7 +1403,7 @@ button {
 }
 
 .reaction-icon {
-  font-size: 1.35rem;
+  font-size: 1.55rem;
   line-height: 1;
   font-weight: 400;
 }
@@ -1413,6 +1419,15 @@ button {
   margin-top: var(--space-3);
   align-items: center;
   justify-content: center;
+}
+
+.result-why {
+  margin: var(--space-3) 0 0;
+  padding: var(--space-3);
+  background: var(--ink-raised);
+  border-radius: var(--radius-card);
+  color: var(--paper-muted);
+  max-width: 32rem;
 }
 
 .feedback-btn {
@@ -2287,25 +2302,38 @@ button {
 
   .reaction-bar {
     margin-top: 0;
-    gap: var(--space-2);
+    gap: var(--space-5);
     width: 100%;
   }
 
   .reaction-btn {
-    min-height: 3.5rem;
-    font-size: 0.75rem;
-    padding: 0.55rem 0.35rem;
+    width: 3.75rem;
+    height: 3.75rem;
+    min-width: 3.75rem;
+    min-height: 3.75rem;
+    font-size: 0;
+    padding: 0;
+  }
+
+  .reaction-btn-like {
+    width: 4.35rem;
+    height: 4.35rem;
+    min-width: 4.35rem;
+    min-height: 4.35rem;
   }
 
   .reaction-icon {
-    font-size: 1.5rem;
+    font-size: 1.65rem;
+  }
+
+  .reaction-label {
+    display: none;
   }
 
   .reaction-quiet {
     margin-top: var(--space-2);
   }
 
-  .why-toggle,
   .text-link,
   .reject-btn {
     min-height: 2.5rem;
@@ -2439,7 +2467,17 @@ button {
 
   /* A pinned dock must not eat a third of a 390px-tall viewport. */
   .reaction-btn {
-    min-height: 2.75rem;
+    width: 3.25rem;
+    height: 3.25rem;
+    min-width: 3.25rem;
+    min-height: 3.25rem;
+  }
+
+  .reaction-btn-like {
+    width: 3.75rem;
+    height: 3.75rem;
+    min-width: 3.75rem;
+    min-height: 3.75rem;
   }
 
   .reaction-icon {
@@ -2453,11 +2491,18 @@ button {
 
 @media (min-width: 721px) {
   .reaction-btn {
-    flex-direction: row;
-    gap: var(--space-2);
-    flex: 0 1 auto;
-    padding: 0.75rem 1.15rem;
-    font-size: 0.95rem;
+    width: 4.5rem;
+    height: 4.5rem;
+    min-width: 4.5rem;
+    min-height: 4.5rem;
+    font-size: 0.72rem;
+  }
+
+  .reaction-btn-like {
+    width: 5rem;
+    height: 5rem;
+    min-width: 5rem;
+    min-height: 5rem;
   }
 
   .top nav {

@@ -1,6 +1,8 @@
 import type { LucideIcon } from "lucide-react";
 import {
+  Candy,
   ChefHat,
+  CircleHelp,
   Compass,
   Cookie,
   Dices,
@@ -25,6 +27,8 @@ import {
 export const QUIZ_OPTION_ICONS: Record<string, LucideIcon> = {
   restaurant: MapPin,
   recipe: ChefHat,
+  snack: Candy,
+  clue: CircleHelp,
   savory: Utensils,
   spicy: Flame,
   sweet: Cookie,
