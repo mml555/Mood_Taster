@@ -1,12 +1,45 @@
 "use client";
 
 import Link from "next/link";
-import { LogOut, Sparkles, Utensils } from "lucide-react";
+import {
+  Bell,
+  ChevronRight,
+  Heart,
+  LogOut,
+  MapPin,
+  Sun,
+  Donut,
+} from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import {
+  PolarAngleAxis,
+  PolarGrid,
+  Radar,
+  RadarChart,
+  ResponsiveContainer,
+  Tooltip,
+} from "recharts";
 import { DietaryPrefsEditor } from "@/components/DietaryPrefsEditor";
+import {
+  DNA_DIMENSIONS,
+  labelDimension,
+  strongestDimensions,
+} from "@/lib/dna";
+import { loadDnaForUser } from "@/lib/dna-sync";
 import { clearLocalUserData } from "@/lib/local-data";
 import { createClient, isSupabaseConfigured } from "@/lib/supabase/client";
+import { useAuthSession } from "@/lib/use-auth-session";
+import type { DnaDimension, DnaProfile } from "@/lib/taste-types";
+
+const RADAR_DIMS: DnaDimension[] = [
+  "savory",
+  "sweet",
+  "spicy",
+  "fresh",
+  "crunchy",
+  "creamy",
+];
 
 type ProfileState = {
   email: string | null;
@@ -15,49 +48,76 @@ type ProfileState = {
 
 export function AccountPanel() {
   const router = useRouter();
+  const auth = useAuthSession();
   const [profile, setProfile] = useState<ProfileState | null>(null);
+  const [dna, setDna] = useState<DnaProfile | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
   const [deleteStep, setDeleteStep] = useState<"idle" | "confirm">("idle");
   const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [showDiet, setShowDiet] = useState(false);
 
   useEffect(() => {
-    queueMicrotask(() => {
-      if (!isSupabaseConfigured()) {
-        setError("Accounts are not configured.");
-        return;
-      }
-
-      void (async () => {
-        const supabase = createClient();
-        const {
-          data: { user },
-        } = await supabase.auth.getUser();
-
-        if (!user) {
-          router.replace("/login");
-          return;
-        }
-
-        const { data } = await supabase
-          .from("profiles")
-          .select("username")
-          .eq("id", user.id)
-          .maybeSingle();
-
-        setProfile({
-          email: user.email ?? null,
-          username: data?.username ?? null,
-        });
-      })();
+    queueMicrotask(async () => {
+      setDna(await loadDnaForUser());
     });
-  }, [router]);
+  }, []);
+
+  useEffect(() => {
+    if (auth.status !== "user") {
+      setProfile(null);
+      return;
+    }
+    if (!isSupabaseConfigured()) {
+      setError("Accounts are not configured.");
+      return;
+    }
+
+    void (async () => {
+      const supabase = createClient();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const { data } = await supabase
+        .from("profiles")
+        .select("username")
+        .eq("id", user.id)
+        .maybeSingle();
+
+      setProfile({
+        email: user.email ?? null,
+        username: data?.username ?? auth.username,
+      });
+    })();
+  }, [auth]);
+
+  const radarData = useMemo(() => {
+    if (!dna) return [];
+    return RADAR_DIMS.map((dimension) => {
+      const entry = dna.experience[dimension].samples
+        ? dna.experience[dimension]
+        : dna.prefs[dimension];
+      return {
+        subject: labelDimension(dimension),
+        value: Math.round(entry.score * 100),
+      };
+    });
+  }, [dna]);
+
+  const dnaLabel = useMemo(() => {
+    if (!dna) return "Still learning";
+    const top = strongestDimensions(dna, DNA_DIMENSIONS, 1, "effective")[0];
+    return top
+      ? `${labelDimension(top.dimension)} Seeker`
+      : "Still learning";
+  }, [dna]);
 
   const onSignOut = useCallback(async () => {
     setPending(true);
     const supabase = createClient();
     await supabase.auth.signOut();
-    // After the session is gone, so a failed sign-out never wipes live data.
     clearLocalUserData();
     router.push("/");
     router.refresh();
@@ -66,7 +126,6 @@ export function AccountPanel() {
   const onDeleteAccount = useCallback(async () => {
     setPending(true);
     setDeleteError(null);
-
     try {
       const res = await fetch("/api/account", { method: "DELETE" });
       if (!res.ok) {
@@ -77,7 +136,6 @@ export function AccountPanel() {
         setPending(false);
         return;
       }
-
       clearLocalUserData();
       const supabase = createClient();
       await supabase.auth.signOut();
@@ -97,103 +155,206 @@ export function AccountPanel() {
     );
   }
 
-  if (!profile) {
+  if (auth.status === "loading") {
     return <p className="dna-lede">Loading profile…</p>;
   }
 
-  return (
-    <div className="account-panel">
-      <dl className="account-facts">
-        <div>
-          <dt>Username</dt>
-          <dd>{profile.username ?? "—"}</dd>
+  if (auth.status === "guest") {
+    return (
+      <section className="profile-panel">
+        <span className="profile-decor" style={{ top: "1rem", right: "-1.5rem" }} aria-hidden>
+          <Sun size={100} />
+        </span>
+        <div className="profile-guest-card">
+          <h1>Ready to find your flavor?</h1>
+          <div className="profile-guest-actions">
+            {isSupabaseConfigured() ? (
+              <Link className="cta" href="/login" style={{ width: "100%" }}>
+                Sign in
+              </Link>
+            ) : null}
+            <Link className="cta-secondary" href="/taste" style={{ width: "100%" }}>
+              Play as Guest
+            </Link>
+          </div>
         </div>
-        <div>
-          <dt>Email</dt>
-          <dd>{profile.email ?? "—"}</dd>
-        </div>
-      </dl>
 
-      <section className="account-dietary" aria-labelledby="diet-title">
-        <h2 id="diet-title" className="dietary-section-title">
-          Diet and allergies
-        </h2>
-        <DietaryPrefsEditor />
+        {dna ? (
+          <div className="profile-radar-wrap">
+            <h2>Taste DNA</h2>
+            <div className="profile-radar-card">
+              <ResponsiveContainer width="100%" height="100%">
+                <RadarChart data={radarData}>
+                  <PolarGrid stroke="color-mix(in srgb, var(--ink) 15%, transparent)" />
+                  <PolarAngleAxis
+                    dataKey="subject"
+                    tick={{ fill: "#310752", fontSize: 12, fontWeight: 700 }}
+                  />
+                  <Tooltip />
+                  <Radar
+                    name="Taste"
+                    dataKey="value"
+                    stroke="#FFDF6E"
+                    strokeWidth={3}
+                    fill="#FFDF6E"
+                    fillOpacity={0.4}
+                  />
+                </RadarChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+        ) : null}
       </section>
+    );
+  }
 
-      <div className="result-actions">
-        <Link className="cta" href="/dna">
-          <Sparkles size={20} strokeWidth={1.5} aria-hidden />
-          Taste DNA
-        </Link>
-        <Link className="text-link" href="/taste">
-          <Utensils size={16} strokeWidth={1.5} aria-hidden />
-          Start a quiz
-        </Link>
-        <button
-          type="button"
-          className="reject-btn"
-          onClick={onSignOut}
-          disabled={pending}
-        >
-          <LogOut size={20} strokeWidth={1.5} aria-hidden />
-          Sign out
-        </button>
+  const displayName = profile?.username ?? auth.username ?? "Friend";
+
+  return (
+    <section className="profile-panel">
+      <span className="profile-decor" style={{ top: "1rem", right: "-1.5rem" }} aria-hidden>
+        <Sun size={100} />
+      </span>
+      <span
+        className="profile-decor"
+        style={{ bottom: "15rem", left: "-1rem", color: "var(--ink)", opacity: 0.1 }}
+        aria-hidden
+      >
+        <Donut size={60} />
+      </span>
+
+      <div className="profile-hero">
+        <div className="profile-avatar" aria-hidden>
+          {displayName.charAt(0).toUpperCase()}
+        </div>
+        <div>
+          <h1 className="profile-name">{displayName}</h1>
+          <p className="profile-sub">DNA Profile: {dnaLabel}</p>
+          {profile?.email ? (
+            <p className="profile-sub">{profile.email}</p>
+          ) : null}
+        </div>
       </div>
 
-      <section className="account-delete" aria-labelledby="delete-title">
-        <h2 id="delete-title" className="dietary-section-title">
-          Delete account
-        </h2>
-        <p className="dietary-note">
-          Removes cloud Taste DNA, favorites, history, diet settings, and this
-          login. Also clears taste data saved on this device.
-        </p>
+      <div className="profile-radar-wrap">
+        <h2>Taste DNA</h2>
+        <div className="profile-radar-card">
+          {radarData.length ? (
+            <ResponsiveContainer width="100%" height="100%">
+              <RadarChart data={radarData}>
+                <PolarGrid stroke="color-mix(in srgb, var(--ink) 15%, transparent)" />
+                <PolarAngleAxis
+                  dataKey="subject"
+                  tick={{ fill: "#310752", fontSize: 12, fontWeight: 700 }}
+                />
+                <Tooltip />
+                <Radar
+                  name="Taste"
+                  dataKey="value"
+                  stroke="#FFDF6E"
+                  strokeWidth={3}
+                  fill="#FFDF6E"
+                  fillOpacity={0.4}
+                />
+              </RadarChart>
+            </ResponsiveContainer>
+          ) : (
+            <p className="dna-lede">Rate dishes to shape your Taste DNA.</p>
+          )}
+        </div>
+      </div>
+
+      <div className="profile-settings">
+        <h2>Settings</h2>
+        <div className="profile-settings-list">
+          <button type="button" className="profile-setting" disabled>
+            <span className="profile-setting-icon" aria-hidden>
+              <Bell size={20} />
+            </span>
+            <span>Notifications</span>
+            <span className="profile-setting-value">Soon</span>
+            <ChevronRight size={20} className="text-indigo/30" aria-hidden />
+          </button>
+          <Link href="/dna" className="profile-setting">
+            <span className="profile-setting-icon" aria-hidden>
+              <MapPin size={20} />
+            </span>
+            <span>Location Preferences</span>
+            <span className="profile-setting-value">Stats</span>
+            <ChevronRight size={20} aria-hidden />
+          </Link>
+          <button
+            type="button"
+            className="profile-setting"
+            onClick={() => setShowDiet((v) => !v)}
+            aria-expanded={showDiet}
+          >
+            <span className="profile-setting-icon" aria-hidden>
+              <Heart size={20} />
+            </span>
+            <span>Dietary Needs</span>
+            <span className="profile-setting-value">
+              {showDiet ? "Open" : "Edit"}
+            </span>
+            <ChevronRight size={20} aria-hidden />
+          </button>
+        </div>
+        {showDiet ? (
+          <div style={{ marginTop: "1rem" }}>
+            <DietaryPrefsEditor />
+          </div>
+        ) : null}
+      </div>
+
+      <div className="profile-signout">
+        <button
+          type="button"
+          className="cta-secondary"
+          style={{ width: "100%", color: "#b42318" }}
+          onClick={() => void onSignOut()}
+          disabled={pending}
+        >
+          <LogOut size={18} strokeWidth={1.5} aria-hidden />
+          Sign Out
+        </button>
 
         {deleteStep === "idle" ? (
           <button
             type="button"
-            className="reject-btn"
+            className="text-link"
+            style={{ marginTop: "1rem" }}
             onClick={() => setDeleteStep("confirm")}
             disabled={pending}
           >
             Delete account
           </button>
         ) : (
-          <div className="account-delete-confirm">
-            <p className="dietary-note">
-              Really delete? Cloud data is gone for good.
-            </p>
-            <div className="account-delete-actions">
-              <button
-                type="button"
-                className="cta"
-                onClick={onDeleteAccount}
-                disabled={pending}
-              >
-                Yes, delete everything
-              </button>
-              <button
-                type="button"
-                className="reject-btn"
-                onClick={() => {
-                  setDeleteStep("idle");
-                  setDeleteError(null);
-                }}
-                disabled={pending}
-              >
-                Keep account
-              </button>
-            </div>
+          <div style={{ marginTop: "1rem" }}>
+            <p className="dna-lede">This cannot be undone.</p>
+            <button
+              type="button"
+              className="cta-secondary"
+              onClick={() => void onDeleteAccount()}
+              disabled={pending}
+            >
+              Confirm delete
+            </button>
+            <button
+              type="button"
+              className="text-link"
+              onClick={() => setDeleteStep("idle")}
+              disabled={pending}
+            >
+              Cancel
+            </button>
+            {deleteError ? (
+              <p className="auth-error" role="alert">
+                {deleteError}
+              </p>
+            ) : null}
           </div>
         )}
-
-        {deleteError ? (
-          <p className="auth-error" role="alert">
-            {deleteError}
-          </p>
-        ) : null}
-      </section>
-    </div>
+      </div>
+    </section>
   );
 }
