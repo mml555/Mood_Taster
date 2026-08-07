@@ -1,6 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
-import { Candy, ChefHat, CircleHelp, MapPin } from "lucide-react";
+import { Candy, ChefHat, CircleHelp, MapPin, Search } from "lucide-react";
 import { SiteFooter } from "@/components/SiteFooter";
 import { SiteHeader } from "@/components/SiteHeader";
 import { ProfileNudge } from "@/components/ProfileNudge";
@@ -96,6 +96,7 @@ function HeroStart() {
         className="cta-highlight hero-start-primary"
         href="/taste?intent=clue&from=home"
       >
+        <Search size={20} strokeWidth={1.5} aria-hidden />
         Show me
       </Link>
       <p className="hero-start-hint">Four quick taps. No account needed.</p>

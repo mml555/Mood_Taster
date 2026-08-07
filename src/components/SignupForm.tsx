@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { Sparkles } from "lucide-react";
 import { FormEvent, useState } from "react";
 import { signupSchema } from "@/lib/auth-schema";
 import { createClient, isSupabaseConfigured } from "@/lib/supabase/client";
@@ -61,9 +62,7 @@ export function SignupForm() {
       }
 
       if (!data.session) {
-        setError(
-          "Check your email to confirm the account, then sign in. (You can turn off email confirm in Supabase Auth settings for local demos.)",
-        );
+        setError("Check your email to confirm your account, then sign in.");
         setPending(false);
         return;
       }
@@ -147,6 +146,7 @@ export function SignupForm() {
       ) : null}
 
       <button type="submit" className="cta auth-submit" disabled={pending}>
+        <Sparkles size={20} strokeWidth={1.5} aria-hidden />
         {pending ? "Saving…" : "Save my taste"}
       </button>
 

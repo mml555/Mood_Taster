@@ -81,8 +81,10 @@ function getSnapshot(): AuthSessionState {
   return shared;
 }
 
+const LOADING_SNAPSHOT: AuthSessionState = { status: "loading" };
+
 function getServerSnapshot(): AuthSessionState {
-  return { status: "loading" };
+  return LOADING_SNAPSHOT;
 }
 
 /**

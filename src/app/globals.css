@@ -186,6 +186,15 @@ button {
   font-weight: 600;
 }
 
+/* Sign in matches the auth form's submit button, not the plain nav links. */
+.top nav a.nav-signin,
+.top nav a.nav-signin:hover,
+.top nav a.nav-signin:focus-visible,
+.top nav a.nav-signin[aria-current="page"] {
+  color: var(--paper);
+  font-weight: 600;
+}
+
 .top-compact nav {
   gap: var(--space-2);
 }
@@ -1967,15 +1976,18 @@ button {
   margin-top: var(--space-6);
   display: flex;
   flex-direction: column;
-  gap: var(--space-3);
+  gap: var(--space-1);
   max-width: 24rem;
 }
 
 .auth-label {
-  margin-top: var(--space-2);
   font-size: 0.85rem;
   font-weight: 500;
   color: var(--paper-muted);
+}
+
+.auth-label:not(:first-child) {
+  margin-top: var(--space-4);
 }
 
 .auth-input {

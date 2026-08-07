@@ -17,8 +17,8 @@ export default function AccountPage() {
             Your profile
           </h1>
           <p className="dna-lede">
-            Signed-in Taste DNA syncs to your account. Sign out anytime; guest
-            quiz still works on this device.
+            Your taste is saved here. Sign out anytime, the quiz still works
+            as a guest.
           </p>
           <AccountPanel />
         </section>

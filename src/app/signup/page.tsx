@@ -17,9 +17,8 @@ export default function SignupPage() {
             Save your taste
           </h1>
           <p className="dna-lede">
-            Optional. The quiz works without this. A free profile keeps your
-            Taste DNA, syncs it across devices, and lets you customize how
-            matches learn from you.
+            Optional. The quiz works fine without this. Saving just keeps
+            your taste on every device.
           </p>
           <SignupForm />
         </section>

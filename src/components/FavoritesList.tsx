@@ -70,8 +70,8 @@ export function FavoritesList() {
         </p>
         <div className="result-actions">
           <Link className="cta" href="/taste?intent=recipe">
-            Show me
             <Search size={20} strokeWidth={1.5} aria-hidden />
+            Show me
           </Link>
         </div>
       </section>
@@ -115,8 +115,8 @@ export function FavoritesList() {
       </ul>
       <div className="result-actions">
         <Link className="cta" href="/taste">
-          New craving
           <Search size={20} strokeWidth={1.5} aria-hidden />
+          New craving
         </Link>
       </div>
     </section>

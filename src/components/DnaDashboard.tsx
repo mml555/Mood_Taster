@@ -66,9 +66,9 @@ export function DnaDashboard() {
   const textures = strongestDimensions(dna, TEXTURE_DIMS);
 
   const lede = signedIn
-    ? "Saved to your profile. Rate more dishes to sharpen matches."
+    ? "Saved to your profile. Rate more dishes for better picks."
     : isSupabaseConfigured()
-      ? "Built from ratings on this device. A free profile keeps it with you."
+      ? "Built from ratings on this device. Save it to keep it."
       : "Built from ratings on this device. No account needed.";
 
   if (evidenced.length === 0) {
@@ -83,8 +83,8 @@ export function DnaDashboard() {
         </p>
         <div className="result-actions">
           <Link className="cta" href="/taste">
-            Show me
             <Search size={20} strokeWidth={1.5} aria-hidden />
+            Show me
           </Link>
           <Link className="cta-secondary" href="/favorites">
             <Heart size={20} strokeWidth={1.5} aria-hidden />
@@ -211,8 +211,8 @@ export function DnaDashboard() {
 
       <div className="result-actions">
         <Link className="cta" href="/taste">
-          Try again
           <Search size={20} strokeWidth={1.5} aria-hidden />
+          Try again
         </Link>
         <button type="button" className="reject-btn" onClick={onReset}>
           <RotateCcw size={20} strokeWidth={1.5} aria-hidden />

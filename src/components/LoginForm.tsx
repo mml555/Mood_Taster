@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { LogIn } from "lucide-react";
 import { FormEvent, useState } from "react";
 import { loginSchema } from "@/lib/auth-schema";
 import { isSupabaseConfigured } from "@/lib/supabase/client";
@@ -109,6 +110,7 @@ export function LoginForm() {
       ) : null}
 
       <button type="submit" className="cta auth-submit" disabled={pending}>
+        <LogIn size={20} strokeWidth={1.5} aria-hidden />
         {pending ? "Signing in…" : "Sign in"}
       </button>
 

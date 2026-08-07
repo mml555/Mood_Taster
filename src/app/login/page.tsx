@@ -17,8 +17,7 @@ export default function LoginPage() {
             Sign in
           </h1>
           <p className="dna-lede">
-            Use your email or username and password. Your Taste DNA loads from
-            your cloud profile when you sign in.
+            Sign in to pick up right where you left off.
           </p>
           <LoginForm />
         </section>
